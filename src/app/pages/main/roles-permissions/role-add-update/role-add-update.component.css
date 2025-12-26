@@ -1,0 +1,115 @@
+.permissions-panel {
+  border: 1px solid #C3C3C3;
+  border-radius: 10px;
+  padding: 15px;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  background-color: #0038bc;
+}
+
+.permissions-panel-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.chosen-panel {
+  background-color: #0038Bc;
+}
+
+.chosen-panel .permissions-panel-title {
+  color: #FFFFFF;
+}
+
+.permissions-list {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid #E0E0E0;
+  border-radius: 5px;
+  padding: 10px;
+  background-color: #FFFFFF;
+  margin-bottom: 10px;
+}
+
+.permission-item {
+  padding: 8px 12px;
+  margin-bottom: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #000000;
+  background-color: #F5F5F5;
+  transition: all 0.2s;
+}
+
+.permission-item:hover {
+  background-color: #E8E8E8;
+}
+
+.permission-item.selected {
+  background-color: #FFE5D9;
+  border: 1px solid #0038Bc;
+}
+
+.permissions-panel-footer {
+  text-align: center;
+  padding-top: 10px;
+}
+
+.permissions-panel-footer a {
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-transfer {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  background-color: #0038bc;
+  color: #FFFFFF;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-transfer:hover:not(:disabled) {
+  background-color: #0038bc;
+  transform: scale(1.1);
+}
+
+.btn-transfer:disabled {
+  background-color: #CCCCCC;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.text-orange {
+  color: white;
+}
+
+/* Custom scrollbar for permissions list */
+.permissions-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.permissions-list::-webkit-scrollbar-track {
+  background: #F5F5F5;
+  border-radius: 4px;
+}
+
+.permissions-list::-webkit-scrollbar-thumb {
+  background: #FF6B35;
+  border-radius: 4px;
+}
+
+.permissions-list::-webkit-scrollbar-thumb:hover {
+  background: #E55A2B;
+}

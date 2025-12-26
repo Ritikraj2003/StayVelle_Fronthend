@@ -1,0 +1,117 @@
+<div class="add_services_container">
+  <h3 class="font_20 fw_semi text_black mb_2">Roles & Permissions</h3>
+  <span class="text_pri fw_med font_12 d-block mb_24">User Management <a routerLink="/main/roles-permissions" class="text_black">~ Roles & Permissions</a> <span class="text_black">~ {{ isEditMode ? 'Update Role' : 'Add Role' }}</span></span>
+  <div class="services_info_blk add_services_info_blk">
+    <form [formGroup]="roleForm" (ngSubmit)="onSubmit()">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Role Name</label>
+            <input
+              type="text"
+              formControlName="role_name"
+              class="form-control"
+              placeholder="Enter role name"
+            />
+            <div *ngIf="roleForm.get('role_name')?.invalid && roleForm.get('role_name')?.touched" class="error-message font_12 text-danger mt_5">
+              Role name is required
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Status</label>
+            <select formControlName="isactive" class="custom-select">
+              <option [value]="true">Active</option>
+              <option [value]="false">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-12">
+          <label class="font_14 fw_semi text_black mb_7">User Permissions*</label>
+          <div class="row">
+            <!-- Available Permissions Panel -->
+            <div class="col-md-5">
+              <div class="permissions-panel">
+                <h4 class="permissions-panel-title text-orange mb_10">Available User Permissions</h4>
+                <input 
+                  type="text" 
+                  class="form-control mb_10" 
+                  placeholder="Search here"
+                  [(ngModel)]="searchAvailable"
+                >
+                <div class="permissions-list">
+                  <div 
+                    *ngFor="let permission of filteredAvailablePermissions" 
+                    class="permission-item"
+                    [class.selected]="selectedAvailable.includes(permission.Id || permission.id)"
+                    (click)="toggleAvailableSelection(permission.Id || permission.id)"
+                  >
+                    {{ permission.permission_name || permission.name }}
+                  </div>
+                  <div *ngIf="filteredAvailablePermissions.length === 0" class="text-center text-muted p-3">
+                    No permissions available
+                  </div>
+                </div>
+                <div class="permissions-panel-footer">
+                  <a href="javascript:void(0)" class="text-orange" (click)="chooseAll()">Choose All →</a>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Transfer Buttons -->
+            <div class="col-md-2 d-flex flex-column align-items-center justify-content-center">
+              <button 
+                type="button" 
+                class="btn-transfer btn-transfer-right mb_10"
+                (click)="moveToChosen()"
+                [disabled]="selectedAvailable.length === 0"
+              >
+                →
+              </button>
+              <button 
+                type="button" 
+                class="btn-transfer btn-transfer-left"
+                (click)="moveToAvailable()"
+                [disabled]="selectedChosen.length === 0"
+              >
+                ←
+              </button>
+            </div>
+            
+            <!-- Chosen Permissions Panel -->
+            <div class="col-md-5">
+              <div class="permissions-panel chosen-panel">
+                <h4 class="permissions-panel-title text-white mb_10">Chosen User Permissions</h4>
+                <div class="permissions-list">
+                  <div 
+                    *ngFor="let permission of chosenPermissions" 
+                    class="permission-item"
+                    [class.selected]="selectedChosen.includes(permission.Id || permission.id)"
+                    (click)="toggleChosenSelection(permission.Id || permission.id)"
+                  >
+                    {{ permission.permission_name || permission.name }}
+                  </div>
+                  <div *ngIf="chosenPermissions.length === 0" class="text-center text-muted p-3">
+                    No permissions chosen
+                  </div>
+                </div>
+                <div class="permissions-panel-footer">
+                  <a href="javascript:void(0)" class="text-orange" (click)="removeAll()">← Remove All</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="right_side_footer_blk d-flex align-items-center justify-content-center">
+    <button type="button" class="btn_primary btn_secondary mr_20 w-200px" (click)="cancel()" [disabled]="isLoading">Cancel</button>
+    <button type="button" class="btn_primary mr_20 w-200px" (click)="onSubmit()" [disabled]="isLoading || roleForm.invalid">
+      <span *ngIf="!isLoading">Save</span>
+      <span *ngIf="isLoading">Saving...</span>
+    </button>
+  </div>
+</div>
+

@@ -1,0 +1,19 @@
+<header class="header">
+  <div class="header-container">
+    <div class="logo">
+      <a routerLink="/main/dashboard">Stayvelle</a>
+    </div>
+    <nav class="nav">
+      <ul class="nav-list">
+        <li><a routerLink="/main/dashboard" routerLinkActive="active">Dashboard</a></li>
+        <li><a routerLink="/main/users" routerLinkActive="active">Users</a></li>
+        <li><a routerLink="/main/settings" routerLinkActive="active">Settings</a></li>
+      </ul>
+    </nav>
+    <div class="user-section" *ngIf="currentUser$ | async as user">
+      <span class="user-name">{{ user.name }}</span>
+      <button class="logout-btn" (click)="logout()">Logout</button>
+    </div>
+  </div>
+</header>
+

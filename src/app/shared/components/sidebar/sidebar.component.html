@@ -1,0 +1,87 @@
+<div class="side_menu_blk">
+  <div class="side_menu_cntn">
+    <img src="assets/images/Logo.png" alt="HMS Logo" class="mb_30">
+    <ul class="p-0 m-0 side_menu_ul">
+      <ng-container *ngFor="let item of menuItems">
+        <!-- Regular menu item (no dropdown) -->
+        <li *ngIf="!item.hasDropdown">
+          <a [routerLink]="item.route" 
+             routerLinkActive="active" 
+             class="text_white font_14 fw_semi"
+             [class.d-flex]="item.hasDropdown === false"
+             [class.align-items-center]="item.hasDropdown === false"
+             [class.justify-content-between]="item.hasDropdown === false">
+            <span class="d-block">{{ item.label }}</span>
+            <img *ngIf="item.hasDropdown === false" src="assets/images/Shape.svg" alt="" class="d-block">
+          </a>
+        </li>
+
+        <!-- Dropdown menu item -->
+        <li *ngIf="item.hasDropdown && item.children" class="sidmenu_dropdown dropdown mb_13">
+          <a class="nav-link m-0 d-flex align-items-center justify-content-between" 
+             href="javascript:void(0)" 
+             [class.show]="isDropdownOpen(item.label)"
+             (click)="toggleDropdown(item.label)">
+            <span class="d-block text_white font_14 fw_semi">{{ item.label }}</span>
+            <img src="assets/images/Blue_arrow.svg" alt="" [class.d-none]="!isDropdownOpen(item.label)" class="blue_down_arrow">
+            <img src="assets/images/Shape.svg" alt="" [class.d-none]="isDropdownOpen(item.label)" class="white_down_arrow">
+          </a>
+          <ul class="dropdown-menu submenu" [class.show]="isDropdownOpen(item.label)">
+            <li *ngFor="let child of item.children">
+              <a [routerLink]="child.route" 
+                 routerLinkActive="active" 
+                 class="submenu-link">{{ child.label }}</a>
+            </li>
+          </ul>
+        </li>
+      </ng-container>
+    </ul>
+  </div>
+  <div class="side_menu_blw_cntn">
+    <div class="d-flex align-items-center justify-content-between position-relative">
+      <div class="d-flex align-items-start">
+        <div class="mr_10 position-relative">
+          <ng-container *ngIf="(currentUser$ | async) as user">
+            <img 
+              *ngIf="user.imageUrl && !imageError" 
+              [src]="user.imageUrl" 
+              alt="User Avatar" 
+              class="profile_img_side_menu"
+              style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.3);"
+              (error)="imageError = true"
+            >
+            <div 
+              *ngIf="!user.imageUrl || imageError"
+              class="profile_img_side_menu d-flex align-items-center justify-content-center"
+              style="width: 40px; height: 40px; border-radius: 8px; background-color: rgba(255, 255, 255, 0.2); border: 2px solid rgba(255, 255, 255, 0.3); font-size: 16px; font-weight: bold; color: white;"
+            >
+              {{ (user.name || 'U').charAt(0).toUpperCase() }}
+            </div>
+          </ng-container>
+        </div>
+        <div class="d-flex flex-column">
+          <span class="font_14 fw_semi text_white">{{ (currentUser$ | async)?.name || 'User' }}</span>
+          <span class="font_10 fw_reg text_white">{{ (currentUser$ | async)?.roleName || 'Admin' }}</span>
+        </div>
+      </div>
+      <div class="position-relative">
+        <img 
+          src="assets/images/profile_dots.svg" 
+          alt="Profile Menu" 
+          class="cursor-pointer"
+          (click)="toggleProfileMenu()"
+        >
+        <!-- Profile Dropdown Menu -->
+        <div 
+          class="profile-dropdown-menu" 
+          *ngIf="showProfileMenu"
+          (click)="$event.stopPropagation()"
+        >
+          <div class="profile-dropdown-item" (click)="logout()">
+            <span>Logout</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

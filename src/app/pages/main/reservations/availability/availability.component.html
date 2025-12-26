@@ -1,0 +1,121 @@
+<div class="reserve_availbilty_blk">
+  <h3 class="font_20 fw_semi text_black mb_2">Search For Reservation</h3>
+  <div class="d-flex align-items-center mb_13">
+    <a routerLink="/main/reservations/availability" class="text_pri fw_med font_12">Reservations</a>
+    <span class="text_black text-decoration-none fw_med font_12">~ Availability</span>
+  </div>
+
+  <!-- Search Form -->
+  <form [formGroup]="searchForm" class="services_info_blk position-relative mb_24">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="date-range-wrapper">
+          <label class="d-flex align-items-center mb_5">
+            <span class="font_14 fw_med text_black w-50">From Date</span>
+            <span class="font_14 fw_med text_black">To Date</span>
+          </label>
+          <div class="date-range-box d-flex align-items-center justify-content-between">
+            <div class="date-field w-46 position-relative first_date_field">
+              <input 
+                type="date" 
+                formControlName="fromDate"
+                placeholder="DD/MM/YYYY">
+              <img src="assets/images/calendar_icon.svg" alt="" class="custom_calendar_picker" />
+            </div>
+            <div class="date-field w-50 position-relative">
+              <input 
+                type="date" 
+                formControlName="toDate"
+                placeholder="DD/MM/YYYY">
+              <img src="assets/images/calendar_icon.svg" alt="" class="custom_calendar_picker" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="d-flex flex-column">
+          <label class="font_14 fw_med text_black mb_5">Room type</label>
+          <select class="custom-select" formControlName="roomType">
+            <option *ngFor="let type of roomTypes" [value]="type.value">{{ type.label }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="d-flex flex-column">
+          <label class="font_14 fw_med text_black mb_5">Tenants Details</label>
+          <select class="custom-select" formControlName="tenantsDetails">
+            <option *ngFor="let option of tenantsOptions" [value]="option.value">{{ option.label }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex justify-content-center">
+      <button type="button" class="btn_primary search_pos" (click)="onSearch()">Search</button>
+    </div>
+  </form>
+
+  <!-- Results Section -->
+  <div *ngIf="showResults && availableRooms.length > 0" class="mb_40">
+    <div *ngFor="let room of availableRooms" class="room_category_blk mb_21">
+      <div class="row">
+        <div class="col-md-4 d-flex align-items-start border_right_reserve">
+          <label class="custom_checkbox_container mr_15">
+            <input 
+              type="checkbox" 
+              [checked]="isRoomSelected(room.id)"
+              (change)="toggleRoomSelection(room)">
+            <span class="checkmark"></span>
+          </label>
+          <div class="d-flex flex-column">
+            <span class="font_20 fw_semi text_black mb_13">{{ room.roomType }}</span>
+            <div class="d-flex align-items-center font_14 fw_med text_black opacity_5">
+              <span class="mr_15">{{ room.fromDate }}</span>
+              <span class="mr_15">To</span>
+              <span>{{ room.toDate }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 d-flex flex-column">
+          <div class="d-flex align-items-center mb_10">
+            <span class="font_14 fw_med text_black opacity_5 mr_3">Adult Occupancy :</span>
+            <span class="font_14 fw_med text_black">{{ room.adultOccupancy }}</span>
+          </div>
+          <div class="d-flex align-items-center mb_10">
+            <span class="font_14 fw_med text_black opacity_5 mr_3">Child Occupancy :</span>
+            <span class="font_14 fw_med text_black">{{ room.childOccupancy }}</span>
+          </div>
+        </div>
+        <div class="col-md-3 d-flex flex-column">
+          <div class="d-flex align-items-center mb_10">
+            <span class="font_14 fw_med text_black opacity_5 mr_3 w-85px">Price</span>
+            <span class="font_14 fw_med text_black">: ₹ {{ room.price.toFixed(2) }}</span>
+          </div>
+          <div class="d-flex align-items-center mb_10">
+            <span class="font_14 fw_med text_black opacity_5 mr_3 w-85px">Tax</span>
+            <span class="font_14 fw_med text_black">: {{ room.tax }}</span>
+          </div>
+          <div class="d-flex align-items-center mb_10">
+            <span class="font_14 fw_med text_black opacity_5 mr_3 w-85px">Net Amount</span>
+            <span class="font_14 fw_med text_black">: ₹ {{ room.netAmount.toFixed(2) }}</span>
+          </div>
+        </div>
+        <div class="col-md-2 d-flex align-items-center flex-column">
+          <span class="font_20 fw_semi text_black mb_10">Room Number</span>
+          <button class="btn_primary btn_secondary room_no_pd">{{ room.roomNumber }}</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Make Reservations Button -->
+    <div class="make_reserv_pos">
+      <button class="btn_primary w-100" (click)="makeReservations()">Make Reservations</button>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!showResults" class="text-center d-flex justify-content-center flex-column align-items-center no_data_found_blk">
+    <img src="assets/images/reservation_empty_img.svg" alt="No results" />
+    <span class="font_14 fw_med text_black">Search your dream stay here.</span>
+  </div>
+</div>
+

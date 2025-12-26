@@ -1,0 +1,58 @@
+<div class="settings">
+  <h1>Settings</h1>
+
+  <form [formGroup]="settingsForm" (ngSubmit)="onSubmit()" class="settings-form">
+    <div class="form-section">
+      <h2>General Settings</h2>
+      
+      <div class="form-group">
+        <label for="siteName">Site Name</label>
+        <input
+          type="text"
+          id="siteName"
+          formControlName="siteName"
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="siteEmail">Site Email</label>
+        <input
+          type="email"
+          id="siteEmail"
+          formControlName="siteEmail"
+          class="form-control"
+        />
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>System Settings</h2>
+      
+      <div class="form-group checkbox-group">
+        <label>
+          <input
+            type="checkbox"
+            formControlName="maintenanceMode"
+          />
+          Maintenance Mode
+        </label>
+      </div>
+
+      <div class="form-group checkbox-group">
+        <label>
+          <input
+            type="checkbox"
+            formControlName="allowRegistration"
+          />
+          Allow User Registration
+        </label>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Save Settings</button>
+    </div>
+  </form>
+</div>
+
