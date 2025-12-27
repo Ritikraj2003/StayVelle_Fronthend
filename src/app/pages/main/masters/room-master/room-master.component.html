@@ -1,0 +1,112 @@
+<div class="add_services_container">
+  <h3 class="font_20 fw_semi text_black mb_2">Room Master</h3>
+  <span class="text_pri fw_med font_12 d-block mb_13">Masters <span class="text_black">~ Room Master</span></span>
+  
+  <!-- Search and Filter Section -->
+  <div class="services_info_blk position-relative mb_24">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="d-flex flex-column">
+          <label class="font_14 fw_med text_black mb_5">Name</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            placeholder="Search by name"
+            [(ngModel)]="filterName"
+          >
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="d-flex flex-column">
+          <label class="font_14 fw_med text_black mb_5">Status</label>
+          <select class="custom-select" [(ngModel)]="filterStatus">
+            <option value="">Select</option>
+            <option>Active</option>
+            <option>Inactive</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex justify-content-center">
+      <button class="btn_primary search_pos" (click)="onSearch()">Search</button>
+    </div>
+  </div>
+
+  <!-- Filter Tags and Add Room Button -->
+  <div class="d-flex align-items-center justify-content-between mb_24">
+    <div class="d-flex align-items-center">
+      <div 
+        class="d-flex align-items-center mr_20" 
+        *ngFor="let filter of activeFilters"
+      >
+        <div class="luxury_info_blk d-flex align-items-center">
+          <span class="font_10 fw_reg text_black luxury_txt d-block">{{ filter.label }}</span>
+          <img 
+            src="assets/images/cross_svgrepo.com.svg" 
+            alt="" 
+            class="cursor-pointer pl_8"
+            (click)="removeFilter(filter.type)"
+          >
+        </div>
+      </div>
+    </div>
+    <a routerLink="/main/masters/room-master/add" class="text-decoration-none btn_primary services_pd">Add Room</a>
+  </div>
+
+  <!-- Rooms Table -->
+  <div class="mb_21 rounded table-responsive">
+    <table class="">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Room Name</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let room of filteredRooms">
+          <td>{{ room.id || 'N/A' }}</td>
+          <td><a routerLink="/main/masters/room-master/edit/{{ room.id }}" class="text_black fw_semi">{{ room.roomNumber || 'N/A' }}</a></td>
+          <td>{{ room.isActive ? 'Active' : 'Inactive' }}</td>
+          <td>
+            <div class="d-flex align-items-center">
+              <a routerLink="/main/masters/room-master/edit/{{ room.id }}">
+                <img 
+                  src="assets/images/edit_icon.svg" 
+                  alt="" 
+                  class="cursor-pointer mr_10"
+                >
+              </a>
+              <img 
+                src="assets/images/delete_icon.svg" 
+                alt="" 
+                class="cursor-pointer"
+                (click)="deleteRoom(room.id!)"
+              >
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="filteredRooms.length === 0 && !isLoading">
+          <td colspan="4" class="text-center">No rooms found</td>
+        </tr>
+        <tr *ngIf="isLoading">
+          <td colspan="4" class="text-center">Loading...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="d-flex align-items-center justify-content-between">
+    <span class="d-block font_12 fw_reg text_black">Showing {{ filteredRooms.length }} of {{ allRooms.length }} Results</span>
+    <div class="pagination_blk d-flex align-items-center">
+      <img src="assets/images/left_arrow.svg" alt="" class="cursor-pointer mr_12">
+      <span class="active font_12 fw_med cursor-pointer">1</span>
+      <span class="font_12 fw_med cursor-pointer">2</span>
+      <span class="font_12 fw_med cursor-pointer">3</span>
+      <img src="assets/images/chevron-down.svg" alt="" class="ml_12 cursor-pointer">
+    </div>
+  </div>
+</div>
+

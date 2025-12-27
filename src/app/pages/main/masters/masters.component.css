@@ -1,0 +1,24 @@
+.tab-button {
+  padding: 12px 24px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-right: 20px;
+}
+
+.tab-button:hover {
+  color: var(--primary_color);
+  border-bottom-color: var(--primary_color);
+}
+
+.tab-button.active {
+  color: var(--primary_color);
+  font-weight: 600;
+  border-bottom-color: var(--primary_color);
+}
+

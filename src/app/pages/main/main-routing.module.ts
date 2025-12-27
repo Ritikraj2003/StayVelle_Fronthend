@@ -7,6 +7,10 @@ import { SettingsComponent } from './settings/settings.component';
 import { AvailabilityComponent } from './reservations/availability/availability.component';
 import { RolesPermissionsComponent } from './roles-permissions/roles-permissions.component';
 import { RoleAddUpdateComponent } from './roles-permissions/role-add-update/role-add-update.component';
+import { MastersComponent } from './masters/masters.component';
+import { RoomMasterComponent } from './masters/room-master/room-master.component';
+import { RoomAddUpdateComponent } from './masters/room-master/room-add-update/room-add-update.component';
+import { HotelRegistrationComponent } from './masters/hotel-registration/hotel-registration.component';
 import { AuthGuard } from '../../core/guards/auth.guard';
 
 const routes: Routes = [
@@ -59,6 +63,34 @@ const routes: Routes = [
     path: 'roles-permissions/edit/:id',
     component: RoleAddUpdateComponent,
     canActivate: [AuthGuard]
+  },
+  {
+    path: 'masters',
+    component: MastersComponent,
+    canActivate: [AuthGuard],
+    children: [
+      {
+        path: '',
+        redirectTo: 'room-master',
+        pathMatch: 'full'
+      },
+      {
+        path: 'room-master',
+        component: RoomMasterComponent
+      },
+      {
+        path: 'room-master/add',
+        component: RoomAddUpdateComponent
+      },
+      {
+        path: 'room-master/edit/:id',
+        component: RoomAddUpdateComponent
+      },
+      {
+        path: 'hotel-registration',
+        component: HotelRegistrationComponent
+      }
+    ]
   }
 ];
 

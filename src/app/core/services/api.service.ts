@@ -99,5 +99,43 @@ export class ApiService {
   deletePermission(id: number): Observable<any> {
     return this.delete<any>(`Permission/${id}`);
   }
+
+  ///////////////////////////////
+  // Room APIs
+  getRooms(): Observable<any> {
+    return this.get<any>('Room');
+  }
+
+  getRoomById(id: number): Observable<any> {
+    return this.get<any>(`Room/${id}`);
+  }
+
+  getRoomByRoomNumber(roomNumber: string): Observable<any> {
+    return this.get<any>(`Room/roomnumber/${roomNumber}`);
+  }
+
+  getRoomsByStatus(status: string): Observable<any> {
+    return this.get<any>(`Room/status/${status}`);
+  }
+
+  getRoomsByType(roomType: string): Observable<any> {
+    return this.get<any>(`Room/type/${roomType}`);
+  }
+
+  createRoom(data: any): Observable<any> {
+    return this.post<any>('Room', data);
+  }
+
+  updateRoom(id: number, data: any): Observable<any> {
+    return this.put<any>(`Room/${id}`, data);
+  }
+
+  deleteRoom(id: number): Observable<any> {
+    return this.delete<any>(`Room/${id}`);
+  }
+
+  hardDeleteRoom(id: number): Observable<any> {
+    return this.delete<any>(`Room/${id}/hard`);
+  }
 }
 

@@ -1,0 +1,258 @@
+<div class="add_services_container">
+  <h3 class="font_20 fw_semi text_black mb_2">Room Master</h3>
+  <span class="text_pri fw_med font_12 d-block mb_24">Masters <a routerLink="/main/masters/room-master" class="text_black">~ Room Master</a> <span class="text_black">~ {{ isEditMode ? 'Update Room' : 'Add Room' }}</span></span>
+  <div class="services_info_blk add_services_info_blk">
+    <form [formGroup]="roomForm" (ngSubmit)="onSubmit()">
+      <div class="row">
+        <!-- First Row: Room Number, Price, Max Occupancy -->
+        <div class="col-md-4">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Room Number</label>
+            <input
+              type="text"
+              formControlName="roomNumber"
+              class="form-control"
+              placeholder="Enter room number"
+            />
+            <div *ngIf="roomForm.get('roomNumber')?.invalid && roomForm.get('roomNumber')?.touched" class="error-message font_12 text-danger mt_5">
+              Room number is required
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Price</label>
+            <input
+              type="number"
+              formControlName="price"
+              class="form-control"
+              placeholder="Enter price"
+              min="0"
+              step="0.01"
+            />
+            <div *ngIf="roomForm.get('price')?.invalid && roomForm.get('price')?.touched" class="error-message font_12 text-danger mt_5">
+              <span *ngIf="roomForm.get('price')?.errors?.['required']">Price is required</span>
+              <span *ngIf="roomForm.get('price')?.errors?.['min']">Price must be greater than 0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Max Occupancy</label>
+            <input
+              type="number"
+              formControlName="maxOccupancy"
+              class="form-control"
+              placeholder="Enter max occupancy"
+              min="1"
+            />
+            <div *ngIf="roomForm.get('maxOccupancy')?.invalid && roomForm.get('maxOccupancy')?.touched" class="error-message font_12 text-danger mt_5">
+              <span *ngIf="roomForm.get('maxOccupancy')?.errors?.['required']">Max occupancy is required</span>
+              <span *ngIf="roomForm.get('maxOccupancy')?.errors?.['min']">Max occupancy must be at least 1</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Second Row: Floor, No. of Beds, Room AC Type -->
+        <div class="col-md-4">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Floor</label>
+            <input
+              type="text"
+              formControlName="floor"
+              class="form-control"
+              placeholder="Enter floor number"
+            />
+            <div *ngIf="roomForm.get('floor')?.invalid && roomForm.get('floor')?.touched" class="error-message font_12 text-danger mt_5">
+              Floor is required
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">No. of Beds</label>
+            <select formControlName="numberOfBeds" class="custom-select">
+              <option value="">No. of Beds</option>
+              <option *ngFor="let bed of numberOfBeds" [value]="bed">{{ bed }}</option>
+            </select>
+            <div *ngIf="roomForm.get('numberOfBeds')?.invalid && roomForm.get('numberOfBeds')?.touched" class="error-message font_12 text-danger mt_5">
+              Number of beds is required
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Room AC Type</label>
+            <select formControlName="acType" class="custom-select">
+              <option value="">Room AC Type</option>
+              <option *ngFor="let ac of acTypes" [value]="ac">{{ ac }}</option>
+            </select>
+            <div *ngIf="roomForm.get('acType')?.invalid && roomForm.get('acType')?.touched" class="error-message font_12 text-danger mt_5">
+              Room AC type is required
+            </div>
+          </div>
+        </div>
+
+        <!-- Third Row: Bathroom Type, Room Status, Is Active, Is TV -->
+        <div class="col-md-4">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Bathroom Type</label>
+            <select formControlName="bathroomType" class="custom-select">
+              <option value="">Bathroom Type</option>
+              <option *ngFor="let bathroom of bathroomTypes" [value]="bathroom">{{ bathroom }}</option>
+            </select>
+            <div *ngIf="roomForm.get('bathroomType')?.invalid && roomForm.get('bathroomType')?.touched" class="error-message font_12 text-danger mt_5">
+              Bathroom type is required
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Room Type</label>
+            <select formControlName="roomType" class="custom-select">
+              <option value="">Select Room Type</option>
+              <option *ngFor="let type of roomTypes" [value]="type">{{ type }}</option>
+            </select>
+            <div *ngIf="roomForm.get('roomType')?.invalid && roomForm.get('roomType')?.touched" class="error-message font_12 text-danger mt_5">
+              Room type is required
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Room Status</label>
+            <select formControlName="roomStatus" class="custom-select">
+              <option value="">Select Room Status</option>
+              <option *ngFor="let status of roomStatuses" [value]="status">{{ status }}</option>
+            </select>
+            <div *ngIf="roomForm.get('roomStatus')?.invalid && roomForm.get('roomStatus')?.touched" class="error-message font_12 text-danger mt_5">
+              Room status is required
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-2">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Is Active</label>
+            <div class="d-flex align-items-center">
+              <label class="custom_checkbox_container">
+                <input 
+                  type="checkbox" 
+                  formControlName="isActive"
+                >
+                <span class="checkmark"></span>
+                <!-- <span class="font_14 fw_med text_black ml_10">Active</span> -->
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-2">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Is TV</label>
+            <div class="d-flex align-items-center">
+              <label class="custom_checkbox_container">
+                <input 
+                  type="checkbox" 
+                  formControlName="isTv"
+                >
+                <span class="checkmark"></span>
+                <!-- <span class="font_14 fw_med text_black ml_10">TV Available</span> -->
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="col-md-6">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Description (optional)</label>
+            <textarea
+              formControlName="description"
+              class="form-control"
+              placeholder="Enter room description"
+              rows="4"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Room Images -->
+        <div class="col-md-6">
+          <label class="font_14 fw_semi text_black mb_7">Room Images</label>
+          <span class="dragBox d-flex align-items-center flex-column">
+            <img src="assets/images/file_upload_img.svg" class="mb_7" alt="Upload">
+            <div class="font_16 fw_med text_black">Add Room images <span class="font_12">(jpg, svg, png only)</span></div>
+            <input 
+              type="file" 
+              accept="image/jpeg,image/jpg,image/svg+xml,image/png" 
+              multiple 
+              (change)="onFileSelected($event)"
+            />
+          </span>
+        </div>
+
+        <!-- Existing Images Preview (from API) -->
+        <div class="col-md-12" *ngIf="existingImages.length > 0">
+          <label class="font_14 fw_semi text_black mb_7">Existing Images</label>
+          <ul class="d-flex align-items-center flex-wrap">
+            <li class="mr_15 d-flex flex-column" *ngFor="let image of existingImages; let i = index">
+              <img [src]="image" alt="Room image" class="service_list_imgs mb_5" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" onerror="this.src='assets/images/file_upload_img.svg'">
+              <button 
+                type="button" 
+                class="btn btn-sm btn-danger"
+                (click)="removeExistingImage(i)"
+                style="font-size: 12px; padding: 4px 8px;"
+              >
+                Remove
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Uploaded Images Preview (newly selected) -->
+        <div class="col-md-12" *ngIf="uploadedImages.length > 0">
+          <label class="font_14 fw_semi text_black mb_7">New Images to Upload</label>
+          <ul class="d-flex align-items-center flex-wrap">
+            <li class="mr_15 d-flex flex-column" *ngFor="let image of uploadedImages; let i = index">
+              <img [src]="image.preview" alt="" class="service_list_imgs mb_5" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;">
+              <span class="font_14 fw_med text_black mb_5">{{ image.name }}</span>
+              <button 
+                type="button" 
+                class="btn btn-sm btn-danger"
+                (click)="removeImage(i)"
+                style="font-size: 12px; padding: 4px 8px;"
+              >
+                Remove
+              </button>
+            </li>
+            <li>
+              <span class="dragBox d-flex align-items-center flex-column">
+                <img src="assets/images/file_upload_logo.svg" class="mb_10" alt="Upload">
+                <div class="font_16 fw_med text_black">Add New</div>
+                <input 
+                  type="file" 
+                  accept="image/jpeg,image/jpg,image/svg+xml,image/png" 
+                  multiple 
+                  (change)="onFileSelected($event)"
+                />
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="right_side_footer_blk d-flex align-items-center justify-content-center">
+    <button type="button" class="btn_primary btn_secondary mr_20 w-200px" (click)="cancel()">Cancel</button>
+    <button type="button" class="btn_primary mr_20 w-300px" (click)="saveAndContinue()">Save and continue editing</button>
+    <button type="button" class="btn_primary mr_20 w-300px" (click)="saveAndAddAnother()">Save and add another</button>
+    <button type="button" class="btn_primary mr_20 w-200px" (click)="onSubmit()">Save</button>
+  </div>
+</div>
+
