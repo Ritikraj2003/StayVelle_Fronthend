@@ -612,8 +612,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .custom_calendar_picker {
   position: absolute;
-  top: 5px;
-  left: 2px;
+  top: 17px;
+  left: 10px;
 }
 
 .first_date_field {

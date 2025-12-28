@@ -11,6 +11,8 @@ import { MastersComponent } from './masters/masters.component';
 import { RoomMasterComponent } from './masters/room-master/room-master.component';
 import { RoomAddUpdateComponent } from './masters/room-master/room-add-update/room-add-update.component';
 import { HotelRegistrationComponent } from './masters/hotel-registration/hotel-registration.component';
+import { RoomBookingComponent } from './room-booking/room-booking.component';
+import { ReservationComponent } from './reservations/reservation/reservation.component';
 import { AuthGuard } from '../../core/guards/auth.guard';
 
 const routes: Routes = [
@@ -27,6 +29,16 @@ const routes: Routes = [
   {
     path: 'reservations/availability',
     component: AvailabilityComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'room-booking',
+    component: RoomBookingComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'reservations/reservation/:roomId',
+    component: ReservationComponent,
     canActivate: [AuthGuard]
   },
   {

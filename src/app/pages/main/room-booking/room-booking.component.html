@@ -1,0 +1,112 @@
+<div class="add_services_container">
+  <h3 class="font_20 fw_semi text_black mb_2">Room Booking</h3>
+  <span class="text_pri fw_med font_12 d-block mb_13">Reservations <span class="text_black">~ Room Booking</span></span>
+  
+  <!-- Search and Filter Section -->
+  <form [formGroup]="filterForm" class="services_info_blk position-relative mb_24">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="date-range-wrapper">
+          <label class="d-flex align-items-center mb_5">
+            <span class="font_14 fw_med text_black w-50">From Date</span>
+            <span class="font_14 fw_med text_black">To Date</span>
+          </label>
+          <div class="date-range-box d-flex align-items-center justify-content-between">
+            <div class="date-field w-46 position-relative first_date_field">
+              <input 
+                type="date" 
+                formControlName="fromDate"
+                placeholder="DD/MM/YYYY">
+              <img src="assets/images/calendar_icon.svg" alt="" class="custom_calendar_picker" />
+            </div>
+            <div class="date-field w-50 position-relative">
+              <input 
+                type="date" 
+                formControlName="toDate"
+                placeholder="DD/MM/YYYY">
+              <img src="assets/images/calendar_icon.svg" alt="" class="custom_calendar_picker" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="d-flex flex-column">
+          <label class="font_14 fw_med text_black mb_5">Room type</label>
+          <select class="custom-select" formControlName="roomType">
+            <option *ngFor="let type of roomTypes" [value]="type.value">{{ type.label }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="d-flex flex-column">
+          <label class="font_14 fw_med text_black mb_5">Floor</label>
+          <select class="custom-select" formControlName="floor">
+            <option value="">Select</option>
+            <option *ngFor="let floor of floors" [value]="floor">{{ floor }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex justify-content-center">
+      <button type="button" class="btn_primary search_pos" (click)="onSearch()">Search</button>
+    </div>
+  </form>
+
+  <!-- Filter Tags -->
+  <div class="d-flex align-items-center justify-content-between mb_24" *ngIf="activeFilters.length > 0">
+    <div class="d-flex align-items-center">
+      <div 
+        class="d-flex align-items-center mr_20" 
+        *ngFor="let filter of activeFilters"
+      >
+        <div class="luxury_info_blk d-flex align-items-center">
+          <span class="font_10 fw_reg text_black luxury_txt d-block">{{ filter.label }}</span>
+          <img 
+            src="assets/images/cross_svgrepo.com.svg" 
+            alt="" 
+            class="cursor-pointer pl_8"
+            (click)="removeFilter(filter.type)"
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rooms Grid -->
+  <div class="rooms-grid mb_21" *ngIf="!isLoading">
+    <div 
+      *ngFor="let room of filteredRooms" 
+      class="room-box" 
+      [class.available]="isRoomAvailable(room)"
+      [class.occupied]="isRoomOccupied(room)"
+      (click)="onRoomClick(room)"
+    >
+      <div class="room-number">{{ room.roomNumber || room.roomnumber || 'N/A' }}</div>
+      <div class="room-type">{{ getRoomType(room) }}</div>
+      <div class="room-status" [class.status-available]="isRoomAvailable(room)" [class.status-occupied]="isRoomOccupied(room)">
+        {{ getRoomStatus(room) }}
+      </div>
+    </div>
+    <div *ngIf="filteredRooms.length === 0 && !isLoading" class="no-rooms-message">
+      <span class="font_14 fw_med text_black">No rooms found</span>
+    </div>
+  </div>
+  
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="d-flex justify-content-center align-items-center" style="min-height: 200px;">
+    <span class="font_14 fw_med text_black">Loading rooms...</span>
+  </div>
+
+  <!-- Pagination -->
+  <div class="d-flex align-items-center justify-content-between">
+    <span class="d-block font_12 fw_reg text_black">Showing {{ filteredRooms.length }} of {{ allRooms.length }} Results</span>
+    <div class="pagination_blk d-flex align-items-center">
+      <img src="assets/images/left_arrow.svg" alt="" class="cursor-pointer mr_12">
+      <span class="active font_12 fw_med cursor-pointer">1</span>
+      <span class="font_12 fw_med cursor-pointer">2</span>
+      <span class="font_12 fw_med cursor-pointer">3</span>
+      <img src="assets/images/chevron-down.svg" alt="" class="ml_12 cursor-pointer">
+    </div>
+  </div>
+</div>
+

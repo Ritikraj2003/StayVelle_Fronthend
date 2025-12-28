@@ -137,5 +137,43 @@ export class ApiService {
   hardDeleteRoom(id: number): Observable<any> {
     return this.delete<any>(`Room/${id}/hard`);
   }
+
+  ///////////////////////////////
+  // Booking APIs
+  getBookings(): Observable<any> {
+    return this.get<any>('Booking');
+  }
+
+  getBookingById(id: number): Observable<any> {
+    return this.get<any>(`Booking/${id}`);
+  }
+
+  getBookingByGuestId(guestId: number): Observable<any> {
+    return this.get<any>(`Booking/guest/${guestId}`);
+  }
+
+  getBookingByGuestPhone(phoneNumber: string): Observable<any> {
+    return this.get<any>(`Booking/phone/${phoneNumber}`);
+  }
+
+  createBooking(data: any): Observable<any> {
+    return this.post<any>('Booking', data);
+  }
+
+  updateBooking(id: number, data: any): Observable<any> {
+    return this.put<any>(`Booking/${id}`, data);
+  }
+
+  deleteBooking(id: number): Observable<any> {
+    return this.delete<any>(`Booking/${id}`);
+  }
+
+  checkInBooking(id: number): Observable<any> {
+    return this.post<any>(`Booking/${id}/checkin`, {});
+  }
+
+  checkOutBooking(id: number): Observable<any> {
+    return this.post<any>(`Booking/${id}/checkout`, {});
+  }
 }
 

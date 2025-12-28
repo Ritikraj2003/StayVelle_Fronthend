@@ -1,0 +1,256 @@
+<div class="add_services_container">
+    <h3 class="font_20 fw_semi text_black mb_2">Reservation</h3>
+    <span class="text_pri fw_med font_12 d-block mb_24">Reservations <a routerLink="/main/room-booking"
+            class="text_black">~ Room Booking</a> <span class="text_black">~ Create Reservation</span></span>
+
+    <!-- Room Information Section -->
+    <div class="room-info-section mb_24" *ngIf="roomData">
+        <div class="d-flex align-items-center justify-content-between p-3"
+            style="background: #f8f9fa; border-radius: 10px; border: 1px solid #e0e0e0;">
+            <div class="d-flex align-items-center">
+                <div class="mr_30">
+                    <span class="font_12 fw_med text-muted d-block mb_5">Room Number</span>
+                    <span class="font_18 fw_semi text_black">{{ getRoomNumber() }}</span>
+                </div>
+                <div class="mr_30">
+                    <span class="font_12 fw_med text-muted d-block mb_5">Room Type</span>
+                    <span class="font_18 fw_semi text_black">{{ getRoomType() }}</span>
+                </div>
+                <div>
+                    <span class="font_12 fw_med text-muted d-block mb_5">Price</span>
+                    <span class="font_18 fw_semi text_pri">{{ getPrice() }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="isLoading && !roomData" class="d-flex justify-content-center align-items-center"
+        style="min-height: 400px;">
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <p class="mt-3">Loading room data...</p>
+        </div>
+    </div>
+
+    <div class="services_info_blk add_services_info_blk" *ngIf="roomData">
+        <form [formGroup]="reservationForm" (ngSubmit)="onSubmit()">
+            <!-- First Div: Check-in, Check-out, Number of Guests -->
+            <div class="row mb_24">
+                <div class="col-md-4">
+                    <div class="d-flex flex-column">
+                        <label class="font_14 fw_med text_black mb_7">Check-in Date</label>
+                        <div class="date-field position-relative">
+                            <input 
+                                type="date" 
+                                formControlName="checkInDate" 
+                                class="form-control date-input" 
+                                id="checkInDate"
+                            />
+                            <img 
+                                src="assets/images/calendar_icon.svg" 
+                                alt="Calendar" 
+                                class="custom_calendar_picker"
+                                (click)="openDatePicker('checkInDate')"
+                            />
+                        </div>
+                        <div *ngIf="reservationForm.get('checkInDate')?.invalid && reservationForm.get('checkInDate')?.touched"
+                            class="error-message font_12 text-danger mt_5">
+                            Check-in date is required
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex flex-column">
+                        <label class="font_14 fw_med text_black mb_7">Check-out Date</label>
+                        <div class="date-field position-relative">
+                            <input 
+                                type="date" 
+                                formControlName="checkOutDate" 
+                                class="form-control date-input"
+                                id="checkOutDate"
+                            />
+                            <img 
+                                src="assets/images/calendar_icon.svg" 
+                                alt="Calendar" 
+                                class="custom_calendar_picker"
+                                (click)="openDatePicker('checkOutDate')"
+                            />
+                        </div>
+                        <div *ngIf="reservationForm.get('checkOutDate')?.invalid && reservationForm.get('checkOutDate')?.touched"
+                            class="error-message font_12 text-danger mt_5">
+                            Check-out date is required
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex flex-column">
+                        <label class="font_14 fw_med text_black mb_7">Number of Guests</label>
+                        <input type="number" formControlName="numberOfGuests" class="form-control"
+                            placeholder="Enter number of guests" min="1" />
+                        <div *ngIf="reservationForm.get('numberOfGuests')?.invalid && reservationForm.get('numberOfGuests')?.touched"
+                            class="error-message font_12 text-danger mt_5">
+                            Number of guests is required
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Second Div: Guest Information -->
+            <div class="row" formArrayName="guests">
+                <div class="col-md-12 mb_15">
+                    <div class="d-flex align-items-center justify-content-between mb_5">
+                        <h4 class="font_16 fw_semi text_black mb-0">Guest Information</h4>
+                        <button type="button" class="btn btn-sm btn-primary d-flex align-items-center"
+                            (click)="addGuest()"
+                            style="background: var(--primary_color); border: none; padding: 8px 16px; border-radius: 5px; color: white; cursor: pointer;">
+                            <span style="font-size: 18px; margin-right: 5px;">+</span>
+                            <span>Add Guest</span>
+                        </button>
+                    </div>
+                    <p class="font_12 text-muted mb-0">
+                        <span class="text-danger">*</span> At least one guest must be marked as primary
+                    </p>
+                </div>
+
+                <!-- Loop through each guest form -->
+                <div *ngFor="let guest of guestsFormArray.controls; let i = index" [formGroupName]="i"
+                    class="col-md-12 guest-form-section mb_24">
+                    <div class="d-flex align-items-center justify-content-between mb_15" *ngIf="i > 0">
+                        <h5 class="font_14 fw_semi text_black mb-0">Guest {{ i + 1 }}</h5>
+                        <button type="button" class="btn btn-sm btn-danger" (click)="removeGuest(i)"
+                            style="padding: 4px 12px; border-radius: 5px; border: none; cursor: pointer;">
+                            Remove
+                        </button>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="d-flex flex-column">
+                                <label class="font_14 fw_med text_black mb_7">Name</label>
+                                <input type="text" formControlName="guestName" class="form-control"
+                                    placeholder="Enter guest name" />
+                                <div *ngIf="guest.get('guestName')?.invalid && guest.get('guestName')?.touched"
+                                    class="error-message font_12 text-danger mt_5">
+                                    Name is required
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="d-flex flex-column">
+                                <label class="font_14 fw_med text_black mb_7">Age</label>
+                                <input type="number" formControlName="age" class="form-control" placeholder="Enter age"
+                                    min="1" max="120" />
+                                <div *ngIf="guest.get('age')?.invalid && guest.get('age')?.touched"
+                                    class="error-message font_12 text-danger mt_5">
+                                    Age is required
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="d-flex flex-column">
+                                <label class="font_14 fw_med text_black mb_7">Gender</label>
+                                <select formControlName="gender" class="custom-select">
+                                    <option *ngFor="let gender of genders" [value]="gender.value">{{ gender.label }}
+                                    </option>
+                                </select>
+                                <div *ngIf="guest.get('gender')?.invalid && guest.get('gender')?.touched"
+                                    class="error-message font_12 text-danger mt_5">
+                                    Gender is required
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="d-flex flex-column">
+                                <label class="font_14 fw_med text_black mb_7">Is Primary</label>
+                                <div class="d-flex align-items-center" style="padding-top: 8px;">
+                                    <input type="checkbox" formControlName="isPrimary" id="isPrimary_{{i}}"
+                                        (change)="onPrimaryChange(i, $event)"
+                                        style="width: 18px; height: 18px; margin-right: 8px; cursor: pointer;" />
+                                    <label for="isPrimary_{{i}}" class="font_14 fw_med text_black mb-0"
+                                        style="cursor: pointer; margin-bottom: 0;">Mark as Primary Guest</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex flex-column">
+                                <label class="font_14 fw_med text_black mb_7">Phone Number</label>
+                                <input type="text" formControlName="guestPhone" class="form-control"
+                                    placeholder="Enter phone number" />
+                                <div *ngIf="guest.get('guestPhone')?.invalid && guest.get('guestPhone')?.touched"
+                                    class="error-message font_12 text-danger mt_5">
+                                    Phone number is required
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex flex-column">
+                                <label class="font_14 fw_med text_black mb_7">Email <span
+                                        class="font_12 text-muted">(Optional)</span></label>
+                                <input type="email" formControlName="guestEmail" class="form-control"
+                                    placeholder="Enter email" />
+                                <div *ngIf="guest.get('guestEmail')?.invalid && guest.get('guestEmail')?.touched"
+                                    class="error-message font_12 text-danger mt_5">
+                                    <span *ngIf="guest.get('guestEmail')?.errors?.['email']">Invalid email format</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <div class="d-flex flex-column">
+                                <label class="font_14 fw_med text_black mb_7">ID Proof</label>
+                                <select formControlName="idProof" class="custom-select">
+                                    <option *ngFor="let idType of idProofTypes" [value]="idType.value">{{ idType.label
+                                        }}</option>
+                                </select>
+                                <div *ngIf="guest.get('idProof')?.invalid && guest.get('idProof')?.touched"
+                                    class="error-message font_12 text-danger mt_5">
+                                    ID Proof is required
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <label class="font_14 fw_semi text_black mb_7">ID Proof Image <span
+                                    class="font_12 text-muted">(Optional)</span></label>
+                            <div *ngIf="!guestImagePreviews[i]" class="dragBox d-flex align-items-center flex-column">
+                                <img src="assets/images/file_upload_img.svg" class="mb_7" alt="Upload">
+                                <div class="font_16 fw_med text_black">Upload ID Proof Image <span class="font_12">(jpg,
+                                        jpeg, png, svg - max 5MB)</span></div>
+                                <input type="file" [attr.data-guest-index]="i" (change)="onIdImageSelected($event, i)"
+                                    accept="image/jpeg,image/jpg,image/png,image/svg+xml" />
+                            </div>
+                            <div *ngIf="guestImagePreviews[i]" class="d-flex align-items-center">
+                                <div class="mr_15 position-relative">
+                                    <img [src]="guestImagePreviews[i]" alt="ID Proof Preview"
+                                        class="user-image-preview mb_5"
+                                        style="width: 150px; height: 150px; object-fit: cover; border-radius: 8px; border: 2px solid #ddd;">
+                                    <button type="button" class="btn btn-sm btn-danger position-absolute"
+                                        style="top: 5px; right: 5px; border-radius: 50%; width: 30px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center;"
+                                        (click)="removeIdImage(i)" title="Remove Image">
+                                        ×
+                                    </button>
+                                </div>
+                                <div class="dragBox d-flex align-items-center flex-column">
+                                    <img src="assets/images/file_upload_logo.svg" class="mb_10" alt="Upload">
+                                    <div class="font_16 fw_med text_black">Change Image</div>
+                                    <input type="file" [attr.data-guest-index]="i"
+                                        (change)="onIdImageSelected($event, i)"
+                                        accept="image/jpeg,image/jpg,image/png,image/svg+xml" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="right_side_footer_blk d-flex align-items-center justify-content-center" *ngIf="roomData">
+    <button type="button" class="btn_primary btn_secondary mr_20 w-200px" (click)="cancel()"
+        [disabled]="isLoading">Cancel</button>
+    <button type="button" class="btn_primary mr_20 w-200px" (click)="onSubmit()"
+        [disabled]="reservationForm.invalid || isLoading">
+        <span *ngIf="!isLoading">Save</span>
+        <span *ngIf="isLoading">Saving...</span>
+    </button>
+</div>
