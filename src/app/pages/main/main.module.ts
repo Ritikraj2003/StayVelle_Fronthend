@@ -8,6 +8,8 @@ import { SettingsComponent } from './settings/settings.component';
 import { AvailabilityComponent } from './reservations/availability/availability.component';
 import { RoomBookingComponent } from './room-booking/room-booking.component';
 import { ReservationComponent } from './reservations/reservation/reservation.component';
+import { CheckoutComponent } from './checkout/checkout.component';
+import { HousekeepingListComponent } from './housekeeping/housekeeping-list/housekeeping-list.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
@@ -24,7 +26,9 @@ import { RouterModule } from '@angular/router';
     SettingsComponent,
     AvailabilityComponent,
     RoomBookingComponent,
-    ReservationComponent
+    ReservationComponent,
+    CheckoutComponent,
+    HousekeepingListComponent
   ]
 })
 export class MainModule { }

@@ -110,3 +110,152 @@
   </div>
 </div>
 
+<!-- Maintenance Room Modal -->
+<div 
+  class="modal fade" 
+  [class.show]="showMaintenanceModal" 
+  [style.display]="showMaintenanceModal ? 'block' : 'none'"
+  tabindex="-1" 
+  role="dialog"
+  *ngIf="showMaintenanceModal"
+  style="z-index: 1050;"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 600px;">
+    <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+      <div class="modal-header" style="border-bottom: 1px solid #E0E0E0; padding: 20px 30px; border-radius: 20px 20px 0 0;">
+        <h5 class="modal-title font_20 fw_semi text_black mb_0">Maintenance Room</h5>
+        <button 
+          type="button" 
+          class="close" 
+          (click)="closeMaintenanceModal()"
+          aria-label="Close"
+          style="background: none; border: none; font-size: 28px; opacity: 0.5; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;"
+        >
+          <span aria-hidden="true" style="line-height: 1;">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="padding: 30px;">
+        <form [formGroup]="maintenanceForm" (ngSubmit)="onSubmitMaintenance()">
+          <div class="row">
+            <!-- Booking ID -->
+            <div class="col-md-6 mb_20">
+              <div class="d-flex flex-column">
+                <label class="font_14 fw_med text_black mb_7">Booking ID</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  formControlName="bookingId"
+                  placeholder="Enter Booking ID"
+                >
+              </div>
+            </div>
+
+            <!-- Room ID -->
+            <div class="col-md-6 mb_20">
+              <div class="d-flex flex-column">
+                <label class="font_14 fw_med text_black mb_7">Room ID <span class="text-danger">*</span></label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  formControlName="roomId"
+                  placeholder="Enter Room ID"
+                  [readonly]="true"
+                  style="background-color: #f5f5f5; cursor: not-allowed;"
+                >
+                <div *ngIf="maintenanceForm.get('roomId')?.invalid && maintenanceForm.get('roomId')?.touched" 
+                     class="error-message font_12 text-danger mt_5">
+                  Room ID is required
+                </div>
+              </div>
+            </div>
+
+            <!-- Task Status -->
+            <div class="col-md-6 mb_20">
+              <div class="d-flex flex-column">
+                <label class="font_14 fw_med text_black mb_7">Task Status <span class="text-danger">*</span></label>
+                <select 
+                  class="custom-select" 
+                  formControlName="taskStatus"
+                >
+                  <option value="">Select Status</option>
+                  <option value="Pending">Pending</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Completed">Completed</option>
+                </select>
+                <div *ngIf="maintenanceForm.get('taskStatus')?.invalid && maintenanceForm.get('taskStatus')?.touched" 
+                     class="error-message font_12 text-danger mt_5">
+                  Task Status is required
+                </div>
+              </div>
+            </div>
+
+            <!-- Task Type -->
+            <div class="col-md-6 mb_20">
+              <div class="d-flex flex-column">
+                <label class="font_14 fw_med text_black mb_7">Task Type <span class="text-danger">*</span></label>
+                <select 
+                  class="custom-select" 
+                  formControlName="taskType"
+                >
+                  <option value="">Select Task Type</option>
+                  <option value="Cleaning">Cleaning</option>
+                  <option value="Maintenance">Maintenance</option>
+                  <option value="Inspection">Inspection</option>
+                  <option value="Setup">Setup</option>
+                </select>
+                <div *ngIf="maintenanceForm.get('taskType')?.invalid && maintenanceForm.get('taskType')?.touched" 
+                     class="error-message font_12 text-danger mt_5">
+                  Task Type is required
+                </div>
+              </div>
+            </div>
+
+            <!-- Staff Dropdown -->
+            <div class="col-md-12 mb_20">
+              <div class="d-flex flex-column">
+                <label class="font_14 fw_med text_black mb_7">Staff</label>
+                <select 
+                  class="custom-select" 
+                  formControlName="assignedToUserId"
+                >
+                  <option value="">Select Staff</option>
+                  <option *ngFor="let staff of staffList" [value]="staff.id">
+                    {{ staff.name }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer" style="border-top: 1px solid #E0E0E0; padding: 20px 30px; border-radius: 0 0 20px 20px; justify-content: flex-end; gap: 15px;">
+        <button 
+          type="button" 
+          class="btn_primary btn_secondary" 
+          (click)="closeMaintenanceModal()"
+          style="min-width: 120px;"
+        >
+          Cancel
+        </button>
+        <button 
+          type="button" 
+          class="btn_primary" 
+          (click)="onSubmitMaintenance()"
+          style="min-width: 120px;"
+        >
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Backdrop -->
+<div 
+  class="modal-backdrop fade" 
+  [class.show]="showMaintenanceModal"
+  *ngIf="showMaintenanceModal"
+  (click)="closeMaintenanceModal()"
+  style="z-index: 1040; background-color: rgba(0, 0, 0, 0.5);"
+></div>
+

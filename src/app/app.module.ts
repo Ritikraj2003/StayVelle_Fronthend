@@ -16,6 +16,7 @@ import { UserListComponent } from './pages/main/users/user-list/user-list.compon
 import { UserAddComponent } from './pages/main/users/user-add/user-add.component';
 import { SettingsComponent } from './pages/main/settings/settings.component';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   declarations: [
@@ -35,7 +36,8 @@ import { AuthInterceptor } from './core/interceptors/auth.interceptor';
     DashboardComponent,
     UserListComponent,
     UserAddComponent,
-    SettingsComponent
+    SettingsComponent,
+    NgbModule
   ],
   providers: [
     {

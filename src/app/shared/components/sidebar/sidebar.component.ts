@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { PermissionService } from '../../../core/services/permission.service';
 import { filter } from 'rxjs/operators';
 
 interface MenuItem {
@@ -9,6 +10,7 @@ interface MenuItem {
   route?: string;
   children?: MenuItem[];
   hasDropdown?: boolean;
+  permissionCode?: string | string[]; // Permission code(s) required to view this menu item (string for single, array for OR condition)
 }
 
 @Component({
@@ -26,91 +28,137 @@ export class SidebarComponent implements OnInit {
   // Generic dropdown state management - works for any number of dropdowns
   dropdownStates: { [key: string]: boolean } = {};
 
-  // Menu configuration - easy to add more dropdowns in the future
-  menuItems: MenuItem[] = [
+  // Menu configuration with permission codes
+  // Permission codes should match the permission_code from PermissionModel in backend
+  allMenuItems: MenuItem[] = [
     {
       label: 'Dashboard',
-      route: '/main/dashboard'
+      route: '/main/dashboard',
+      permissionCode: 'DS' // Dashboard permission code
     },
     {
       label: 'Reservations',
       hasDropdown: true,
+      permissionCode: 'RB', // Reservations permission code (matches backend "RB" - Reservation | RoomBooking)
       children: [
-        { label: 'Availability', route: '/main/reservations/availability' },
-        { label: 'Room Booking', route: '/main/room-booking' },
-        { label: 'Current Booking', route: '/main/reservations/current-booking' },
-        { label: 'Set Room Availability', route: '/main/reservations/set-availability' }
+        { label: 'Availability', route: '/main/reservations/availability', permissionCode: 'RS' },
+        { label: 'Room Booking', route: '/main/room-booking', permissionCode: 'RB' },
+        { label: 'Current Booking', route: '/main/reservations/current-booking', permissionCode: 'RB' },
+        { label: 'Set Room Availability', route: '/main/reservations/set-availability', permissionCode: 'RB' },
+        { label: 'Booking History', route: '/main/booking-history', permissionCode: 'RB' }, // Using same permission as Reservations
       ]
     },
     {
       label: 'Front Desk',
       route: '/main/front-desk',
-      hasDropdown: false
+      hasDropdown: false,
+      permissionCode: 'FD' // Front Desk permission code
     },
     {
       label: 'House keeping',
-      route: '/main/housekeeping'
+      route: '/main/housekeeping',
+      permissionCode: 'HK' // Housekeeping permission code
     },
     {
       label: 'Message Management',
-      route: '/main/messages'
+      route: '/main/messages',
+      permissionCode: 'MM' // Message Management permission code
     },
     {
       label: 'Masters',
-      route: '/main/masters'
+      route: '/main/masters',
+      permissionCode: 'MS' // Masters permission code
     },
     {
       label: 'Property Setup',
       route: '/main/property-setup',
-      hasDropdown: false
+      hasDropdown: false,
+      permissionCode: 'PS' // Property Setup permission code
     },
     {
       label: 'Revenue Management',
       route: '/main/revenue',
-      hasDropdown: false
+      hasDropdown: false,
+      permissionCode: 'RM' // Revenue Management permission code
     },
     {
       label: 'User Management',
       hasDropdown: true,
+      permissionCode: ['RU', 'RO'], // User Management - show if user has UM OR RO permission
       children: [
-        { label: 'Roles & Permissions', route: '/main/roles-permissions' },
-        { label: 'Users', route: '/main/users' }
+        { label: 'Roles & Permissions', route: '/main/roles-permissions', permissionCode: 'RO' },
+        { label: 'Users', route: '/main/users', permissionCode: 'RU' }
       ]
     },
     {
       label: 'Reports',
       route: '/main/reports',
-      hasDropdown: false
+      hasDropdown: false,
+      permissionCode: 'RT' // Reports permission code
     }
   ];
 
+  // Filtered menu items based on permissions
+  menuItems: MenuItem[] = [];
+
   constructor(
     private authService: AuthService,
+    private permissionService: PermissionService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    // Auto-open/close dropdowns based on current route
+    this.filterMenuItemsByPermissions();
+
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: any) => {
         this.updateDropdownStates(event.url);
       });
 
-    // Check initial route
     this.updateDropdownStates(this.router.url);
 
-    // Reset image error when user changes
     this.currentUser$.subscribe(user => {
       this.imageError = false;
+      this.filterMenuItemsByPermissions();
     });
 
-    // Close profile menu when clicking outside
     document.addEventListener('click', (event: any) => {
       if (!event.target.closest('.side_menu_blw_cntn')) {
         this.closeProfileMenu();
       }
     });
+  }
+
+  /**
+   * Filter menu items based on user permissions
+   */
+  filterMenuItemsByPermissions(): void {
+    this.menuItems = this.allMenuItems
+      .map(item => ({ ...item, children: item.children ? [...item.children] : undefined }))
+      .filter(item => {
+        if (!item.permissionCode) {
+          return false;
+        }
+
+        if (!this.permissionService.hasPermission(item.permissionCode)) {
+          return false;
+        }
+
+        if (item.hasDropdown && item.children) {
+          const filteredChildren = item.children.filter(child => 
+            child.permissionCode && this.permissionService.hasPermission(child.permissionCode)
+          );
+          
+          if (filteredChildren.length > 0) {
+            item.children = filteredChildren;
+            return true;
+          }
+          return false;
+        }
+
+        return true;
+      });
   }
 
   /**
@@ -128,13 +176,21 @@ export class SidebarComponent implements OnInit {
       if (item.hasDropdown && item.children) {
         const dropdownKey = this.getDropdownKey(item.label);
         // Check if any child route matches current URL
-        const isOnChildRoute = item.children.some(child => {
+        let isOnChildRoute = item.children.some(child => {
           if (!child.route) return false;
           // Remove /main/ prefix for comparison
           const routePath = child.route.replace('/main/', '');
           // Check if current URL includes the route path
           return currentUrl.includes(routePath);
         });
+        
+        // Special handling for Reservations dropdown
+        // Keep it open for reservation or checkout pages (related to Room Booking)
+        if (item.label === 'Reservations' && !isOnChildRoute) {
+          isOnChildRoute = currentUrl.includes('/main/reservations/reservation') ||
+                          currentUrl.includes('/main/checkout');
+        }
+        
         this.dropdownStates[dropdownKey] = isOnChildRoute;
       }
     });
@@ -175,6 +231,27 @@ export class SidebarComponent implements OnInit {
    */
   closeProfileMenu(): void {
     this.showProfileMenu = false;
+  }
+
+  /**
+   * Check if a child menu item should be active
+   * Handles special cases like Room Booking -> Reservation/Checkout
+   */
+  isChildActive(childRoute: string | undefined, childLabel: string): boolean {
+    const currentUrl = this.router.url;
+    if (!currentUrl || !childRoute) return false;
+    
+    // Special handling for Room Booking
+    // Keep it active when navigating to reservation or checkout pages
+    if (childLabel === 'Room Booking' && childRoute === '/main/room-booking') {
+      return currentUrl === '/main/room-booking' ||
+             currentUrl.includes('/main/reservations/reservation') ||
+             currentUrl.includes('/main/checkout');
+    }
+    
+    // Default behavior: check if current URL matches or starts with the route
+    // This handles cases like /main/users/add matching /main/users
+    return currentUrl === childRoute || currentUrl.startsWith(childRoute + '/');
   }
 
   /**

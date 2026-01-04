@@ -40,7 +40,7 @@
         </div>
       </div>
     </div>
-    <a routerLink="/main/roles-permissions/add" class="text-decoration-none btn_primary services_pd">Add Role</a>
+    <a *ngIf="permissionService.hasPermission('RA')" routerLink="/main/roles-permissions/add" class="text-decoration-none btn_primary services_pd">Add Role</a>
   </div>
 
   <!-- Roles Table -->

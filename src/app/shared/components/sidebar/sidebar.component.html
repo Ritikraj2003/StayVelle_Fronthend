@@ -29,7 +29,7 @@
           <ul class="dropdown-menu submenu" [class.show]="isDropdownOpen(item.label)">
             <li *ngFor="let child of item.children">
               <a [routerLink]="child.route" 
-                 routerLinkActive="active" 
+                 [class.active]="isChildActive(child.route, child.label)"
                  class="submenu-link">{{ child.label }}</a>
             </li>
           </ul>

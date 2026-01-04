@@ -1,0 +1,222 @@
+<div class="add_services_container">
+  <h3 class="font_20 fw_semi text_black mb_2">Check Out</h3>
+  <span class="text_pri fw_med font_12 d-block mb_13">Reservations <span class="text_black">~ <a routerLink="/main/room-booking" class="text_pri text-decoration-none">Room Booking</a> <span class="text_black">~ Check Out</span></span></span>
+  
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="d-flex justify-content-center align-items-center" style="min-height: 400px;">
+    <span class="font_14 fw_med text_black">Loading booking details...</span>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="alert alert-danger mb_24">
+    <span class="font_14 fw_med">{{ error }}</span>
+  </div>
+
+  <!-- Booking Details -->
+  <div *ngIf="bookingData && !isLoading" class="booking-details-container">
+    
+    <!-- Booking Information Card -->
+    <div class="info-card mb_24">
+      <h4 class="font_16 fw_semi text_black mb_16">Booking Information</h4>
+      <div class="row">
+        <div class="col-md-3 mb_12">
+          <div class="info-item">
+            <span class="font_12 fw_med text_black label">Booking ID:</span>
+            <span class="font_14 fw_reg text_black value">#{{ bookingData.bookingId }}</span>
+          </div>
+        </div>
+        <div class="col-md-3 mb_12">
+          <div class="info-item">
+            <span class="font_12 fw_med text_black label">Booking Status:</span>
+            <span class="font_14 fw_reg text_black value status-badge" [class.status-checkedout]="bookingData.bookingStatus === 'CheckedOut'">
+              {{ bookingData.bookingStatus }}
+            </span>
+          </div>
+        </div>
+        <div class="col-md-3 mb_12">
+          <div class="info-item">
+            <span class="font_12 fw_med text_black label">Check-In Date:</span>
+            <span class="font_14 fw_reg text_black value">{{ formatDate(bookingData.checkInDate) }}</span>
+          </div>
+        </div>
+        <div class="col-md-3 mb_12">
+          <div class="info-item">
+            <span class="font_12 fw_med text_black label">Check-Out Date:</span>
+            <span class="font_14 fw_reg text_black value">{{ formatDate(bookingData.checkOutDate) }}</span>
+          </div>
+        </div>
+        <div class="col-md-3 mb_12">
+          <div class="info-item">
+            <span class="font_12 fw_med text_black label">Actual Check-In:</span>
+            <span class="font_14 fw_reg text_black value">{{ formatDate(bookingData.actualCheckInTime) }}</span>
+          </div>
+        </div>
+        <div class="col-md-3 mb_12">
+          <div class="info-item">
+            <span class="font_12 fw_med text_black label">Actual Check-Out:</span>
+            <span class="font_14 fw_reg text_black value">{{ getCurrentDateTime() }}</span>
+          </div>
+        </div>
+        <div class="col-md-3 mb_12">
+          <div class="info-item">
+            <span class="font_12 fw_med text_black label">Number of Guests:</span>
+            <span class="font_14 fw_reg text_black value">{{ bookingData.numberOfGuests }}</span>
+          </div>
+        </div>
+        <div class="col-md-3 mb_12">
+          <div class="info-item">
+            <span class="font_12 fw_med text_black label">Number of Nights:</span>
+            <span class="font_14 fw_reg text_black value">{{ calculateNights() }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Room Information Card -->
+    <div class="info-card mb_24" *ngIf="bookingData.room">
+      <h4 class="font_16 fw_semi text_black mb_16">Room Information</h4>
+      <div class="row">
+        <div class="col-md-3 mb_12">
+          <div class="info-item">
+            <span class="font_12 fw_med text_black label">Room Number:</span>
+            <span class="font_14 fw_reg text_black value">{{ bookingData.room.roomNumber }}</span>
+          </div>
+        </div>
+        <div class="col-md-3 mb_12">
+          <div class="info-item">
+            <span class="font_12 fw_med text_black label">Room Type:</span>
+            <span class="font_14 fw_reg text_black value">{{ bookingData.room.roomType }}</span>
+          </div>
+        </div>
+        <div class="col-md-3 mb_12">
+          <div class="info-item">
+            <span class="font_12 fw_med text_black label">Floor:</span>
+            <span class="font_14 fw_reg text_black value">{{ bookingData.room.floor }}</span>
+          </div>
+        </div>
+        <div class="col-md-3 mb_12">
+          <div class="info-item">
+            <span class="font_12 fw_med text_black label">Max Occupancy:</span>
+            <span class="font_14 fw_reg text_black value">{{ bookingData.room.maxOccupancy }}</span>
+          </div>
+        </div>
+        <div class="col-md-3 mb_12">
+          <div class="info-item">
+            <span class="font_12 fw_med text_black label">Number of Beds:</span>
+            <span class="font_14 fw_reg text_black value">{{ bookingData.room.numberOfBeds }}</span>
+          </div>
+        </div>
+        <div class="col-md-3 mb_12">
+          <div class="info-item">
+            <span class="font_12 fw_med text_black label">AC Type:</span>
+            <span class="font_14 fw_reg text_black value">{{ bookingData.room.acType }}</span>
+          </div>
+        </div>
+        <div class="col-md-3 mb_12">
+          <div class="info-item">
+            <span class="font_12 fw_med text_black label">Bathroom Type:</span>
+            <span class="font_14 fw_reg text_black value">{{ bookingData.room.bathroomType }}</span>
+          </div>
+        </div>
+        <div class="col-md-3 mb_12">
+          <div class="info-item">
+            <span class="font_12 fw_med text_black label">TV Available:</span>
+            <span class="font_14 fw_reg text_black value">{{ bookingData.room.isTv ? 'Yes' : 'No' }}</span>
+          </div>
+        </div>
+        <div class="col-md-12 mb_12" *ngIf="bookingData.room.description">
+          <div class="info-item">
+            <span class="font_12 fw_med text_black label">Description:</span>
+            <span class="font_14 fw_reg text_black value">{{ bookingData.room.description }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Guest Information Card -->
+    <div class="info-card mb_24" *ngIf="bookingData.guests && bookingData.guests.length > 0">
+      <h4 class="font_16 fw_semi text_black mb_16 guest-info-title">Guest Information</h4>
+      <div class="guests-list">
+        <div class="guest-entry" *ngFor="let guest of bookingData.guests; let last = last">
+          <div class="guest-content">
+            <div class="guest-left-column">
+              <div class="guest-info-row">
+                <span class="guest-label">GUEST NAME:</span>
+                <span class="guest-value">
+                  {{ guest.guestName }}
+                  <span *ngIf="guest.isPrimary" class="primary-badge">(PRIMARY)</span>
+                </span>
+              </div>
+              <div class="guest-info-row">
+                <span class="guest-label">GENDER:</span>
+                <span class="guest-value">{{ guest.gender }}</span>
+              </div>
+              <div class="guest-info-row">
+                <span class="guest-label">ID PROOF:</span>
+                <span class="guest-value">{{ guest.idProof }}</span>
+              </div>
+            </div>
+            <div class="guest-right-column">
+              <div class="guest-info-row">
+                <span class="guest-label">AGE:</span>
+                <span class="guest-value">{{ guest.age }}</span>
+              </div>
+              <div class="guest-info-row">
+                <span class="guest-label">PHONE:</span>
+                <span class="guest-value">{{ guest.guestPhone }}</span>
+              </div>
+            </div>
+            <div class="guest-image-column">
+              <div class="guest-image-placeholder">
+                <img 
+                  [src]="guest.idProofImagePath || 'assets/images/file_upload_img.svg'" 
+                  [alt]="guest.guestName + ' ID Proof Image'"
+                  class="guest-image"
+                  (error)="$any($event.target).src='assets/images/file_upload_img.svg'"
+                />
+              </div>
+            </div>
+          </div>
+          <hr *ngIf="!last" class="guest-separator">
+        </div>
+      </div>
+    </div>
+
+    <!-- Amount Calculation Card -->
+    <div class="info-card amount-card">
+      <h4 class="font_16 fw_semi text_black mb_16">Amount Calculation</h4>
+      <div class="amount-details">
+        <div class="amount-row d-flex justify-content-between align-items-center mb_12">
+          <span class="font_14 fw_med text_black">Room Price (per night):</span>
+          <span class="font_14 fw_reg text_black">₹{{ bookingData.room?.price || 0 }}</span>
+        </div>
+        <div class="amount-row d-flex justify-content-between align-items-center mb_12">
+          <span class="font_14 fw_med text_black">Number of Nights:</span>
+          <span class="font_14 fw_reg text_black">{{ calculateNights() }}</span>
+        </div>
+        <div class="amount-row d-flex justify-content-between align-items-center mb_12">
+          <span class="font_14 fw_med text_black">Subtotal:</span>
+          <span class="font_14 fw_reg text_black">₹{{ calculateSubtotal().toFixed(2) }}</span>
+        </div>
+        <div class="amount-row d-flex justify-content-between align-items-center mb_12">
+          <span class="font_14 fw_med text_black">GST (18%):</span>
+          <span class="font_14 fw_reg text_black">₹{{ calculateTax().toFixed(2) }}</span>
+        </div>
+        <hr class="amount-separator mb_16">
+        <div class="amount-row d-flex justify-content-between align-items-center total-row">
+          <span class="font_16 fw_semi text_black">Total Amount:</span>
+          <span class="font_18 fw_semi text_pri">₹{{ calculateTotal().toFixed(2) }}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="right_side_footer_blk d-flex align-items-center justify-content-center" *ngIf="bookingData && !isLoading">
+  <button type="button" class="btn_primary btn_secondary mr_20 w-200px" (click)="cancel()" [disabled]="isSaving">Cancel</button>
+  <button type="button" class="btn_primary mr_20 w-200px" (click)="save()" [disabled]="isSaving">
+    <span *ngIf="!isSaving">Save</span>
+    <span *ngIf="isSaving">Saving...</span>
+  </button>
+</div>
+

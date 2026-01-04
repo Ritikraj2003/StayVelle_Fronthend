@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
+import { PermissionService } from '../../../core/services/permission.service';
 
 @Component({
   selector: 'app-roles-permissions',
@@ -21,10 +22,12 @@ export class RolesPermissionsComponent implements OnInit {
   // Active filters array
   activeFilters: Array<{type: string, label: string, value: string}> = [];
 
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private apiService: ApiService,
+    public permissionService: PermissionService
+  ) {}
 
   ngOnInit(): void {
-    // Load roles data
     this.getRoles();
   }
 
@@ -86,6 +89,11 @@ export class RolesPermissionsComponent implements OnInit {
   }
 
   deleteRole(id: number): void {
+    if (!this.permissionService.hasPermission('RD')) {
+      alert('You do not have permission to delete roles.');
+      return;
+    }
+
     if (confirm('Are you sure you want to delete this role?')) {
       this.apiService.deleteRole(id).subscribe({
         next: () => {

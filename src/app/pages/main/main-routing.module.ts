@@ -13,6 +13,9 @@ import { RoomAddUpdateComponent } from './masters/room-master/room-add-update/ro
 import { HotelRegistrationComponent } from './masters/hotel-registration/hotel-registration.component';
 import { RoomBookingComponent } from './room-booking/room-booking.component';
 import { ReservationComponent } from './reservations/reservation/reservation.component';
+import { CheckoutComponent } from './checkout/checkout.component';
+import { HousekeepingListComponent } from './housekeeping/housekeeping-list/housekeeping-list.component';
+import { BookingHistoryComponent } from './booking-history/booking-history.component';
 import { AuthGuard } from '../../core/guards/auth.guard';
 
 const routes: Routes = [
@@ -42,6 +45,21 @@ const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
+    path: 'checkout/:id',
+    component: CheckoutComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'checkout',
+    component: CheckoutComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'booking-history',
+    component: BookingHistoryComponent,
+    canActivate: [AuthGuard]
+  },
+  {
     path: 'users',
     component: UserListComponent,
     canActivate: [AuthGuard]
@@ -54,6 +72,11 @@ const routes: Routes = [
   {
     path: 'users/edit/:id',
     component: UserAddComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'housekeeping',
+    component: HousekeepingListComponent,
     canActivate: [AuthGuard]
   },
   {

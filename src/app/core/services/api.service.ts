@@ -175,5 +175,31 @@ export class ApiService {
   checkOutBooking(id: number): Observable<any> {
     return this.post<any>(`Booking/${id}/checkout`, {});
   }
+
+  ///////////////////////////////
+  // Housekeeping Task APIs
+  getHousekeepingTasks(): Observable<any> {
+    return this.get<any>('HousekeepingTask');
+  }
+
+  getHousekeepingTaskById(id: number): Observable<any> {
+    return this.get<any>(`HousekeepingTask/${id}`);
+  }
+
+  getHousekeepingTaskByBookingId(bookingId: number): Observable<any> {
+    return this.get<any>(`HousekeepingTask/booking/${bookingId}`);
+  }
+
+  createHousekeepingTask(data: any): Observable<any> {
+    return this.post<any>('HousekeepingTask', data);
+  }
+
+  updateHousekeepingTask(id: number, data: any): Observable<any> {
+    return this.put<any>(`HousekeepingTask/${id}`, data);
+  }
+
+  deleteHousekeepingTask(id: number): Observable<any> {
+    return this.delete<any>(`HousekeepingTask/${id}`);
+  }
 }
 

@@ -1,59 +1,55 @@
 import { Injectable } from '@angular/core';
-import { AuthService, Permission } from './auth.service';
+import { StorageService } from './storage.service';
+import { Permission, User } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PermissionService {
-  constructor(private authService: AuthService) {}
+  private readonly PERMISSIONS_KEY = 'user_permissions';
+
+  constructor(private storageService: StorageService,) {}
 
   /**
-   * Check if user has a specific permission
+   * Set permissions (called after login)
    */
-  hasPermission(module: string, action: string): boolean {
-    // Admin has all permissions
-    if (this.authService.isAdmin()) {
-      return true;
-    }
-    return this.authService.hasPermission(module, action);
+  setPermissions(permissions: Permission[]): void {
+    this.storageService.setItem(this.PERMISSIONS_KEY, permissions);
   }
 
   /**
-   * Check if user has any of the specified permissions
-   */
-  hasAnyPermission(permissions: { module: string; action: string }[]): boolean {
-    if (this.authService.isAdmin()) {
-      return true;
-    }
-    return this.authService.hasAnyPermission(permissions);
-  }
-
-  /**
-   * Check if user has all of the specified permissions
-   */
-  hasAllPermissions(permissions: { module: string; action: string }[]): boolean {
-    if (this.authService.isAdmin()) {
-      return true;
-    }
-    return permissions.every(p => this.authService.hasPermission(p.module, p.action));
-  }
-
-  /**
-   * Get all permissions for current user
+   * Get permissions from localStorage
    */
   getPermissions(): Permission[] {
-    return this.authService.getPermissions();
+    return this.storageService.getItem<Permission[]>(this.PERMISSIONS_KEY) || [];
   }
 
   /**
-   * Check if user can access a module
+   * Check if user has a specific permission by permission code (module)
    */
-  canAccessModule(module: string): boolean {
-    if (this.authService.isAdmin()) {
+  hasPermission(permissionCode: string | string[]): boolean {
+
+    // If user is admin, allow everything
+    const user = this.storageService.getItem<User>("current_user");
+    if (user?.isAdmin === true) {
       return true;
     }
+
     const permissions = this.getPermissions();
-    return permissions.some(p => p.module.toLowerCase() === module.toLowerCase());
+    const codes = Array.isArray(permissionCode) ? permissionCode : [permissionCode];
+    
+    return codes.some(code => 
+      permissions.some(p => 
+        p.module?.toLowerCase() === code.toLowerCase() ||
+        p.name?.toLowerCase() === code.toLowerCase()
+      )
+    );
+  }
+
+  /**
+   * Clear permissions (called on logout)
+   */
+  clearPermissions(): void {
+    this.storageService.removeItem(this.PERMISSIONS_KEY);
   }
 }
-

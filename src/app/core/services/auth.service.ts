@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { StorageService } from './storage.service';
 import { ApiService } from './api.service';
+import { PermissionService } from './permission.service';
 
 export interface Permission {
   id: number;
@@ -38,12 +39,12 @@ export class AuthService {
 
   private readonly TOKEN_KEY = 'auth_token';
   private readonly USER_KEY = 'current_user';
-  private readonly PERMISSIONS_KEY = 'user_permissions';
 
   constructor(
     private storageService: StorageService,
     private router: Router,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private permissionService: PermissionService
   ) {
     this.loadUserFromStorage();
   }
@@ -85,19 +86,11 @@ export class AuthService {
   }
 
   logout(): void {
-    // Clear all stored authentication data
     this.storageService.removeItem(this.TOKEN_KEY);
     this.storageService.removeItem(this.USER_KEY);
-    this.storageService.removeItem(this.PERMISSIONS_KEY);
-    
-    // Clear current user from memory
+    this.permissionService.clearPermissions();
     this.currentUserSubject.next(null);
-    
-    // Navigate to login page
-    this.router.navigate(['/auth/login']).then(() => {
-      // Optional: Clear any cached data or perform additional cleanup
-      console.log('User logged out successfully');
-    });
+    this.router.navigate(['/auth/login']);
   }
 
   isAuthenticated(): boolean {
@@ -112,7 +105,7 @@ export class AuthService {
   setUser(user: User, token: string): void {
     this.storageService.setItem(this.TOKEN_KEY, token);
     this.storageService.setItem(this.USER_KEY, user);
-    this.storageService.setItem(this.PERMISSIONS_KEY, user.permissions);
+    this.permissionService.setPermissions(user.permissions);
     this.currentUserSubject.next(user);
   }
 
