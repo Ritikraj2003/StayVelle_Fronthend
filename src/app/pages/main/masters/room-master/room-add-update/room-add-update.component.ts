@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../../../../core/services/api.service';
+import { LoaderService } from '../../../../../core/services/loader.service';
 
 
 interface UploadedImage {
@@ -44,7 +45,8 @@ export class RoomAddUpdateComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private loaderService: LoaderService
   ) {
     this.roomForm = this.fb.group({
       roomNumber: ['', [Validators.required]],
@@ -74,6 +76,7 @@ export class RoomAddUpdateComponent implements OnInit {
   }
 
   loadRoom(id: number): void {
+    this.loaderService.show();
     this.apiService.getRoomById(id).subscribe({
       next: (room) => {
         this.roomForm.patchValue({
@@ -95,10 +98,12 @@ export class RoomAddUpdateComponent implements OnInit {
         if (room.images) {
           this.existingImages = Array.isArray(room.images) ? room.images : this.parseImages(room.images);
         }
+        this.loaderService.hide();
       },
       error: (error) => {
         console.error('Error loading room:', error);
         alert('Failed to load room. Please try again.');
+        this.loaderService.hide();
         this.router.navigate(['/main/masters/room-master']);
       }
     });
@@ -133,26 +138,31 @@ export class RoomAddUpdateComponent implements OnInit {
 
   async onSubmit(): Promise<void> {
     if (this.roomForm.valid) {
+      this.loaderService.show();
       const formData = await this.prepareFormData();
       
       if (this.isEditMode && this.roomId) {
         this.apiService.updateRoom(this.roomId, formData).subscribe({
           next: () => {
+            this.loaderService.hide();
             this.router.navigate(['/main/masters/room-master']);
           },
           error: (error) => {
             console.error('Error updating room:', error);
             alert('Failed to update room. Please try again.');
+            this.loaderService.hide();
           }
         });
       } else {
         this.apiService.createRoom(formData).subscribe({
           next: () => {
+            this.loaderService.hide();
             this.router.navigate(['/main/masters/room-master']);
           },
           error: (error) => {
             console.error('Error creating room:', error);
             alert('Failed to create room. Please try again.');
+            this.loaderService.hide();
           }
         });
       }
@@ -161,6 +171,7 @@ export class RoomAddUpdateComponent implements OnInit {
 
   async saveAndContinue(): Promise<void> {
     if (this.roomForm.valid) {
+      this.loaderService.show();
       const formData = await this.prepareFormData();
       
       if (this.isEditMode && this.roomId) {
@@ -169,10 +180,12 @@ export class RoomAddUpdateComponent implements OnInit {
             // Reload room data to stay on page
             this.loadRoom(this.roomId!);
             alert('Room updated successfully!');
+            this.loaderService.hide();
           },
           error: (error) => {
             console.error('Error updating room:', error);
             alert('Failed to update room. Please try again.');
+            this.loaderService.hide();
           }
         });
       } else {
@@ -181,12 +194,14 @@ export class RoomAddUpdateComponent implements OnInit {
             // Switch to edit mode with new room ID
             this.roomId = room.id;
             this.isEditMode = true;
+            this.loaderService.hide();
             this.router.navigate(['/main/masters/room-master/edit', this.roomId]);
             alert('Room created successfully!');
           },
           error: (error) => {
             console.error('Error creating room:', error);
             alert('Failed to create room. Please try again.');
+            this.loaderService.hide();
           }
         });
       }
@@ -195,6 +210,7 @@ export class RoomAddUpdateComponent implements OnInit {
 
   async saveAndAddAnother(): Promise<void> {
     if (this.roomForm.valid) {
+      this.loaderService.show();
       const formData = await this.prepareFormData();
       
       if (this.isEditMode && this.roomId) {
@@ -203,10 +219,12 @@ export class RoomAddUpdateComponent implements OnInit {
           next: () => {
             // Reset form for adding another room
             this.resetFormForNewRoom();
+            this.loaderService.hide();
           },
           error: (error) => {
             console.error('Error updating room:', error);
             alert('Failed to update room. Please try again.');
+            this.loaderService.hide();
           }
         });
       } else {
@@ -216,10 +234,12 @@ export class RoomAddUpdateComponent implements OnInit {
             // Reset form for adding another room
             this.resetFormForNewRoom();
             alert('Room created successfully!');
+            this.loaderService.hide();
           },
           error: (error) => {
             console.error('Error creating room:', error);
             alert('Failed to create room. Please try again.');
+            this.loaderService.hide();
           }
         });
       }

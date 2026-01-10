@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { ApiService } from '../../../../core/services/api.service';
+import { LoaderService } from '../../../../core/services/loader.service';
 
 @Component({
   selector: 'app-room-master',
@@ -25,7 +26,8 @@ export class RoomMasterComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
-    private router: Router
+    private router: Router,
+    private loaderService: LoaderService
   ) {}
 
   ngOnInit(): void {
@@ -35,15 +37,18 @@ export class RoomMasterComponent implements OnInit {
 
   getRooms(): void {
     this.isLoading = true;
+    this.loaderService.show();
     this.apiService.getRooms().subscribe({
       next: (rooms) => {
         this.allRooms = rooms;
         this.filteredRooms = [...this.allRooms];
         this.isLoading = false;
+        this.loaderService.hide();
       },
       error: (error) => {
         console.error('Error loading rooms:', error);
         this.isLoading = false;
+        this.loaderService.hide();
         alert('Failed to load rooms. Please try again.');
       }
     });
@@ -111,13 +116,16 @@ export class RoomMasterComponent implements OnInit {
 
   deleteRoom(id: number): void {
     if (confirm('Are you sure you want to delete this room?')) {
+      this.loaderService.show();
       this.apiService.deleteRoom(id).subscribe({
         next: () => {
           this.getRooms();
+          this.loaderService.hide();
         },
         error: (error) => {
           console.error('Error deleting room:', error);
           alert('Failed to delete room. Please try again.');
+          this.loaderService.hide();
         }
       });
     }

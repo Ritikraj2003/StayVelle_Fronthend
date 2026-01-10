@@ -73,7 +73,7 @@
   </div>
 
   <!-- Rooms Grid -->
-  <div class="rooms-grid mb_21" *ngIf="!isLoading">
+  <div class="rooms-grid mb_21">
     <div 
       *ngFor="let room of filteredRooms" 
       class="room-box" 
@@ -87,16 +87,10 @@
         {{ getRoomStatus(room) }}
       </div>
     </div>
-    <div *ngIf="filteredRooms.length === 0 && !isLoading" class="no-rooms-message">
+    <div *ngIf="filteredRooms.length === 0" class="no-rooms-message">
       <span class="font_14 fw_med text_black">No rooms found</span>
     </div>
   </div>
-  
-  <!-- Loading State -->
-  <div *ngIf="isLoading" class="d-flex justify-content-center align-items-center" style="min-height: 200px;">
-    <span class="font_14 fw_med text_black">Loading rooms...</span>
-  </div>
-
   <!-- Pagination -->
   <div class="d-flex align-items-center justify-content-between">
     <span class="d-block font_12 fw_reg text_black">Showing {{ filteredRooms.length }} of {{ allRooms.length }} Results</span>

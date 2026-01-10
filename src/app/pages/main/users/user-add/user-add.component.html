@@ -1,15 +1,7 @@
 <div class="add_services_container">
   <h3 class="font_20 fw_semi text_black mb_2">Users</h3>
   <span class="text_pri fw_med font_12 d-block mb_24">User Management <a routerLink="/main/users" class="text_black">~ User</a> <span class="text_black">~ {{ isEditMode ? 'Edit User' : 'Add User' }}</span></span>
-  <div *ngIf="isLoadingUser" class="d-flex justify-content-center align-items-center" style="min-height: 400px;">
-    <div class="text-center">
-      <div class="spinner-border text-primary" role="status">
-        <span class="sr-only">Loading...</span>
-      </div>
-      <p class="mt-3">Loading user data...</p>
-    </div>
-  </div>
-  <div class="services_info_blk add_services_info_blk" *ngIf="!isLoadingUser">
+  <div class="services_info_blk add_services_info_blk">
     <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
       <div class="row">
         <div class="col-md-6">

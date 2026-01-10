@@ -4,6 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/services/api.service';
 import { PermissionService } from '../../../../core/services/permission.service';
+import { LoaderService } from '../../../../core/services/loader.service';
 
 @Component({
   selector: 'app-user-list',
@@ -28,7 +29,8 @@ export class UserListComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private router: Router,
-    public permissionService: PermissionService
+    public permissionService: PermissionService,
+    private loaderService: LoaderService
   ) {}
 
   ngOnInit(): void {
@@ -37,29 +39,35 @@ export class UserListComponent implements OnInit {
   }
 
   loadRoles(): void {
+    this.loaderService.show();
     this.apiService.getRoles().subscribe({
       next: (roles) => {
         // Filter only active roles
         this.roles = roles.filter((role: any) => role.isactive);
+        this.loaderService.hide();
       },
       error: (error) => {
         console.error('Error loading roles:', error);
         this.roles = [];
+        this.loaderService.hide();
       }
     });
   }
 
   getUsers(): void {
+    this.loaderService.show();
     this.apiService.getUsers().subscribe({
       next: (users) => {
         this.allUsers = users;
         // Initially show all users, filters will be applied only on Search button click
         this.filteredUsers = [...this.allUsers];
+        this.loaderService.hide();
       },
       error: (error) => {
         console.error('Error loading users:', error);
         this.allUsers = [];
         this.filteredUsers = [];
+        this.loaderService.hide();
       }
     });
   }
@@ -70,6 +78,7 @@ export class UserListComponent implements OnInit {
 
   deleteUser(id: number): void {
     if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      this.loaderService.show();
       this.apiService.deleteUser(id).subscribe({
         next: () => {
           // Reload users after deletion
@@ -78,11 +87,13 @@ export class UserListComponent implements OnInit {
           if (this.filterName || this.filterRole || this.filterStatus) {
             this.applyFilters();
           }
+          this.loaderService.hide();
         },
         error: (error) => {
           console.error('Error deleting user:', error);
           const errorMessage = error.error?.message || 'Error deleting user. Please try again.';
           alert(errorMessage);
+          this.loaderService.hide();
         }
       });
     }

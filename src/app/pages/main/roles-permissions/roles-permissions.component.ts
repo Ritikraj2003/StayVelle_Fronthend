@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 import { PermissionService } from '../../../core/services/permission.service';
+import { LoaderService } from '../../../core/services/loader.service';
 
 @Component({
   selector: 'app-roles-permissions',
@@ -24,7 +25,8 @@ export class RolesPermissionsComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
-    public permissionService: PermissionService
+    public permissionService: PermissionService,
+    private loaderService: LoaderService
   ) {}
 
   ngOnInit(): void {
@@ -32,15 +34,18 @@ export class RolesPermissionsComponent implements OnInit {
   }
 
   getRoles(): void {
+    this.loaderService.show();
     this.apiService.getRoles().subscribe({
       next: (roles) => {
         this.allRoles = roles;
         this.filteredRoles = [...this.allRoles];
+        this.loaderService.hide();
       },
       error: (error) => {
         console.error('Error loading roles:', error);
         this.allRoles = [];
         this.filteredRoles = [];
+        this.loaderService.hide();
       }
     });
   }
@@ -95,14 +100,17 @@ export class RolesPermissionsComponent implements OnInit {
     }
 
     if (confirm('Are you sure you want to delete this role?')) {
+      this.loaderService.show();
       this.apiService.deleteRole(id).subscribe({
         next: () => {
           // Reload roles after deletion
           this.getRoles();
+          this.loaderService.hide();
         },
         error: (error) => {
           console.error('Error deleting role:', error);
           alert('Error deleting role. Please try again.');
+          this.loaderService.hide();
         }
       });
     }

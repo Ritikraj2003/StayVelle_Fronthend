@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../../../core/services/api.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { LoaderService } from '../../../../core/services/loader.service';
 
 @Component({
   selector: 'app-user-add',
@@ -28,7 +29,8 @@ export class UserAddComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private apiService: ApiService,
-    private authService: AuthService
+    private authService: AuthService,
+    private loaderService: LoaderService
   ) {
     this.userForm = this.fb.group({
       name: ['', [Validators.required]],
@@ -66,14 +68,17 @@ export class UserAddComponent implements OnInit {
   }
 
   loadRoles(): void {
+    this.loaderService.show();
     this.apiService.getRoles().subscribe({
       next: (roles) => {
         // Filter only active roles
         this.roles = roles.filter((role: any) => role.isactive);
+        this.loaderService.hide();
       },
       error: (error) => {
         console.error('Error loading roles:', error);
         this.roles = [];
+        this.loaderService.hide();
       }
     });
   }
@@ -125,9 +130,11 @@ export class UserAddComponent implements OnInit {
 
   loadUserData(id: number): void {
     this.isLoadingUser = true;
+    this.loaderService.show();
     this.apiService.getUserById(id).subscribe({
       next: (user) => {
         this.isLoadingUser = false;
+        this.loaderService.hide();
         if (user) {
           // Populate form with user data
           this.userForm.patchValue({
@@ -158,6 +165,7 @@ export class UserAddComponent implements OnInit {
       },
       error: (error) => {
         this.isLoadingUser = false;
+        this.loaderService.hide();
         console.error('Error loading user:', error);
         alert('Error loading user data. Please try again.');
         this.router.navigate(['/main/users']);
@@ -168,6 +176,7 @@ export class UserAddComponent implements OnInit {
   onSubmit(): void {
     if (this.userForm.valid) {
       this.isLoading = true;
+      this.loaderService.show();
       const formData = this.prepareFormData();
       
       if (this.isEditMode && this.userId) {
@@ -175,10 +184,12 @@ export class UserAddComponent implements OnInit {
         this.apiService.updateUser(this.userId, formData).subscribe({
           next: (response) => {
             this.isLoading = false;
+            this.loaderService.hide();
             this.router.navigate(['/main/users']);
           },
           error: (error) => {
             this.isLoading = false;
+            this.loaderService.hide();
             console.error('Error updating user:', error);
             const errorMessage = error.error?.message || 'Error updating user. Please try again.';
             alert(errorMessage);
@@ -189,10 +200,12 @@ export class UserAddComponent implements OnInit {
         this.apiService.createUser(formData).subscribe({
           next: (response) => {
             this.isLoading = false;
+            this.loaderService.hide();
             this.router.navigate(['/main/users']);
           },
           error: (error) => {
             this.isLoading = false;
+            this.loaderService.hide();
             console.error('Error creating user:', error);
             const errorMessage = error.error?.message || 'Error creating user. Please try again.';
             alert(errorMessage);

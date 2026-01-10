@@ -6,6 +6,7 @@ import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../../../core/services/api.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { PermissionService } from '../../../../core/services/permission.service';
+import { LoaderService } from '../../../../core/services/loader.service';
 
 @Component({
   selector: 'app-role-add-update',
@@ -34,7 +35,8 @@ export class RoleAddUpdateComponent implements OnInit {
     private route: ActivatedRoute,
     private apiService: ApiService,
     private authService: AuthService,
-    public permissionService: PermissionService
+    public permissionService: PermissionService,
+    private loaderService: LoaderService
   ) {
     this.roleForm = this.fb.group({
       role_name: ['', [Validators.required]],
@@ -57,6 +59,7 @@ export class RoleAddUpdateComponent implements OnInit {
   }
 
   loadPermissions(): void {
+    this.loaderService.show();
     this.apiService.getPermissions().subscribe({
       next: (permissions) => {
         this.allPermissions = permissions;
@@ -65,17 +68,20 @@ export class RoleAddUpdateComponent implements OnInit {
           this.availablePermissions = [...this.allPermissions];
           this.chosenPermissions = [];
         }
+        this.loaderService.hide();
       },
       error: (error) => {
         console.error('Error loading permissions:', error);
         this.allPermissions = [];
         this.availablePermissions = [];
+        this.loaderService.hide();
       }
     });
   }
 
   loadRole(id: number): void {
     this.isLoading = true;
+    this.loaderService.show();
     this.apiService.getRoleById(id).subscribe({
       next: (role) => {
         this.roleForm.patchValue({
@@ -87,12 +93,14 @@ export class RoleAddUpdateComponent implements OnInit {
         const permissionIds = role.permissions ? role.permissions.map((p: any) => p.Id || p.id) : [];
         this.setPermissions(permissionIds);
         this.isLoading = false;
+        this.loaderService.hide();
       },
       error: (error) => {
         console.error('Error loading role:', error);
         alert('Error loading role. Please try again.');
         this.router.navigate(['/main/roles-permissions']);
         this.isLoading = false;
+        this.loaderService.hide();
       }
     });
   }
@@ -174,30 +182,35 @@ export class RoleAddUpdateComponent implements OnInit {
   onSubmit(): void {
     if (this.roleForm.valid && this.chosenPermissions.length > 0) {
       this.isLoading = true;
+      this.loaderService.show();
       const formData = this.prepareFormData();
       
       if (this.isEditMode && this.roleId) {
         this.apiService.updateRole(this.roleId, formData).subscribe({
           next: () => {
             this.isLoading = false;
+            this.loaderService.hide();
             this.router.navigate(['/main/roles-permissions']);
           },
           error: (error) => {
             console.error('Error updating role:', error);
             alert(error.error?.message || 'Error updating role. Please try again.');
             this.isLoading = false;
+            this.loaderService.hide();
           }
         });
       } else {
         this.apiService.createRole(formData).subscribe({
           next: () => {
             this.isLoading = false;
+            this.loaderService.hide();
             this.router.navigate(['/main/roles-permissions']);
           },
           error: (error) => {
             console.error('Error creating role:', error);
             alert(error.error?.message || 'Error creating role. Please try again.');
             this.isLoading = false;
+            this.loaderService.hide();
           }
         });
       }
@@ -218,11 +231,13 @@ export class RoleAddUpdateComponent implements OnInit {
   saveAndAddAnother(): void {
     if (this.roleForm.valid && this.chosenPermissions.length > 0) {
       this.isLoading = true;
+      this.loaderService.show();
       const formData = this.prepareFormData();
       
       this.apiService.createRole(formData).subscribe({
         next: () => {
           this.isLoading = false;
+          this.loaderService.hide();
           // Reset form for adding another role
           this.roleForm.reset({
             isactive: true
@@ -239,6 +254,7 @@ export class RoleAddUpdateComponent implements OnInit {
           console.error('Error creating role:', error);
           alert(error.error?.message || 'Error creating role. Please try again.');
           this.isLoading = false;
+          this.loaderService.hide();
         }
       });
     } else if (this.chosenPermissions.length === 0) {

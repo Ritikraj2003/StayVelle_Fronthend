@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
+import { LoaderService } from '../../../core/services/loader.service';
 
 @Component({
   selector: 'app-checkout',
@@ -20,7 +21,8 @@ export class CheckoutComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private loaderService: LoaderService
   ) {}
 
   ngOnInit(): void {
@@ -35,16 +37,19 @@ export class CheckoutComponent implements OnInit {
   loadBookingData(): void {
     this.isLoading = true;
     this.error = '';
+    this.loaderService.show();
     
     this.apiService.getBookingById(this.bookingId).subscribe({  
       next: (data: any) => {
         this.bookingData = data;
         this.isLoading = false;
+        this.loaderService.hide();
       },
       error: (error: any) => {
         console.error('Error loading booking:', error);
         this.error = 'Failed to load booking data. Please try again.';
         this.isLoading = false;
+        this.loaderService.hide();
       }
     });
   }
@@ -148,10 +153,12 @@ export class CheckoutComponent implements OnInit {
 
     this.isSaving = true;
     this.error = '';
+    this.loaderService.show();
 
     this.apiService.checkOutBooking(this.bookingId).subscribe({
       next: (response: any) => {
         this.isSaving = false;
+        this.loaderService.hide();
         // Redirect to booking page after successful checkout
         this.router.navigate(['/main/room-booking']);
       },
@@ -159,6 +166,7 @@ export class CheckoutComponent implements OnInit {
         console.error('Error during checkout:', error);
         this.error = error?.error?.message || 'Failed to process checkout. Please try again.';
         this.isSaving = false;
+        this.loaderService.hide();
       }
     });
   }

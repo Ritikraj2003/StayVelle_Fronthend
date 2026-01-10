@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
+@import 'ngx-toastr/toastr';
 
 :root {
   --primary_color: #0038BC;
@@ -959,6 +960,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   align-items: flex-start !important;
 }
 
+/* Toastr Notification Styles - Ensure toasts are visible */
+#toast-container {
+  z-index: 9999 !important;
+}
 
+.toast {
+  z-index: 9999 !important;
+  position: fixed !important;
+}
 
 

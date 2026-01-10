@@ -216,13 +216,8 @@
     <button class="text-decoration-none btn_primary services_pd" (click)="showAddForm()">Add Housekeeping</button>
   </div>
 
-  <!-- Loading State -->
-  <div *ngIf="isLoading" class="text-center py_20">
-    <p class="font_14 text_black">Loading housekeeping tasks...</p>
-  </div>
-
   <!-- Housekeeping Table -->
-  <div *ngIf="!isLoading" class="mb_21 rounded table-responsive">
+  <div class="mb_21 rounded table-responsive">
     <table class="">
       <thead>
         <tr>
@@ -268,7 +263,7 @@
             </div>
           </td>
         </tr>
-        <tr *ngIf="filteredHousekeeping.length === 0 && !isLoading">
+        <tr *ngIf="filteredHousekeeping.length === 0">
           <td colspan="9" class="text-center">No housekeeping records found</td>
         </tr>
       </tbody>
@@ -276,7 +271,7 @@
   </div>
 
   <!-- Pagination -->
-  <div *ngIf="!isLoading" class="d-flex align-items-center justify-content-between">
+  <div class="d-flex align-items-center justify-content-between">
     <span class="d-block font_12 fw_reg text_black">Showing {{ filteredHousekeeping.length }} of {{ allHousekeeping.length }} Results</span>
     <div class="pagination_blk d-flex align-items-center">
       <img src="assets/images/left_arrow.svg" alt="" class="cursor-pointer mr_12">

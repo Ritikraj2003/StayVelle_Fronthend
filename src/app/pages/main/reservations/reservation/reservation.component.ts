@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../../../core/services/api.service';
+import { LoaderService } from '../../../../core/services/loader.service';
 
 @Component({
   selector: 'app-reservation',
@@ -37,7 +38,8 @@ export class ReservationComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private loaderService: LoaderService
   ) {
     // Set today's date as default for check-in
     const today = new Date();
@@ -92,15 +94,18 @@ export class ReservationComponent implements OnInit {
 
   loadRoomData(roomId: number): void {
     this.isLoading = true;
+    this.loaderService.show();
     this.apiService.getRoomById(roomId).subscribe({
       next: (room: any) => {
         this.roomData = room;
         this.initializeForm();
         this.isLoading = false;
+        this.loaderService.hide();
       },
       error: (error: any) => {
         console.error('Error loading room:', error);
         this.isLoading = false;
+        this.loaderService.hide();
         alert('Error loading room data. Please try again.');
         this.router.navigate(['/main/room-booking']);
       }
@@ -215,18 +220,21 @@ export class ReservationComponent implements OnInit {
 
     if (this.reservationForm.valid) {
       this.isLoading = true;
+      this.loaderService.show();
       const formData = await this.prepareFormData();
       
       // Call booking API
       this.apiService.createBooking(formData).subscribe({
         next: (response: any) => {
           this.isLoading = false;
+          this.loaderService.hide();
           alert('Reservation submitted successfully!');
           this.router.navigate(['/main/room-booking']);
         },
         error: (error: any) => {
           console.error('Error creating booking:', error);
           this.isLoading = false;
+          this.loaderService.hide();
           const errorMessage = error?.error?.message || error?.message || 'Failed to create reservation. Please try again.';
           alert(errorMessage);
         }

@@ -1,7 +1,9 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -17,6 +19,7 @@ import { UserAddComponent } from './pages/main/users/user-add/user-add.component
 import { SettingsComponent } from './pages/main/settings/settings.component';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { ToastrModule } from 'ngx-toastr';
 
 @NgModule({
   declarations: [
@@ -24,8 +27,10 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     HttpClientModule,
     ReactiveFormsModule,
+    CommonModule,
     AppRoutingModule,
     AuthLayoutComponent,
     MainLayoutComponent,
@@ -37,7 +42,14 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     UserListComponent,
     UserAddComponent,
     SettingsComponent,
-    NgbModule
+    NgbModule,
+    ToastrModule.forRoot({
+      timeOut: 3000,
+      positionClass: 'toast-top-center',
+      preventDuplicates: true,
+      closeButton: true,
+      progressBar: true
+    })
   ],
   providers: [
     {

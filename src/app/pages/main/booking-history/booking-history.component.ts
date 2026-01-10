@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
+import { LoaderService } from '../../../core/services/loader.service';
 
 @Component({
   selector: 'app-booking-history',
@@ -31,7 +32,8 @@ export class BookingHistoryComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
-    private router: Router
+    private router: Router,
+    private loaderService: LoaderService
   ) {}
 
   ngOnInit(): void {
@@ -40,18 +42,21 @@ export class BookingHistoryComponent implements OnInit {
 
   getBookings(): void {
     this.isLoading = true;
+    this.loaderService.show();
     this.apiService.getBookings().subscribe({
       next: (bookings) => {
         this.allBookings = bookings || [];
         // Initially show all bookings, filters will be applied only on Search button click
         this.filteredBookings = [...this.allBookings];
         this.isLoading = false;
+        this.loaderService.hide();
       },
       error: (error) => {
         console.error('Error loading bookings:', error);
         this.allBookings = [];
         this.filteredBookings = [];
         this.isLoading = false;
+       this.loaderService.hide();
       }
     });
   }

@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 import { MaintenanceTask } from '../../../models/maintenance-task.model';
+import { LoaderService } from '../../../core/services/loader.service';
 
 
 @Component({
@@ -49,7 +50,8 @@ export class RoomBookingComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private apiService: ApiService,
-    private router: Router
+    private router: Router,
+    private loaderService: LoaderService
   ) {
     this.filterForm = this.fb.group({
       fromDate: [''],
@@ -87,18 +89,21 @@ export class RoomBookingComponent implements OnInit {
 
   getRooms(): void {
     this.isLoading = true;
+    this.loaderService.show();
     this.apiService.getRooms().subscribe({
       next: (rooms: any) => {
         this.allRooms = rooms || [];
         this.filteredRooms = [...this.allRooms];
         this.extractFloors();
         this.isLoading = false;
+        this.loaderService.hide();
       },
       error: (error: any) => {
         console.error('Error loading rooms:', error);
         this.allRooms = [];
         this.filteredRooms = [];
         this.isLoading = false;
+        this.loaderService.hide();
         alert('Failed to load rooms. Please try again.');
       }
     });
@@ -244,6 +249,7 @@ export class RoomBookingComponent implements OnInit {
 
       if (activeBooking?.bookingId) {
         const bookingId = activeBooking.bookingId;
+        this.loaderService.show();
         this.apiService.getHousekeepingTaskByBookingId(bookingId).subscribe({
           next: (taskData: any) => {
             console.log('API Response Data (raw):', taskData);
@@ -251,6 +257,7 @@ export class RoomBookingComponent implements OnInit {
             const data = Array.isArray(taskData) ? taskData[0] : (taskData?.data || taskData);
             if (!data) {
               console.warn('No task data found in API response');
+              this.loaderService.hide();
               return;
             }
             // Store the task data (could be single object or array)
@@ -265,9 +272,11 @@ export class RoomBookingComponent implements OnInit {
               taskType: data.taskType ? String(data.taskType).trim() : '',
               assignedToUserId: data.assignedToUserId || ''
             });
+            this.loaderService.hide();
           },
           error: (error: any) => {
             console.error('Error fetching housekeeping task:', error);
+            this.loaderService.hide();
           }
         });
       }
@@ -357,6 +366,7 @@ export class RoomBookingComponent implements OnInit {
     console.log('Calling API service with taskId:', taskIdNumber, 'and data:', updateData);
     
     try {
+      this.loaderService.show();
       const apiCall = this.apiService.updateHousekeepingTask(taskIdNumber, updateData);
       console.log('API call observable created:', apiCall);
       
@@ -366,6 +376,7 @@ export class RoomBookingComponent implements OnInit {
           alert('Maintenance task updated successfully!');
           this.closeMaintenanceModal();
           this.getRooms();
+          this.loaderService.hide();
         },
         error: (error: any) => {
           console.error('Error updating maintenance task:', error);
@@ -373,6 +384,7 @@ export class RoomBookingComponent implements OnInit {
           console.error('Error details:', error.error);
           console.error('Full error object:', JSON.stringify(error, null, 2));
           alert('Failed to update maintenance task: ' + (error.error?.message || error.message || 'Unknown error'));
+          this.loaderService.hide();
         },
         complete: () => {
           console.log('API call completed');
@@ -381,6 +393,7 @@ export class RoomBookingComponent implements OnInit {
     } catch (error) {
       console.error('Exception while calling API:', error);
       alert('Failed to call update API. Please check console for details.');
+      this.loaderService.hide();
     }
   }
 

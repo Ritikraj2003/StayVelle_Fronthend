@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../../../core/services/api.service';
+import { LoaderService } from '../../../../core/services/loader.service';
 
 @Component({
   selector: 'app-housekeeping-list',
@@ -39,7 +40,8 @@ export class HousekeepingListComponent implements OnInit {
   constructor(
     private router: Router,
     private apiService: ApiService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private loaderService: LoaderService
   ) {
     this.housekeepingForm = this.fb.group({
       roomId: ['', [Validators.required]],
@@ -57,11 +59,13 @@ export class HousekeepingListComponent implements OnInit {
 
   loadHousekeeping(): void {
     this.isLoading = true;
+    this.loaderService.show();
     this.apiService.get<any[]>('HousekeepingTask').subscribe({
       next: (data) => {
         this.allHousekeeping = data || [];
         this.filteredHousekeeping = [...this.allHousekeeping];
         this.isLoading = false;
+        this.loaderService.hide();
       },
       error: (error) => {
         console.error('Error loading housekeeping tasks:', error);
@@ -69,6 +73,7 @@ export class HousekeepingListComponent implements OnInit {
         // Fallback to empty array on error
         this.allHousekeeping = [];
         this.filteredHousekeeping = [];
+        this.loaderService.hide();
       }
     });
   }
@@ -131,30 +136,36 @@ export class HousekeepingListComponent implements OnInit {
 
       if (this.isEditMode && this.currentTaskId) {
         // Update existing task
+        this.loaderService.show();
         this.apiService.put<any>(`HousekeepingTask/${this.currentTaskId}`, formData).subscribe({
           next: (response) => {
             this.loadHousekeeping();
             this.cancelEdit();
             alert('Housekeeping task updated successfully!');
+            this.loaderService.hide();
           },
           error: (error) => {
             console.error('Error updating housekeeping task:', error);
             alert('Error updating housekeeping task. Please try again.');
             this.isLoading = false;
+            this.loaderService.hide();
           }
         });
       } else {
         // Create new task
+        this.loaderService.show();
         this.apiService.post<any>('HousekeepingTask', formData).subscribe({
           next: (response) => {
             this.loadHousekeeping();
             this.cancelEdit();
             alert('Housekeeping task created successfully!');
+            this.loaderService.hide();
           },
           error: (error) => {
             console.error('Error creating housekeeping task:', error);
             alert('Error creating housekeeping task. Please try again.');
             this.isLoading = false;
+            this.loaderService.hide();
           }
         });
       }
@@ -259,15 +270,18 @@ export class HousekeepingListComponent implements OnInit {
   deleteHousekeeping(task: any): void {
     if (confirm('Are you sure you want to delete this housekeeping record? This action cannot be undone.')) {
       this.isLoading = true;
+      this.loaderService.show();
       this.apiService.delete<any>(`HousekeepingTask/${task.taskId}`).subscribe({
         next: () => {
           this.loadHousekeeping();
           alert('Housekeeping task deleted successfully!');
+          this.loaderService.hide();
         },
         error: (error) => {
           console.error('Error deleting housekeeping task:', error);
           alert('Error deleting housekeeping task. Please try again.');
           this.isLoading = false;
+          this.loaderService.hide();
         }
       });
     }

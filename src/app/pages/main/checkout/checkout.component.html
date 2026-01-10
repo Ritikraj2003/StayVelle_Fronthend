@@ -2,18 +2,13 @@
   <h3 class="font_20 fw_semi text_black mb_2">Check Out</h3>
   <span class="text_pri fw_med font_12 d-block mb_13">Reservations <span class="text_black">~ <a routerLink="/main/room-booking" class="text_pri text-decoration-none">Room Booking</a> <span class="text_black">~ Check Out</span></span></span>
   
-  <!-- Loading State -->
-  <div *ngIf="isLoading" class="d-flex justify-content-center align-items-center" style="min-height: 400px;">
-    <span class="font_14 fw_med text_black">Loading booking details...</span>
-  </div>
-
   <!-- Error State -->
-  <div *ngIf="error && !isLoading" class="alert alert-danger mb_24">
+  <div *ngIf="error" class="alert alert-danger mb_24">
     <span class="font_14 fw_med">{{ error }}</span>
   </div>
 
   <!-- Booking Details -->
-  <div *ngIf="bookingData && !isLoading" class="booking-details-container">
+  <div *ngIf="bookingData" class="booking-details-container">
     
     <!-- Booking Information Card -->
     <div class="info-card mb_24">
@@ -212,7 +207,7 @@
 
   </div>
 </div>
-<div class="right_side_footer_blk d-flex align-items-center justify-content-center" *ngIf="bookingData && !isLoading">
+<div class="right_side_footer_blk d-flex align-items-center justify-content-center" *ngIf="bookingData">
   <button type="button" class="btn_primary btn_secondary mr_20 w-200px" (click)="cancel()" [disabled]="isSaving">Cancel</button>
   <button type="button" class="btn_primary mr_20 w-200px" (click)="save()" [disabled]="isSaving">
     <span *ngIf="!isSaving">Save</span>
