@@ -1,0 +1,126 @@
+<div class="qr-container">
+    <div class="static-header-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="welcome-text">
+                <p>Welcome back,</p>
+                <h1>{{guestName}}</h1>
+            </div>
+            <div class="header-actions">
+                <div class="room-badge">Room {{roomNumber}}</div>
+                <div class="notification-icon">
+                    <span class="notification-dot"></span>
+                    <i class="ri-notification-3-line"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call Reception Card -->
+        <div class="card call-reception">
+            <div class="card-content">
+                <div class="icon-circle phone-icon">
+                    <i class="ri-phone-fill"></i>
+                </div>
+                <div class="text-content">
+                    <h3>Call Reception</h3>
+                    <p>Available 24/7 for any requests</p>
+                </div>
+                <div class="arrow-icon">
+                    <i class="ri-arrow-right-s-line"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Status -->
+    <div class="section-header">
+        <h2>CURRENT STATUS</h2>
+        <div class="section-actions">
+            <span class="badge-more">+4 more</span>
+            <span class="view-all">VIEW ALL</span>
+        </div>
+    </div>
+
+    <div class="card status-card">
+        <div class="status-content">
+            <div class="order-icon">
+                <i class="ri-restaurant-2-fill"></i>
+            </div>
+            <div class="order-details">
+                <h3>{{currentOrder.item}}</h3>
+                <p>ORDER {{currentOrder.orderId}} • MOST RECENT</p>
+            </div>
+        </div>
+        <div class="process-status">
+            <div class="status-indicator">
+                <span class="dot"></span>
+                <span class="status-text">{{currentOrder.status}}</span>
+            </div>
+            <span class="est-time">Est. {{currentOrder.estimatedTime}}</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress" [style.width.%]="currentOrder.progress"></div>
+        </div>
+    </div>
+
+    <!-- Service Directory -->
+    <div class="section-header">
+        <div class="service-dir-text">
+            <h2>SERVICE DIRECTORY</h2>
+            <p>Contact reception to book or order from our amenities</p>
+        </div>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="services-grid">
+        <div class="service-card" *ngFor="let cat of uniqueCategories" (click)="onCategoryClick(cat)">
+            <img [src]="cat.imageUrl" [alt]="cat.category">
+            <div class="service-overlay">
+                <div class="service-icon">
+                    <i [class]="cat.icon"></i>
+                </div>
+                <h3>{{cat.category}}</h3>
+                <div class="service-time" *ngIf="cat.category === 'Food'">7 AM - 11 PM</div>
+                <div class="service-time" *ngIf="cat.category === 'Spa'">LEVEL 4 • FLOOR M</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Concierge Card -->
+    <div class="card concierge-card">
+        <div class="concierge-content">
+            <div class="concierge-icon">
+                <i class="ri-customer-service-2-fill"></i>
+            </div>
+            <div class="text-content">
+                <h3>Concierge</h3>
+                <p>TRANSPORT, TOURS & ASSISTANCE</p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- WiFi Information -->
+    <div class="section-header">
+        <h2>WI-FI INFORMATION</h2>
+    </div>
+
+    <div class="card wifi-card">
+        <div class="wifi-row">
+            <i class="ri-wifi-fill"></i>
+            <div class="wifi-details">
+                <span class="label">NETWORK</span>
+                <span class="value">{{wifiNetwork}}</span>
+            </div>
+        </div>
+        <div class="separator"></div>
+        <div class="wifi-row">
+            <i class="ri-key-2-fill"></i>
+            <div class="wifi-details">
+                <span class="label">PASSWORD</span>
+                <span class="value">{{wifiPassword}}</span>
+            </div>
+            <i class="ri-file-copy-line copy-icon"></i>
+        </div>
+    </div>
+</div>

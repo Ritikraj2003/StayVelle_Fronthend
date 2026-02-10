@@ -1,0 +1,73 @@
+<div class="category-page-container">
+
+    <div class="static-header-container">
+        <!-- Header -->
+        <header class="page-header">
+            <button class="back-btn" (click)="goBack()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <h1 class="category-title">{{ categoryName }}</h1>
+            <button class="info-btn" title="Information">
+                <i class="fas fa-info-circle"></i>
+            </button>
+        </header>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <div class="search-input-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" placeholder="Search for delicacies..." [(ngModel)]="searchTerm" (input)="onSearch()"
+                    class="search-input">
+            </div>
+        </div>
+    </div>
+
+    <!-- Content List -->
+    <div class="content-list">
+
+        <div *ngFor="let group of subCategories; let i = index" class="subcategory-group">
+
+            <!-- Accordion Header -->
+            <div class="subcategory-header" (click)="toggleCategory(i)">
+                <h2 class="subcategory-title">{{ group.name | uppercase }}</h2>
+                <div class="header-line"></div>
+                <i class="fas fa-chevron-down chevron-icon" [class.rotated]="group.isOpen"></i>
+            </div>
+
+            <!-- Items List -->
+            <div class="items-container" [class.open]="group.isOpen">
+                <div *ngFor="let item of group.items" class="item-card">
+
+                    <div class="item-image-container">
+                        <img [src]="item.imageUrl || 'assets/placeholder-food.jpg'" [alt]="item.itemName"
+                            class="item-image">
+                    </div>
+
+                    <div class="item-details">
+                        <div class="item-header-row">
+                            <h3 class="item-name">{{ item.itemName }}</h3>
+                            <span class="item-price">${{ item.price | number:'1.2-2' }}</span>
+                        </div>
+
+                        <p class="item-description">{{ item.description }}</p>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div *ngIf="subCategories.length === 0" class="no-results">
+            <p>No items found.</p>
+        </div>
+
+    </div>
+
+    <!-- Floating Action Button (Phone) if needed, based on image showing phone icon -->
+    <div class="fab-container">
+        <button class="fab-btn">
+            <i class="fas fa-phone-alt"></i>
+        </button>
+    </div>
+
+</div>

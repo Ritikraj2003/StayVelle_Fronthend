@@ -20,6 +20,10 @@ const routes: Routes = [
     component: MainLayoutComponent,
     loadChildren: () => import('./pages/main/main.module').then(m => m.MainModule),
     canActivate: [AuthGuard]
+  },
+  {
+    path: 'qr-room-page',
+    loadChildren: () => import('./pages/qr-room-page/qr-room-page.module').then(m => m.QrRoomPageModule)
   }
 ];
 
