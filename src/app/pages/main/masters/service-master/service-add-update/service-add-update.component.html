@@ -1,0 +1,158 @@
+<div class="add_services_container">
+  <h3 class="font_20 fw_semi text_black mb_2">Service Master</h3>
+  <span class="text_pri fw_med font_12 d-block mb_24">Masters <a routerLink="/main/masters/service-master"
+      class="text_black">~ Service Master</a> <span class="text_black">~ {{ isEditMode ? 'Update Service' : 'Add
+      Service' }}</span></span>
+  <div class="services_info_blk add_services_info_blk">
+    <form [formGroup]="serviceForm" (ngSubmit)="onSubmit()">
+      <div class="row">
+        <!-- First Row: Category, SubCategory, Service Name -->
+        <div class="col-md-4">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Service Category</label>
+            <div class="searchable-dropdown-container">
+              <input type="text" class="form-control" formControlName="serviceCategory"
+                (input)="onCategoryInput($event)" (focus)="onCategoryInput($event)" (blur)="closeDropdowns()"
+                placeholder="Select or type category..." />
+
+              <ul class="dropdown-list" *ngIf="showCategoryDropdown && filteredCategories.length > 0">
+                <li *ngFor="let cat of filteredCategories" (mousedown)="selectCategory(cat)">
+                  {{ cat }}
+                </li>
+              </ul>
+            </div>
+
+            <div *ngIf="serviceForm.get('serviceCategory')?.invalid && serviceForm.get('serviceCategory')?.touched"
+              class="error-message font_12 text-danger mt_5">
+              Service category is required
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Sub Category</label>
+            <div class="searchable-dropdown-container">
+              <input type="text" class="form-control" formControlName="subCategory" (input)="onSubCategoryInput($event)"
+                (focus)="onSubCategoryInput($event)" (blur)="closeDropdowns()"
+                placeholder="Select or type sub category..." />
+
+              <ul class="dropdown-list" *ngIf="showSubCategoryDropdown && filteredSubCategories.length > 0">
+                <li *ngFor="let sub of filteredSubCategories" (mousedown)="selectSubCategory(sub)">
+                  {{ sub }}
+                </li>
+              </ul>
+            </div>
+
+            <div *ngIf="serviceForm.get('subCategory')?.invalid && serviceForm.get('subCategory')?.touched"
+              class="error-message font_12 text-danger mt_5">
+              Sub category is required
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Service Name</label>
+            <input type="text" formControlName="serviceName" class="form-control" placeholder="Enter service name" />
+            <div *ngIf="serviceForm.get('serviceName')?.invalid && serviceForm.get('serviceName')?.touched"
+              class="error-message font_12 text-danger mt_5">
+              <span *ngIf="serviceForm.get('serviceName')?.errors?.['required']">Service name is required</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Second Row: Price, Is Active -->
+        <div class="col-md-4 mt_15">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Price</label>
+            <input type="number" formControlName="price" class="form-control" placeholder="Enter price" min="0"
+              step="0.01" />
+            <div *ngIf="serviceForm.get('price')?.invalid && serviceForm.get('price')?.touched"
+              class="error-message font_12 text-danger mt_5">
+              Price is required
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-2 mt_15">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Is Active</label>
+            <div class="d-flex align-items-center">
+              <label class="custom_checkbox_container">
+                <input type="checkbox" formControlName="isActive">
+                <span class="checkmark"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="col-md-6 mt_15">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Description (optional)</label>
+            <textarea formControlName="description" class="form-control" placeholder="Enter description"
+              rows="4"></textarea>
+          </div>
+        </div>
+
+        <!-- Images -->
+        <div class="col-md-12 mt_20">
+          <label class="font_14 fw_semi text_black mb_7">Service Images</label>
+          <span class="dragBox d-flex align-items-center flex-column">
+            <img src="assets/images/file_upload_img.svg" class="mb_7" alt="Upload">
+            <div class="font_16 fw_med text_black">Add Service images <span class="font_12">(jpg, svg, png only)</span>
+            </div>
+            <input type="file" accept="image/jpeg,image/jpg,image/svg+xml,image/png" multiple
+              (change)="onFileSelected($event)" />
+          </span>
+        </div>
+
+        <!-- Existing Images Preview (from API) -->
+        <div class="col-md-12 mt_15" *ngIf="existingImages.length > 0">
+          <label class="font_14 fw_semi text_black mb_7">Existing Images</label>
+          <ul class="d-flex align-items-center flex-wrap">
+            <li class="mr_15 d-flex flex-column" *ngFor="let image of existingImages; let i = index">
+              <img [src]="image" alt="Service image" class="service_list_imgs mb_5"
+                style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;"
+                onerror="this.src='assets/images/file_upload_img.svg'">
+              <button type="button" class="btn btn-sm btn-danger" (click)="removeExistingImage(i)"
+                style="font-size: 12px; padding: 4px 8px;">
+                Remove
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Uploaded Images Preview (newly selected) -->
+        <div class="col-md-12 mt_15" *ngIf="uploadedImages.length > 0">
+          <label class="font_14 fw_semi text_black mb_7">New Images to Upload</label>
+          <ul class="d-flex align-items-center flex-wrap">
+            <li class="mr_15 d-flex flex-column" *ngFor="let image of uploadedImages; let i = index">
+              <img [src]="image.preview" alt="" class="service_list_imgs mb_5"
+                style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;">
+              <span class="font_14 fw_med text_black mb_5">{{ image.name }}</span>
+              <button type="button" class="btn btn-sm btn-danger" (click)="removeImage(i)"
+                style="font-size: 12px; padding: 4px 8px;">
+                Remove
+              </button>
+            </li>
+            <li>
+              <span class="dragBox d-flex align-items-center flex-column">
+                <img src="assets/images/file_upload_logo.svg" class="mb_10" alt="Upload">
+                <div class="font_16 fw_med text_black">Add New</div>
+                <input type="file" accept="image/jpeg,image/jpg,image/svg+xml,image/png" multiple
+                  (change)="onFileSelected($event)" />
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="right_side_footer_blk d-flex align-items-center justify-content-center">
+    <button type="button" class="btn_primary btn_secondary mr_20 w-200px" (click)="cancel()">Cancel</button>
+    <button type="button" class="btn_primary mr_20 w-300px" (click)="saveAndAddAnother()">Save and add another</button>
+    <button type="button" class="btn_primary mr_20 w-200px" (click)="onSubmit()">Save</button>
+  </div>
+</div>

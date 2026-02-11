@@ -1,23 +1,19 @@
 <div class="add_services_container">
   <!-- Tabs -->
   <div class="d-flex align-items-center mb_24" style="border-bottom: 2px solid #E0E0E0;">
-    <button 
-      class="tab-button"
-      [class.active]="activeTab === 'room-master'"
-      (click)="setActiveTab('room-master')"
-    >
+    <button class="tab-button" [class.active]="activeTab === 'room-master'" (click)="setActiveTab('room-master')">
       Room Master
     </button>
-    <button 
-      class="tab-button"
-      [class.active]="activeTab === 'hotel-registration'"
-      (click)="setActiveTab('hotel-registration')"
-    >
+    <button class="tab-button" [class.active]="activeTab === 'hotel-registration'"
+      (click)="setActiveTab('hotel-registration')">
       Hotel Registration
     </button>
+    <button class="tab-button" [class.active]="activeTab === 'service-master'"
+    (click)="setActiveTab('service-master')">
+    Service Master
+  </button>
   </div>
 
   <!-- Tab Content -->
   <router-outlet></router-outlet>
 </div>
-

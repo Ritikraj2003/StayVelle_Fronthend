@@ -17,6 +17,8 @@ import { CheckoutComponent } from './checkout/checkout.component';
 import { HousekeepingListComponent } from './housekeeping/housekeeping-list/housekeeping-list.component';
 import { BookingHistoryComponent } from './booking-history/booking-history.component';
 import { AuthGuard } from '../../core/guards/auth.guard';
+import { ServiceMasterComponent } from './masters/service-master/service-master.component';
+import { ServiceAddUpdateComponent } from './masters/service-master/service-add-update/service-add-update.component';
 
 const routes: Routes = [
   {
@@ -124,7 +126,19 @@ const routes: Routes = [
       {
         path: 'hotel-registration',
         component: HotelRegistrationComponent
-      }
+      },
+      {
+        path: 'service-master',
+        component: ServiceMasterComponent
+      },
+      {
+        path: 'service-master/add',
+        component: ServiceAddUpdateComponent
+      },
+      {
+        path: 'service-master/edit/:id',
+        component: ServiceAddUpdateComponent
+      },
     ]
   }
 ];

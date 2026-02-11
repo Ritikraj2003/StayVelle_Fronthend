@@ -30,7 +30,7 @@ export class ApiService {
 
   ///////////////////////////////
   // User APIs
-  getUsers() : Observable<any>{
+  getUsers(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/Users`) as Observable<any>;
   }
 
@@ -38,7 +38,7 @@ export class ApiService {
     return this.get<any>(`Users/${id}`);
   }
 
-  createUser(data: any) : Observable<any> {
+  createUser(data: any): Observable<any> {
     return this.post<any>('Users', data);
   }
 

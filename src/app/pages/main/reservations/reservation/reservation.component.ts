@@ -146,7 +146,7 @@ export class ReservationComponent implements OnInit {
       delete this.guestImageFiles[index];
       // Reindex the remaining images
       this.reindexGuestImages(index);
-      
+
       // If the removed guest was primary, set the first remaining guest as primary
       if (wasPrimary && this.guestsFormArray.length > 0) {
         this.guestsFormArray.at(0).patchValue({ isPrimary: true });
@@ -157,7 +157,7 @@ export class ReservationComponent implements OnInit {
   reindexGuestImages(removedIndex: number): void {
     const newPreviews: { [key: number]: string } = {};
     const newFiles: { [key: number]: File } = {};
-    
+
     Object.keys(this.guestImagePreviews).forEach(key => {
       const idx = parseInt(key);
       if (idx > removedIndex) {
@@ -168,7 +168,7 @@ export class ReservationComponent implements OnInit {
         newFiles[idx] = this.guestImageFiles[idx];
       }
     });
-    
+
     this.guestImagePreviews = newPreviews;
     this.guestImageFiles = newFiles;
   }
@@ -177,7 +177,7 @@ export class ReservationComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
-      
+
       // Validate file type
       const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/svg+xml'];
       if (validTypes.includes(file.type)) {
@@ -188,7 +188,7 @@ export class ReservationComponent implements OnInit {
           input.value = '';
           return;
         }
-        
+
         this.guestImageFiles[guestIndex] = file;
         const reader = new FileReader();
         reader.onload = (e: any) => {
@@ -221,8 +221,8 @@ export class ReservationComponent implements OnInit {
     if (this.reservationForm.valid) {
       this.isLoading = true;
       this.loaderService.show();
-      const formData = await this.prepareFormData();
-      
+      const formData = this.prepareFormData();
+
       // Call booking API
       this.apiService.createBooking(formData).subscribe({
         next: (response: any) => {
@@ -242,59 +242,47 @@ export class ReservationComponent implements OnInit {
     }
   }
 
-  private async prepareFormData(): Promise<any> {
+  private prepareFormData(): FormData {
+    const formData = new FormData();
     const formValue = this.reservationForm.value;
-    
-    // Convert image files to base64
-    const guests = await Promise.all(
-      formValue.guests.map(async (guest: any, index: number) => {
-        let idProofImage = '';
-        
-        // If there's a file, convert it to base64
-        if (this.guestImageFiles[index]) {
-          idProofImage = await this.fileToBase64(this.guestImageFiles[index]);
-        } else if (this.guestImagePreviews[index]) {
-          // If there's already a preview (base64), use it
-          idProofImage = this.guestImagePreviews[index];
-        }
-        
-        return {
-          guestName: guest.guestName,
-          age: parseInt(guest.age),
-          gender: guest.gender.toLowerCase(),
-          guestPhone: guest.guestPhone,
-          guestEmail: guest.guestEmail || null,
-          idProof: guest.idProof.toLowerCase(),
-          idProofImage: idProofImage,
-          isPrimary: guest.isPrimary === true || guest.isPrimary === 'true'
-        };
-      })
-    );
-    
+
     const roomId = this.roomId || this.roomData?.Id || this.roomData?.id;
     const roomNumber = this.roomData?.roomNumber || this.roomData?.roomnumber;
-    
-    return {
-      roomId: roomId,
-      roomNumber: roomNumber,
-      checkInDate: formValue.checkInDate,
-      checkOutDate: formValue.checkOutDate,
-      numberOfGuests: parseInt(formValue.numberOfGuests),
-      guests: guests
-    };
+
+    formData.append('RoomId', roomId ? roomId.toString() : '0');
+    if (roomNumber) formData.append('RoomNumber', roomNumber);
+    formData.append('CheckInDate', formValue.checkInDate);
+    formData.append('CheckOutDate', formValue.checkOutDate);
+    formData.append('NumberOfGuests', formValue.numberOfGuests.toString());
+
+    // Iterate guests
+    formValue.guests.forEach((guest: any, index: number) => {
+      formData.append(`Guests[${index}].GuestName`, guest.guestName);
+      formData.append(`Guests[${index}].Age`, guest.age.toString());
+      formData.append(`Guests[${index}].Gender`, guest.gender);
+      formData.append(`Guests[${index}].GuestPhone`, guest.guestPhone);
+      if (guest.guestEmail) formData.append(`Guests[${index}].GuestEmail`, guest.guestEmail);
+      formData.append(`Guests[${index}].IdProof`, guest.idProof);
+      formData.append(`Guests[${index}].IsPrimary`, String(guest.isPrimary === true || guest.isPrimary === 'true')); // Convert to string "true"/"false"
+
+      // Handle Document (ID Proof Image)
+      // Check if we have a file for this guest
+      if (this.guestImageFiles[index]) {
+        const file = this.guestImageFiles[index];
+        // We are adding one document as per current UI logic (IdProofImage)
+        // Index 0 for documents list
+        formData.append(`Guests[${index}].Documents[0].DocumentType`, 'ID_PROOF');
+        formData.append(`Guests[${index}].Documents[0].EntityType`, 'GUEST');
+        formData.append(`Guests[${index}].Documents[0].IsPrimary`, 'true');
+        formData.append(`Guests[${index}].Documents[0].FileName`, file.name);
+        formData.append(`Guests[${index}].Documents[0].file`, file);
+      }
+    });
+
+    return formData;
   }
 
-  private fileToBase64(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = reader.result as string;
-        resolve(result);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
+
 
   cancel(): void {
     this.router.navigate(['/main/room-booking']);
