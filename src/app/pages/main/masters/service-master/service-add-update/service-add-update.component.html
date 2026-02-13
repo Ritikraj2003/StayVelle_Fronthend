@@ -75,12 +75,36 @@
           </div>
         </div>
 
+        <div class="col-md-4 mt_15">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Unit</label>
+            <input type="text" formControlName="unit" class="form-control"
+              placeholder="Enter unit (e.g., Plate, Cup)" />
+            <div *ngIf="serviceForm.get('unit')?.invalid && serviceForm.get('unit')?.touched"
+              class="error-message font_12 text-danger mt_5">
+              Unit is required
+            </div>
+          </div>
+        </div>
+
         <div class="col-md-2 mt_15">
           <div class="d-flex flex-column">
             <label class="font_14 fw_med text_black mb_7">Is Active</label>
             <div class="d-flex align-items-center">
               <label class="custom_checkbox_container">
                 <input type="checkbox" formControlName="isActive">
+                <span class="checkmark"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-2 mt_15">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Is Complementary</label>
+            <div class="d-flex align-items-center">
+              <label class="custom_checkbox_container">
+                <input type="checkbox" formControlName="isComplementary">
                 <span class="checkmark"></span>
               </label>
             </div>

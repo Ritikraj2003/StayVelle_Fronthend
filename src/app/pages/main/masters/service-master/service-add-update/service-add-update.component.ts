@@ -24,22 +24,7 @@ export class ServiceAddUpdateComponent implements OnInit {
   existingImages: string[] = []; // Images from API (base64 or URLs)
 
   serviceCategories: string[] = [];
-  // Room types
-  // roomTypes: string[] = ['Single', 'Double', 'Deluxe'];
 
-  // Room statuses
-  // roomStatuses: string[] = ['Available', 'Blocked', 'Maintenance'];
-
-  // Number of beds
-  // numberOfBeds: string[] = ['1', '2', '3'];
-
-  // AC types
-  // acTypes: string[] = ['AC', 'Non-AC'];
-
-  // Bathroom types
-  // bathroomTypes: string[] = ['Attached', 'Separate'];
-
-  // Searchable Dropdown State
   showCategoryDropdown: boolean = false;
   showSubCategoryDropdown: boolean = false;
   filteredCategories: string[] = [];
@@ -65,8 +50,10 @@ export class ServiceAddUpdateComponent implements OnInit {
     this.serviceForm = this.fb.group({
       serviceName: ['', [Validators.required]],
       price: ['', [Validators.required, Validators.min(0)]],
+      unit: ['', [Validators.required]],
       description: [''],
       isActive: [true],
+      isComplementary: [false],
       serviceCategory: ['', [Validators.required]],
       subCategory: ['', [Validators.required]]
     });
@@ -81,68 +68,111 @@ export class ServiceAddUpdateComponent implements OnInit {
       if (params['id']) {
         this.serviceId = +params['id'];
         this.isEditMode = true;
+        this.getServiceById(this.serviceId);
+      }
+    });
+  }
 
-        // Find service from mock data
-        const service = this.allService.find(s => s.serviceId === this.serviceId);
+  getAllServices() {
 
-        if (service) {
+    this.loaderService.show();
+    this.apiService.getServices().subscribe({
+      next: (res: any) => {
+        if (res.success == true) {
+          this.allService = res.data;
+          const categories = new Set<string>();
+          const subCatMap: any = {};
+
+          this.allService.forEach((service: any) => {
+            if (service.serviceCategory) {
+              categories.add(service.serviceCategory);
+
+              if (!subCatMap[service.serviceCategory]) {
+                subCatMap[service.serviceCategory] = new Set<string>();
+              }
+              if (service.subCategory) {
+                subCatMap[service.serviceCategory].add(service.subCategory);
+              }
+            }
+          });
+
+          this.serviceCategories = Array.from(categories);
+
+          this.subCategoriesMap = {};
+          Object.keys(subCatMap).forEach(key => {
+            this.subCategoriesMap[key] = Array.from(subCatMap[key]);
+          });
+
+          this.filteredCategories = [...this.serviceCategories];
+
+          // Re-filter if category is selected (e.g. edit mode loaded first)
+          const currentCategory = this.serviceForm.get('serviceCategory')?.value;
+          if (currentCategory) {
+            this.filterSubCategories();
+          }
+
+          this.loaderService.hide();
+        }
+      },
+      error: (error) => {
+        console.error('Error loading rooms:', error);
+
+        this.loaderService.hide();
+        alert('Failed to load rooms. Please try again.');
+      }
+    });
+    // Simulating API call with mock data as requested
+    // this.allService = [
+    //   { serviceId: 1, serviceCategory: 'Foodeeeee', subCategory: 'Thalieeee', serviceName: 'Veg Thali', price: 180, unit: 'Plate', isActive: true },
+    //   { serviceId: 2, serviceCategory: 'Food', subCategory: 'Tea', serviceName: 'Tea', price: 30, unit: 'Cup', isActive: true },
+    //   { serviceId: 3, serviceCategory: 'Laundry', subCategory: 'Wash', serviceName: 'Shirt Wash', price: 50, unit: 'Piece', isActive: true },
+    //   { serviceId: 4, serviceCategory: 'Laundry', subCategory: 'Iron', serviceName: 'Pant Iron', price: 30, unit: 'Piece', isActive: false },
+    //   { serviceId: 5, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
+    //   { serviceId: 6, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
+    //   { serviceId: 7, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
+    //   { serviceId: 8, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
+    //   { serviceId: 9, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
+    //   { serviceId: 10, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
+    // ];
+    debugger
+
+  }
+
+  getServiceById(id: number) {
+    this.loaderService.show();
+    this.apiService.getServiceById(id).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          const service = res.data;
           this.serviceForm.patchValue({
             serviceName: service.serviceName,
             price: service.price,
+            unit: service.unit,
             isActive: service.isActive,
+            isComplementary: service.isComplementary,
             serviceCategory: service.serviceCategory,
             subCategory: service.subCategory,
-            description: ''
+            description: service.description || ''
           });
 
           // Update local inputs for the searchable dropdown
           this.categoryInput = service.serviceCategory || '';
           this.subCategoryInput = service.subCategory || '';
           this.filterSubCategories();
+
+          // Handle Documents (Images)
+          if (service.documents && service.documents.length > 0) {
+            this.existingImages = service.documents.map((d: any) => d.filePath || d.url);
+          }
         }
+        this.loaderService.hide();
+      },
+      error: (error: any) => {
+        console.error('Error fetching service:', error);
+        this.loaderService.hide();
+        alert('Failed to load service details.');
       }
     });
-  }
-
-  getAllServices() {
-    // Simulating API call with mock data as requested
-    this.allService = [
-      { serviceId: 1, serviceCategory: 'Foodeeeee', subCategory: 'Thalieeee', serviceName: 'Veg Thali', price: 180, unit: 'Plate', isActive: true },
-      { serviceId: 2, serviceCategory: 'Food', subCategory: 'Tea', serviceName: 'Tea', price: 30, unit: 'Cup', isActive: true },
-      { serviceId: 3, serviceCategory: 'Laundry', subCategory: 'Wash', serviceName: 'Shirt Wash', price: 50, unit: 'Piece', isActive: true },
-      { serviceId: 4, serviceCategory: 'Laundry', subCategory: 'Iron', serviceName: 'Pant Iron', price: 30, unit: 'Piece', isActive: false },
-      { serviceId: 5, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
-      { serviceId: 6, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
-      { serviceId: 7, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
-      { serviceId: 8, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
-      { serviceId: 9, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
-      { serviceId: 10, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
-    ];
-
-    const categories = new Set<string>();
-    const subCatMap: any = {};
-
-    this.allService.forEach((service: any) => {
-      if (service.serviceCategory) {
-        categories.add(service.serviceCategory);
-
-        if (!subCatMap[service.serviceCategory]) {
-          subCatMap[service.serviceCategory] = new Set<string>();
-        }
-        if (service.subCategory) {
-          subCatMap[service.serviceCategory].add(service.subCategory);
-        }
-      }
-    });
-
-    this.serviceCategories = Array.from(categories);
-
-    this.subCategoriesMap = {};
-    Object.keys(subCatMap).forEach(key => {
-      this.subCategoriesMap[key] = Array.from(subCatMap[key]);
-    });
-
-    this.filteredCategories = [...this.serviceCategories];
   }
 
   // Category Logic
@@ -252,24 +282,24 @@ export class ServiceAddUpdateComponent implements OnInit {
       const formData = await this.prepareFormData();
 
       if (this.isEditMode && this.serviceId) {
-        this.apiService.updateRoom(this.serviceId, formData).subscribe({
+        this.apiService.updateService(this.serviceId, formData).subscribe({
           next: () => {
             this.loaderService.hide();
             this.router.navigate(['/main/masters/service-master']);
           },
-          error: (error) => {
+          error: (error: any) => {
             console.error('Error updating service:', error);
             alert('Failed to update service. Please try again.');
             this.loaderService.hide();
           }
         });
       } else {
-        this.apiService.createRoom(formData).subscribe({
+        this.apiService.createService(formData).subscribe({
           next: () => {
             this.loaderService.hide();
             this.router.navigate(['/main/masters/service-master']);
           },
-          error: (error) => {
+          error: (error: any) => {
             console.error('Error creating service:', error);
             alert('Failed to create service. Please try again.');
             this.loaderService.hide();
@@ -286,13 +316,13 @@ export class ServiceAddUpdateComponent implements OnInit {
 
       if (this.isEditMode && this.serviceId) {
         // Update current service first
-        this.apiService.updateRoom(this.serviceId, formData).subscribe({
+        this.apiService.updateService(this.serviceId, formData).subscribe({
           next: () => {
             // Reset form for adding another service
             this.resetFormForNewService();
             this.loaderService.hide();
           },
-          error: (error) => {
+          error: (error: any) => {
             console.error('Error updating service:', error);
             alert('Failed to update service. Please try again.');
             this.loaderService.hide();
@@ -300,14 +330,14 @@ export class ServiceAddUpdateComponent implements OnInit {
         });
       } else {
         // Create service
-        this.apiService.createRoom(formData).subscribe({
+        this.apiService.createService(formData).subscribe({
           next: () => {
             // Reset form for adding another service
             this.resetFormForNewService();
             alert('Service created successfully!');
             this.loaderService.hide();
           },
-          error: (error) => {
+          error: (error: any) => {
             console.error('Error creating service:', error);
             alert('Failed to create service. Please try again.');
             this.loaderService.hide();
@@ -320,7 +350,9 @@ export class ServiceAddUpdateComponent implements OnInit {
   private resetFormForNewService(): void {
     this.serviceForm.reset({
       isActive: true,
-      description: ''
+      isComplementary: false,
+      description: '',
+      unit: ''
     });
     this.uploadedImages = [];
     this.existingImages = [];
@@ -328,36 +360,38 @@ export class ServiceAddUpdateComponent implements OnInit {
     this.serviceId = null;
   }
 
-  private async prepareFormData(): Promise<any> {
+  private async prepareFormData(): Promise<FormData> {
     const formValue = this.serviceForm.value;
+    const formData = new FormData();
 
-    // Convert uploaded images to base64 strings
-    const imagePromises = this.uploadedImages.map(img => this.fileToBase64(img.file));
-    const newImages = await Promise.all(imagePromises);
+    formData.append('ServiceCategory', formValue.serviceCategory);
+    formData.append('SubCategory', formValue.subCategory);
+    formData.append('ServiceName', formValue.serviceName);
+    formData.append('Price', formValue.price);
+    formData.append('Unit', formValue.unit);
+    formData.append('IsComplementary', String(formValue.isComplementary));
+    formData.append('IsActive', String(formValue.isActive));
+    // formData.append('Description', formValue.description || ''); // Description not in screenshot, but good to keep if API supports it, or remove if strict. Keeping out for now based on screenshot unless user asked. The screenshot didn't show description but the form has it. I'll omit it to be safe or add if needed. The screenshot shows: ServiceCategory, SubCategory, ServiceName, Price, Unit, IsComplementary, IsActive, Image. 
 
-    // Combine existing images with new images
-    const allImages = [...this.existingImages, ...newImages];
+    // Handle Documents (Images)
+    if (this.uploadedImages.length > 0) {
+      for (let i = 0; i < this.uploadedImages.length; i++) {
+        const image = this.uploadedImages[i];
 
-    const baseData = {
-      serviceName: formValue.serviceName,
-      price: parseFloat(formValue.price),
-      description: formValue.description || '',
-      isActive: formValue.isActive === true || formValue.isActive === 'true',
-      serviceCategory: formValue.serviceCategory,
-      subCategory: formValue.subCategory,
-      images: allImages.length > 0 ? allImages : undefined
-    };
-
-    // Add createdBy and createdOn for new services
-    if (!this.isEditMode) {
-      return {
-        ...baseData,
-        createdBy: 'system', // You can get this from auth service
-        createdOn: new Date().toISOString()
-      };
+        formData.append(`Documents[${i}].filePath`, '');
+        formData.append(`Documents[${i}].fileName`, image.name);
+        formData.append(`Documents[${i}].documentType`, 'Image');
+        formData.append(`Documents[${i}].documentId`, '0');
+        formData.append(`Documents[${i}].isPrimary`, i === 0 ? 'true' : 'false');
+        formData.append(`Documents[${i}].file`, image.file);
+        formData.append(`Documents[${i}].description`, '');
+        formData.append(`Documents[${i}].entityType`, 'Service');
+        formData.append(`Documents[${i}].entityId`, '0');
+      }
     }
 
-    return baseData;
+
+    return formData;
   }
 
   private parseImages(imagesJson: string): string[] {
@@ -372,17 +406,7 @@ export class ServiceAddUpdateComponent implements OnInit {
     }
   }
 
-  private fileToBase64(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = reader.result as string;
-        resolve(result);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
+
 
   removeExistingImage(index: number): void {
     this.existingImages.splice(index, 1);

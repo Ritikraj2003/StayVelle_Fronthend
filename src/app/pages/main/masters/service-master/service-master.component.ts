@@ -32,29 +32,50 @@ export class ServiceMasterComponent implements OnInit {
 
   ngOnInit(): void {
     // Load rooms data
-    this.getRooms();
+    this.getServices();
   }
 
-  getRooms(): void {
-    this.allService = [
-      { serviceId: 1, serviceCategory: 'Food', subCategory: 'Thali', serviceName: 'Veg Thali', price: 180, unit: 'Plate', isActive: true },
-      { serviceId: 2, serviceCategory: 'Food', subCategory: 'Tea', serviceName: 'Tea', price: 30, unit: 'Cup', isActive: true },
-      { serviceId: 3, serviceCategory: 'Laundry', subCategory: 'Wash', serviceName: 'Shirt Wash', price: 50, unit: 'Piece', isActive: true },
-      { serviceId: 4, serviceCategory: 'Laundry', subCategory: 'Iron', serviceName: 'Pant Iron', price: 30, unit: 'Piece', isActive: false },
-      { serviceId: 5, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
-      { serviceId: 6, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
-      { serviceId: 7, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
-      { serviceId: 8, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
-      { serviceId: 9, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
-      { serviceId: 10, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
-    ];
+  getServices(): void {
+
+    this.isLoading = true;
+    this.loaderService.show();
+    this.apiService.getServices().subscribe({
+      next: (res: any) => {
+        if (res.success == true) {
+          this.allService = res.data;
+          this.filteredService = [...this.allService];
+          this.isLoading = false;
+          this.loaderService.hide();
+        }
+      },
+      error: (error) => {
+        console.error('Error loading rooms:', error);
+        this.isLoading = false;
+        this.loaderService.hide();
+        alert('Failed to load rooms. Please try again.');
+      }
+    });
+
+
+    // this.allService = [
+    //   { serviceId: 1, serviceCategory: 'Food', subCategory: 'Thali', serviceName: 'Veg Thali', price: 180, unit: 'Plate', isActive: true },
+    //   { serviceId: 2, serviceCategory: 'Food', subCategory: 'Tea', serviceName: 'Tea', price: 30, unit: 'Cup', isActive: true },
+    //   { serviceId: 3, serviceCategory: 'Laundry', subCategory: 'Wash', serviceName: 'Shirt Wash', price: 50, unit: 'Piece', isActive: true },
+    //   { serviceId: 4, serviceCategory: 'Laundry', subCategory: 'Iron', serviceName: 'Pant Iron', price: 30, unit: 'Piece', isActive: false },
+    //   { serviceId: 5, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
+    //   { serviceId: 6, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
+    //   { serviceId: 7, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
+    //   { serviceId: 8, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
+    //   { serviceId: 9, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
+    //   { serviceId: 10, serviceCategory: 'Spa', subCategory: 'Full Body', serviceName: 'Full Body Spa', price: 1500, unit: 'Hour', isActive: true },
+    // ];
 
     // this.isLoading = true;
     // this.loaderService.show();
     // this.apiService.getRooms().subscribe({
     //   next: (service) => {
     //     this.allService = service;
-    this.filteredService = [...this.allService];
+    // this.filteredService = [...this.allService];
     //     this.isLoading = false;
     //     this.loaderService.hide();
     //   },
@@ -132,7 +153,7 @@ export class ServiceMasterComponent implements OnInit {
       this.loaderService.show();
       this.apiService.deleteRoom(id).subscribe({
         next: () => {
-          this.getRooms();
+          this.getServices();
           this.loaderService.hide();
         },
         error: (error) => {

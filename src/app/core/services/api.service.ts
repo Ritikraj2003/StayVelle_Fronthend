@@ -144,6 +144,10 @@ export class ApiService {
     return this.get<any>('Booking');
   }
 
+  getBookingsByRoomIdRoomNumber(roomNumber: string, roomId: number): Observable<any> {
+    return this.get<any>(`Booking/room/${roomId}/${roomNumber}`);
+  }
+
   getBookingById(id: number): Observable<any> {
     return this.get<any>(`Booking/${id}`);
   }
@@ -186,8 +190,8 @@ export class ApiService {
     return this.get<any>(`HousekeepingTask/${id}`);
   }
 
-  getHousekeepingTaskByBookingId(bookingId: number): Observable<any> {
-    return this.get<any>(`HousekeepingTask/booking/${bookingId}`);
+  getHousekeepingTaskByRoomId(roomId: number): Observable<any> {
+    return this.get<any>(`HousekeepingTask/room/${roomId}`);
   }
 
   createHousekeepingTask(data: any): Observable<any> {
@@ -200,6 +204,27 @@ export class ApiService {
 
   deleteHousekeepingTask(id: number): Observable<any> {
     return this.delete<any>(`HousekeepingTask/${id}`);
+  }
+
+  //Service APIs
+  getServices(): Observable<any> {
+    return this.get<any>('Service/GetAllServices');
+  }
+
+  getServiceById(id: number): Observable<any> {
+    return this.get<any>(`Service/GetServiceById/${id}`);
+  }
+
+  createService(data: any): Observable<any> {
+    return this.post<any>('Service/CreateService', data);
+  }
+
+  updateService(id: number, data: any): Observable<any> {
+    return this.put<any>(`Service/${id}`, data);
+  }
+
+  deleteService(id: number): Observable<any> {
+    return this.delete<any>(`Service/${id}`);
   }
 }
 

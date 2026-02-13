@@ -41,7 +41,7 @@ export class SidebarComponent implements OnInit {
       hasDropdown: true,
       permissionCode: 'RB', // Reservations permission code (matches backend "RB" - Reservation | RoomBooking)
       children: [
-        { label: 'Availability', route: '/main/reservations/availability', permissionCode: 'RS' },
+        //{ label: 'Availability', route: '/main/reservations/availability', permissionCode: 'RS' },
         { label: 'Room Booking', route: '/main/room-booking', permissionCode: 'RB' },
         { label: 'Current Booking', route: '/main/reservations/current-booking', permissionCode: 'RB' },
         { label: 'Set Room Availability', route: '/main/reservations/set-availability', permissionCode: 'RB' },

@@ -4,7 +4,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserAddComponent } from './users/user-add/user-add.component';
 import { SettingsComponent } from './settings/settings.component';
-import { AvailabilityComponent } from './reservations/availability/availability.component';
+import { CurrentBookingComponent } from './reservations/currentbooking/currentbooking.component';
 import { RolesPermissionsComponent } from './roles-permissions/roles-permissions.component';
 import { RoleAddUpdateComponent } from './roles-permissions/role-add-update/role-add-update.component';
 import { MastersComponent } from './masters/masters.component';
@@ -32,8 +32,8 @@ const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
-    path: 'reservations/availability',
-    component: AvailabilityComponent,
+    path: 'reservations/current-booking',
+    component: CurrentBookingComponent,
     canActivate: [AuthGuard]
   },
   {
@@ -44,6 +44,11 @@ const routes: Routes = [
   {
     path: 'reservations/reservation/:roomId',
     component: ReservationComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'checkout/:roomId/:roomNumber',
+    component: CheckoutComponent,
     canActivate: [AuthGuard]
   },
   {

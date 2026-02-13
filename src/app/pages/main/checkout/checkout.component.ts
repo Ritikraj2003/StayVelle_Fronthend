@@ -12,7 +12,9 @@ import { LoaderService } from '../../../core/services/loader.service';
   styleUrl: './checkout.component.css'
 })
 export class CheckoutComponent implements OnInit {
-  bookingId: number = 1; // Default to 1, can be passed via route
+  bookingId: number | null = null;
+  roomId: number | null = null;
+  roomNumber: string | null = null;
   bookingData: any = null;
   isLoading: boolean = false;
   isSaving: boolean = false;
@@ -23,27 +25,54 @@ export class CheckoutComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private loaderService: LoaderService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
-    // Get booking ID from route params if available, otherwise use default
-    const routeId = this.route.snapshot.params['id'];
-    if (routeId) {
-      this.bookingId = +routeId;
+    // Check for roomId and roomNumber parameters
+    const params = this.route.snapshot.params;
+
+    if (params['roomId'] && params['roomNumber']) {
+      this.roomId = +params['roomId'];
+      this.roomNumber = params['roomNumber'];
+      this.loadBookingDataByRoom();
+    } else if (params['id']) {
+      this.bookingId = +params['id'];
+      this.loadBookingData();
+    } else {
+      this.error = 'No booking information provided.';
     }
-    this.loadBookingData();
   }
 
-  loadBookingData(): void {
+  loadBookingDataByRoom(): void {
+    if (!this.roomId || !this.roomNumber) return;
+
     this.isLoading = true;
     this.error = '';
     this.loaderService.show();
-    
-    this.apiService.getBookingById(this.bookingId).subscribe({  
+
+    this.apiService.getBookingsByRoomIdRoomNumber(this.roomNumber, this.roomId).subscribe({
       next: (data: any) => {
-        this.bookingData = data;
+        this.processBookingData(data);
+      },
+      error: (error: any) => {
+        console.error('Error loading booking by room:', error);
+        this.error = 'Failed to load booking data. Please try again.';
         this.isLoading = false;
         this.loaderService.hide();
+      }
+    });
+  }
+
+  loadBookingData(): void {
+    if (!this.bookingId) return;
+
+    this.isLoading = true;
+    this.error = '';
+    this.loaderService.show();
+
+    this.apiService.getBookingById(this.bookingId).subscribe({
+      next: (data: any) => {
+        this.processBookingData(data);
       },
       error: (error: any) => {
         console.error('Error loading booking:', error);
@@ -54,12 +83,36 @@ export class CheckoutComponent implements OnInit {
     });
   }
 
+  processBookingData(data: any): void {
+    this.bookingData = data;
+    if (data?.bookingId) {
+      this.bookingId = data.bookingId;
+    }
+
+    // Process guests to extract ID proof image path
+    if (this.bookingData.guests && this.bookingData.guests.length > 0) {
+      this.bookingData.guests.forEach((guest: any) => {
+        if (guest.documents && guest.documents.length > 0) {
+          const idProofDoc = guest.documents.find((doc: any) => doc.documentType === 'ID_PROOF') || guest.documents[0];
+          if (idProofDoc) {
+            guest.idProofImagePath = idProofDoc.filePath;
+            // Also try to set idProof text to fileName or description if available
+            guest.idProof = idProofDoc.fileName || idProofDoc.documentType;
+          }
+        }
+      });
+    }
+
+    this.isLoading = false;
+    this.loaderService.hide();
+  }
+
   formatDate(dateString: string | null): string {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB', { 
-      day: '2-digit', 
-      month: '2-digit', 
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
@@ -68,9 +121,9 @@ export class CheckoutComponent implements OnInit {
 
   getCurrentDateTime(): string {
     const now = new Date();
-    return now.toLocaleDateString('en-GB', { 
-      day: '2-digit', 
-      month: '2-digit', 
+    return now.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
@@ -85,22 +138,22 @@ export class CheckoutComponent implements OnInit {
     const checkIn = new Date(this.bookingData.checkInDate);
     let checkOut = new Date(this.bookingData.checkOutDate);
     const today = new Date();
-    
+
     // Normalize dates to start of day for accurate comparison
     checkIn.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
     checkOut.setHours(0, 0, 0, 0);
-    
+
     // If checkout date is greater than today, use today's date
     if (checkOut < today) {
       checkOut = new Date(today);
     }
-    
+
     // Ensure check-out is not before check-in
     if (checkOut < checkIn) {
       checkOut = new Date(checkIn);
     }
-    
+
     // Calculate difference in days
     const diffTime = checkOut.getTime() - checkIn.getTime();
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));

@@ -5,7 +5,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserAddComponent } from './users/user-add/user-add.component';
 import { SettingsComponent } from './settings/settings.component';
-import { AvailabilityComponent } from './reservations/availability/availability.component';
+import { CurrentBookingComponent } from './reservations/currentbooking/currentbooking.component';
 import { RoomBookingComponent } from './room-booking/room-booking.component';
 import { ReservationComponent } from './reservations/reservation/reservation.component';
 import { CheckoutComponent } from './checkout/checkout.component';
@@ -24,7 +24,7 @@ import { RouterModule } from '@angular/router';
     UserListComponent,
     UserAddComponent,
     SettingsComponent,
-    AvailabilityComponent,
+    CurrentBookingComponent,
     RoomBookingComponent,
     ReservationComponent,
     CheckoutComponent,

@@ -24,20 +24,20 @@ export class RoomAddUpdateComponent implements OnInit {
   roomId: number | null = null;
   isEditMode: boolean = false;
   uploadedImages: UploadedImage[] = [];
-  existingImages: string[] = []; // Images from API (base64 or URLs)
-  
+  existingImages: any[] = []; // Full Document objects from API
+
   // Room types
   roomTypes: string[] = ['Single', 'Double', 'Deluxe'];
-  
+
   // Room statuses
   roomStatuses: string[] = ['Available', 'Blocked', 'Maintenance'];
-  
+
   // Number of beds
   numberOfBeds: string[] = ['1', '2', '3'];
-  
+
   // AC types
   acTypes: string[] = ['AC', 'Non-AC'];
-  
+
   // Bathroom types
   bathroomTypes: string[] = ['Attached', 'Separate'];
 
@@ -93,10 +93,15 @@ export class RoomAddUpdateComponent implements OnInit {
           roomType: room.roomType,
           roomStatus: room.roomStatus
         });
-        
+
         // Load existing images
-        if (room.images) {
-          this.existingImages = Array.isArray(room.images) ? room.images : this.parseImages(room.images);
+
+        if (room.documents && Array.isArray(room.documents)) {
+          this.existingImages = room.documents;
+        } else if (room.images) {
+          // Fallback: wrap strings in object structure
+          const imgs = Array.isArray(room.images) ? room.images : this.parseImages(room.images);
+          this.existingImages = imgs.map((img: string) => ({ filePath: img }));
         }
         this.loaderService.hide();
       },
@@ -139,8 +144,9 @@ export class RoomAddUpdateComponent implements OnInit {
   async onSubmit(): Promise<void> {
     if (this.roomForm.valid) {
       this.loaderService.show();
+      this.loaderService.show();
       const formData = await this.prepareFormData();
-      
+
       if (this.isEditMode && this.roomId) {
         this.apiService.updateRoom(this.roomId, formData).subscribe({
           next: () => {
@@ -172,8 +178,9 @@ export class RoomAddUpdateComponent implements OnInit {
   async saveAndContinue(): Promise<void> {
     if (this.roomForm.valid) {
       this.loaderService.show();
+      this.loaderService.show();
       const formData = await this.prepareFormData();
-      
+
       if (this.isEditMode && this.roomId) {
         this.apiService.updateRoom(this.roomId, formData).subscribe({
           next: () => {
@@ -211,8 +218,9 @@ export class RoomAddUpdateComponent implements OnInit {
   async saveAndAddAnother(): Promise<void> {
     if (this.roomForm.valid) {
       this.loaderService.show();
+      this.loaderService.show();
       const formData = await this.prepareFormData();
-      
+
       if (this.isEditMode && this.roomId) {
         // Update current room first
         this.apiService.updateRoom(this.roomId, formData).subscribe({
@@ -263,67 +271,91 @@ export class RoomAddUpdateComponent implements OnInit {
     this.roomId = null;
   }
 
-  private async prepareFormData(): Promise<any> {
+  private async prepareFormData(): Promise<FormData> {
     const formValue = this.roomForm.value;
-    
-    // Convert uploaded images to base64 strings
-    const imagePromises = this.uploadedImages.map(img => this.fileToBase64(img.file));
-    const newImages = await Promise.all(imagePromises);
-    
-    // Combine existing images with new images
-    const allImages = [...this.existingImages, ...newImages];
-    
-    const baseData = {
-      roomNumber: formValue.roomNumber,
-      price: parseFloat(formValue.price),
-      maxOccupancy: parseInt(formValue.maxOccupancy),
-      floor: formValue.floor,
-      numberOfBeds: formValue.numberOfBeds,
-      acType: formValue.acType,
-      bathroomType: formValue.bathroomType,
-      description: formValue.description || '',
-      isActive: formValue.isActive === true || formValue.isActive === 'true',
-      isTv: formValue.isTv === true || formValue.isTv === 'true',
-      roomType: formValue.roomType,
-      roomStatus: formValue.roomStatus,
-      images: allImages.length > 0 ? allImages : undefined
-    };
+    const formData = new FormData();
 
-    // Add createdBy and createdOn for new rooms
+    formData.append('RoomNumber', formValue.roomNumber);
+    formData.append('Price', formValue.price);
+    formData.append('MaxOccupancy', formValue.maxOccupancy);
+    formData.append('Floor', formValue.floor);
+    formData.append('NumberOfBeds', formValue.numberOfBeds);
+    formData.append('AcType', formValue.acType);
+    formData.append('BathroomType', formValue.bathroomType);
+    formData.append('RoomStatus', formValue.roomStatus);
+    formData.append('RoomType', formValue.roomType);
+    formData.append('IsActive', String(formValue.isActive));
+    formData.append('Description', formValue.description || '');
+    formData.append('IsTv', String(formValue.isTv));
+
+    // Add createdBy and createdOn for new rooms - though usually handled by backend, 
+    // keeping consistent with request if needed, but often better left to backend.
+    // However, for FormData, we append what's needed.
+    // The previous implementation added them conditionally.
     if (!this.isEditMode) {
-      return {
-        ...baseData,
-        createdBy: 'system', // You can get this from auth service
-        createdOn: new Date().toISOString()
-      };
+      // specific requirements might need these, but usually backend handles auditing.
+      // If strict Swagger adherence is required, we might need them. 
+      // Based on Swagger screenshot, CreatedBy/On are there but maybe optional or read-only? 
+      // I will omit distinct CreatedBy/On unless critical as backend should set them.
+      // But I will follow the previous pattern if it was explicit.
+      // Actually, let's keep it simple first.
     }
 
-    return baseData;
+    // Handle Documents (Existing + New)
+    let docIndex = 0;
+
+    // 1. Add Existing Documents (that haven't been removed)
+    if (this.existingImages.length > 0) {
+      for (const existingDoc of this.existingImages) {
+        if (existingDoc.documentId) {
+          formData.append(`Documents[${docIndex}].documentId`, existingDoc.documentId);
+          formData.append(`Documents[${docIndex}].entityType`, existingDoc.entityType || 'Room');
+          formData.append(`Documents[${docIndex}].entityId`, existingDoc.entityId || '0');
+          formData.append(`Documents[${docIndex}].documentType`, existingDoc.documentType || 'Image');
+          formData.append(`Documents[${docIndex}].fileName`, existingDoc.fileName || '');
+          formData.append(`Documents[${docIndex}].filePath`, existingDoc.filePath || '');
+          formData.append(`Documents[${docIndex}].isPrimary`, String(existingDoc.isPrimary));
+        }
+        docIndex++;
+      }
+    }
+
+    // 2. Add New Images
+    if (this.uploadedImages.length > 0) {
+      for (let i = 0; i < this.uploadedImages.length; i++) {
+        const image = this.uploadedImages[i];
+
+        formData.append(`Documents[${docIndex}].filePath`, '');
+        formData.append(`Documents[${docIndex}].fileName`, image.name);
+        formData.append(`Documents[${docIndex}].documentType`, 'Image');
+        formData.append(`Documents[${docIndex}].documentId`, '0');
+        const isPrimary = this.existingImages.length === 0 && i === 0;
+        formData.append(`Documents[${docIndex}].isPrimary`, isPrimary ? 'true' : 'false');
+        formData.append(`Documents[${docIndex}].file`, image.file);
+        formData.append(`Documents[${docIndex}].description`, '');
+        formData.append(`Documents[${docIndex}].entityType`, 'Room');
+        formData.append(`Documents[${docIndex}].entityId`, '0');
+
+        docIndex++;
+      }
+    }
+
+    return formData;
   }
 
   private parseImages(imagesJson: string): string[] {
+    // Helper not strictly used if we rely on documents, but kept for fallback
     if (!imagesJson) {
       return [];
     }
     try {
       return JSON.parse(imagesJson);
     } catch {
-      // If parsing fails, return empty array or the string as single item
       return imagesJson ? [imagesJson] : [];
     }
   }
 
-  private fileToBase64(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = reader.result as string;
-        resolve(result);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
+
 
   removeExistingImage(index: number): void {
     this.existingImages.splice(index, 1);

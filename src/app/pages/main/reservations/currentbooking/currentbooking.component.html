@@ -16,17 +16,11 @@
           </label>
           <div class="date-range-box d-flex align-items-center justify-content-between">
             <div class="date-field w-46 position-relative first_date_field">
-              <input 
-                type="date" 
-                formControlName="fromDate"
-                placeholder="DD/MM/YYYY">
+              <input type="date" formControlName="fromDate" placeholder="DD/MM/YYYY">
               <img src="assets/images/calendar_icon.svg" alt="" class="custom_calendar_picker" />
             </div>
             <div class="date-field w-50 position-relative">
-              <input 
-                type="date" 
-                formControlName="toDate"
-                placeholder="DD/MM/YYYY">
+              <input type="date" formControlName="toDate" placeholder="DD/MM/YYYY">
               <img src="assets/images/calendar_icon.svg" alt="" class="custom_calendar_picker" />
             </div>
           </div>
@@ -42,10 +36,9 @@
       </div>
       <div class="col-md-4">
         <div class="d-flex flex-column">
-          <label class="font_14 fw_med text_black mb_5">Tenants Details</label>
-          <select class="custom-select" formControlName="tenantsDetails">
-            <option *ngFor="let option of tenantsOptions" [value]="option.value">{{ option.label }}</option>
-          </select>
+          <label class="font_14 fw_med text_black mb_5">Room Number</label>
+          <input type="text" class="form-control custom-input" formControlName="roomNumber"
+            placeholder="Enter Room Number">
         </div>
       </div>
     </div>
@@ -60,10 +53,7 @@
       <div class="row">
         <div class="col-md-4 d-flex align-items-start border_right_reserve">
           <label class="custom_checkbox_container mr_15">
-            <input 
-              type="checkbox" 
-              [checked]="isRoomSelected(room.id)"
-              (change)="toggleRoomSelection(room)">
+            <input type="checkbox" [checked]="isRoomSelected(room.id)" (change)="toggleRoomSelection(room)">
             <span class="checkmark"></span>
           </label>
           <div class="d-flex flex-column">
@@ -113,9 +103,9 @@
   </div>
 
   <!-- Empty State -->
-  <div *ngIf="!showResults" class="text-center d-flex justify-content-center flex-column align-items-center no_data_found_blk">
+  <div *ngIf="!showResults"
+    class="text-center d-flex justify-content-center flex-column align-items-center no_data_found_blk">
     <img src="assets/images/reservation_empty_img.svg" alt="No results" />
     <span class="font_14 fw_med text_black">Search your dream stay here.</span>
   </div>
 </div>
-

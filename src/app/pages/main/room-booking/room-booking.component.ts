@@ -27,7 +27,6 @@ export class RoomBookingComponent implements OnInit {
 
   allRooms: any[] = [];
   filteredRooms: any[] = [];
-  allBookings: any[] = [];
   isLoading: boolean = false;
   floors: string[] = [];
   HousekeepingTask: any = null;
@@ -72,20 +71,8 @@ export class RoomBookingComponent implements OnInit {
 
   ngOnInit(): void {
     this.getRooms();
-    this.getBookings();
   }
 
-  getBookings(): void {
-    this.apiService.getBookings().subscribe({
-      next: (bookings: any) => {
-        this.allBookings = bookings || [];
-      },
-      error: (error: any) => {
-        console.error('Error loading bookings:', error);
-        this.allBookings = [];
-      }
-    });
-  }
 
   getRooms(): void {
     this.isLoading = true;
@@ -229,58 +216,34 @@ export class RoomBookingComponent implements OnInit {
     return status && status.toLowerCase() === 'occupied';
   }
 
-  isRoomMaintenance(room: any): boolean {
-    const status = room.roomStatus || room.roomstatus || room.status || room.Status || '';
-    return status && status.toLowerCase() === 'maintenance';
-  }
+  // isRoomMaintenance(room: any): boolean {
+  //   const status = room.roomStatus || room.roomstatus || room.status || room.Status || '';
+  //   return status && status.toLowerCase() === 'maintenance';
+  // }
 
   openMaintenanceModal(room: any, event?: Event): void {
     if (event) {
       event.stopPropagation();
     }
-    if (room.id !== null) {
-      // Use stored bookings data
-      const activeBooking = this.allBookings.find((booking: any) => {
-        const bookingRoomId = booking.roomId || booking.RoomId;
-        const isActive = booking.bookingStatus == 'CheckedOut' &&
-          booking.bookingStatus !== 'Cancelled';
-        return bookingRoomId === room.id && isActive;
-      });
-
-      if (activeBooking?.bookingId) {
-        const bookingId = activeBooking.bookingId;
-        this.loaderService.show();
-        this.apiService.getHousekeepingTaskByBookingId(bookingId).subscribe({
-          next: (taskData: any) => {
-            console.log('API Response Data (raw):', taskData);
-            // Handle if response is wrapped in data property or is an array
-            const data = Array.isArray(taskData) ? taskData[0] : (taskData?.data || taskData);
-            if (!data) {
-              console.warn('No task data found in API response');
-              this.loaderService.hide();
-              return;
-            }
-            // Store the task data (could be single object or array)
-            this.HousekeepingTask = Array.isArray(taskData) ? taskData : data;
-            this.showMaintenanceModal = true;
-            
-            this.maintenanceForm.patchValue({
-              taskId: data.taskId || '',
-              roomId: data.roomId || room.id || '',
-              bookingId: data.bookingId || bookingId || '',
-              taskStatus: data.taskStatus ? String(data.taskStatus).trim() : '',
-              taskType: data.taskType ? String(data.taskType).trim() : '',
-              assignedToUserId: data.assignedToUserId || ''
-            });
-            this.loaderService.hide();
-          },
-          error: (error: any) => {
-            console.error('Error fetching housekeeping task:', error);
-            this.loaderService.hide();
-          }
+    this.apiService.getHousekeepingTaskByRoomId(room.id).subscribe((task: any) => {
+      if (task && task.length > 0) {
+        this.HousekeepingTask = task[0];
+        this.maintenanceForm.patchValue({
+          taskId: this.HousekeepingTask.taskId,
+          roomId: this.HousekeepingTask.roomId,
+          bookingId: this.HousekeepingTask.bookingId,
+          taskStatus: this.HousekeepingTask.taskStatus,
+          taskType: this.HousekeepingTask.taskType,
+          assignedToUserId: this.HousekeepingTask.assignedToUserId
         });
+        this.showMaintenanceModal = true;
+      } else {
+        this.showMaintenanceModal = false;
+        this.maintenanceForm.reset();
+        this.selectedRoom = null;
+        alert('No maintenance task found for this room.');
       }
-    }
+    });
   }
 
   closeMaintenanceModal(): void {
@@ -294,7 +257,7 @@ export class RoomBookingComponent implements OnInit {
     console.log('Form valid:', this.maintenanceForm.valid);
     console.log('Form errors:', this.maintenanceForm.errors);
     console.log('Form value:', this.maintenanceForm.value);
-    
+
     // Mark all fields as touched to show validation errors
     Object.keys(this.maintenanceForm.controls).forEach(key => {
       const control = this.maintenanceForm.get(key);
@@ -303,9 +266,9 @@ export class RoomBookingComponent implements OnInit {
         console.log(`Field ${key} has errors:`, control.errors);
       }
     });
-    
+
     const formData = this.maintenanceForm.value;
-    
+
     // Check if taskId is present (required for update)
     if (!formData.taskId) {
       alert('Task ID is required. Please close and reopen the maintenance modal.');
@@ -328,10 +291,10 @@ export class RoomBookingComponent implements OnInit {
 
     // Get existing task data for reference
     const existingTask = Array.isArray(this.HousekeepingTask) ? this.HousekeepingTask[0] : this.HousekeepingTask;
-    
+
     // Prepare update data - use form values or existing values
     const updateData: any = {};
-    
+
     // Only include fields that have values
     if (formData.assignedToUserId) {
       updateData.assignedToUserId = Number(formData.assignedToUserId);
@@ -364,12 +327,12 @@ export class RoomBookingComponent implements OnInit {
     }
 
     console.log('Calling API service with taskId:', taskIdNumber, 'and data:', updateData);
-    
+
     try {
       this.loaderService.show();
       const apiCall = this.apiService.updateHousekeepingTask(taskIdNumber, updateData);
       console.log('API call observable created:', apiCall);
-      
+
       apiCall.subscribe({
         next: (response: any) => {
           console.log('Update response received:', response);
@@ -398,57 +361,44 @@ export class RoomBookingComponent implements OnInit {
   }
 
   onRoomClick(room: any): void {
-    if (this.isRoomMaintenance(room)) {
-      this.openMaintenanceModal(room);
-      return;
-    }
+    debugger;
+    const status = (room.roomStatus || room.roomstatus || room.status || room.Status || '').toLowerCase();
 
-    if (this.isRoomAvailable(room)) {
-      const roomId = room.Id || room.id || room.roomId || 0;
-      this.router.navigate(['/main/reservations/reservation', roomId], {
-        state: { room: room }
-      });
-      return;
-    }
+    switch (status) {
+      case 'maintenance':
+        this.openMaintenanceModal(room);
+        break;
+      case 'available': {
+        const roomId = room.Id || room.id || room.roomId || 0;
+        this.router.navigate(['/main/reservations/reservation', roomId], {
+          state: { room: room }
+        });
+        break;
+      }
+      case 'occupied': {
+        const roomId = room.Id || room.id || room.roomId;
+        if (!roomId) {
+          alert('Room ID not found. Cannot proceed to checkout.');
+          return;
+        }
 
-    if (this.isRoomOccupied(room)) {
-      this.navigateToCheckout(room);
-      return;
-    }
+        const roomNumber = room.roomNumber || room.RoomNumber || room.room_number;
 
-    alert('This room is not available for booking at the moment.');
-  }
+        if (!roomNumber) {
+          alert('Room Number not found. Cannot proceed to checkout.');
+          return;
+        }
 
-  navigateToCheckout(room: any): void {
-    const roomId = room.Id || room.id || room.roomId;
-    if (!roomId) {
-      alert('Room ID not found. Cannot proceed to checkout.');
-      return;
-    }
+        this.router.navigate(['/main/checkout', roomId, roomNumber]);
 
-    // Use stored bookings data
-    const activeBooking = this.allBookings.find((booking: any) => {
-      const bookingRoomId = booking.roomId || booking.RoomId;
-      const isActive = booking.bookingStatus !== 'CheckedOut' &&
-        booking.bookingStatus !== 'Cancelled';
-      return bookingRoomId === roomId && isActive;
-    });
-
-    if (activeBooking?.bookingId) {
-      this.router.navigate(['/main/checkout', activeBooking.bookingId]);
-      return;
-    }
-
-    const anyBooking = this.allBookings.find((booking: any) => {
-      const bookingRoomId = booking.roomId || booking.RoomId;
-      return bookingRoomId === roomId;
-    });
-
-    if (anyBooking?.bookingId) {
-      this.router.navigate(['/main/checkout', anyBooking.bookingId]);
-    } else {
-      alert('No booking found for this room. Cannot proceed to checkout.');
+        break;
+      }
+      default:
+        alert('This room is not available for booking at the moment.');
+        break;
     }
   }
+
+
 }
 
