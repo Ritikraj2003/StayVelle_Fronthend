@@ -1,0 +1,200 @@
+/* Global Page Style */
+.page-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #1a1a1a;
+    font-family: 'Inter', sans-serif;
+    padding: 20px;
+}
+
+/* Validation Card */
+.validation-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 40px 20px;
+    text-align: center;
+    color: #fff;
+}
+
+.icon-container {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 30px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.star-icon {
+    width: 40px;
+    height: 40px;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: #fff;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #a0a0a0;
+    margin-bottom: 40px;
+    line-height: 1.5;
+}
+
+/* Inputs & Buttons */
+.input-group {
+    margin-bottom: 20px;
+}
+
+.pin-input {
+    width: 100%;
+    padding: 15px;
+    background: #252525;
+    border: 1px solid #333;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 18px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.pin-input:focus {
+    border-color: #fdd835;
+}
+
+.btn-verify {
+    width: 100%;
+    padding: 15px;
+    background: #fdd835;
+    border: none;
+    border-radius: 12px;
+    color: #000;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 25px;
+    transition: background-color 0.3s;
+}
+
+.btn-verify:hover {
+    background-color: #fbc02d;
+}
+
+.forgot-link {
+    display: block;
+    color: #fdd835;
+    font-size: 14px;
+    margin-bottom: 80px;
+    text-decoration: none;
+}
+
+.forgot-link:hover {
+    text-decoration: underline;
+}
+
+/* Footer Section */
+.footer-actions {
+    margin-top: auto;
+}
+
+.need-help {
+    font-size: 14px;
+    color: #a0a0a0;
+    margin-bottom: 15px;
+}
+
+.btn-reception {
+    width: 100%;
+    padding: 15px;
+    background: #2a2a2a;
+    border: 1px solid #fdd835;
+    border-radius: 12px;
+    color: #fdd835;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    transition: background-color 0.3s;
+}
+
+.btn-reception:hover {
+    background: rgba(253, 216, 53, 0.1);
+}
+
+/* Loading State */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #1a1a1a;
+    color: #fdd835;
+}
+
+.text-gold {
+    color: #fdd835;
+}
+
+/* Not Found Popup */
+.not-found-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.not-found-card {
+    background: #252525;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    color: #fff;
+    max-width: 90%;
+    width: 350px;
+    border: 1px solid #333;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.not-found-icon {
+    width: 60px;
+    height: 60px;
+    background: #ff5252;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 30px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 20px;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .validation-card {
+        padding: 20px;
+    }
+    
+    .title {
+        font-size: 20px;
+    }
+}

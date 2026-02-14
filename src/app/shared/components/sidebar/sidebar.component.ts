@@ -24,7 +24,7 @@ export class SidebarComponent implements OnInit {
   currentUser$ = this.authService.currentUser$;
   showProfileMenu: boolean = false;
   imageError: boolean = false;
-  
+
   // Generic dropdown state management - works for any number of dropdowns
   dropdownStates: { [key: string]: boolean } = {};
 
@@ -96,6 +96,7 @@ export class SidebarComponent implements OnInit {
       hasDropdown: false,
       permissionCode: 'RT' // Reports permission code
     }
+
   ];
 
   // Filtered menu items based on permissions
@@ -105,7 +106,7 @@ export class SidebarComponent implements OnInit {
     private authService: AuthService,
     private permissionService: PermissionService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.filterMenuItemsByPermissions();
@@ -146,10 +147,10 @@ export class SidebarComponent implements OnInit {
         }
 
         if (item.hasDropdown && item.children) {
-          const filteredChildren = item.children.filter(child => 
+          const filteredChildren = item.children.filter(child =>
             child.permissionCode && this.permissionService.hasPermission(child.permissionCode)
           );
-          
+
           if (filteredChildren.length > 0) {
             item.children = filteredChildren;
             return true;
@@ -183,14 +184,15 @@ export class SidebarComponent implements OnInit {
           // Check if current URL includes the route path
           return currentUrl.includes(routePath);
         });
-        
+
         // Special handling for Reservations dropdown
         // Keep it open for reservation or checkout pages (related to Room Booking)
         if (item.label === 'Reservations' && !isOnChildRoute) {
           isOnChildRoute = currentUrl.includes('/main/reservations/reservation') ||
-                          currentUrl.includes('/main/checkout');
+            currentUrl.includes('/main/checkout') ||
+            currentUrl.includes('/main/add-update-servcie');
         }
-        
+
         this.dropdownStates[dropdownKey] = isOnChildRoute;
       }
     });
@@ -240,15 +242,22 @@ export class SidebarComponent implements OnInit {
   isChildActive(childRoute: string | undefined, childLabel: string): boolean {
     const currentUrl = this.router.url;
     if (!currentUrl || !childRoute) return false;
-    
+
     // Special handling for Room Booking
     // Keep it active when navigating to reservation or checkout pages
     if (childLabel === 'Room Booking' && childRoute === '/main/room-booking') {
       return currentUrl === '/main/room-booking' ||
-             currentUrl.includes('/main/reservations/reservation') ||
-             currentUrl.includes('/main/checkout');
+        currentUrl.includes('/main/reservations/reservation') ||
+        currentUrl.includes('/main/checkout');
     }
-    
+
+    // Special handling for Current Booking
+    // Keep it active when navigating to add/update service page
+    if (childLabel === 'Current Booking' && childRoute === '/main/reservations/current-booking') {
+      return currentUrl === '/main/reservations/current-booking' ||
+        currentUrl.includes('/main/add-update-servcie');
+    }
+
     // Default behavior: check if current URL matches or starts with the route
     // This handles cases like /main/users/add matching /main/users
     return currentUrl === childRoute || currentUrl.startsWith(childRoute + '/');

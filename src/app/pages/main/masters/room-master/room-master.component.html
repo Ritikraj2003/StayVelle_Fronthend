@@ -1,19 +1,14 @@
 <div class="add_services_container">
   <h3 class="font_20 fw_semi text_black mb_2">Room Master</h3>
   <span class="text_pri fw_med font_12 d-block mb_13">Masters <span class="text_black">~ Room Master</span></span>
-  
+
   <!-- Search and Filter Section -->
   <div class="services_info_blk position-relative mb_24">
     <div class="row">
       <div class="col-md-4">
         <div class="d-flex flex-column">
           <label class="font_14 fw_med text_black mb_5">Name</label>
-          <input 
-            type="text" 
-            class="form-control" 
-            placeholder="Search by name"
-            [(ngModel)]="filterName"
-          >
+          <input type="text" class="form-control" placeholder="Search by name" [(ngModel)]="filterName">
         </div>
       </div>
       <div class="col-md-4">
@@ -35,18 +30,11 @@
   <!-- Filter Tags and Add Room Button -->
   <div class="d-flex align-items-center justify-content-between mb_24">
     <div class="d-flex align-items-center">
-      <div 
-        class="d-flex align-items-center mr_20" 
-        *ngFor="let filter of activeFilters"
-      >
+      <div class="d-flex align-items-center mr_20" *ngFor="let filter of activeFilters">
         <div class="luxury_info_blk d-flex align-items-center">
           <span class="font_10 fw_reg text_black luxury_txt d-block">{{ filter.label }}</span>
-          <img 
-            src="assets/images/cross_svgrepo.com.svg" 
-            alt="" 
-            class="cursor-pointer pl_8"
-            (click)="removeFilter(filter.type)"
-          >
+          <img src="assets/images/cross_svgrepo.com.svg" alt="" class="cursor-pointer pl_8"
+            (click)="removeFilter(filter.type)">
         </div>
       </div>
     </div>
@@ -67,23 +55,19 @@
       <tbody>
         <tr *ngFor="let room of filteredRooms">
           <td>{{ room.id || 'N/A' }}</td>
-          <td><a routerLink="/main/masters/room-master/edit/{{ room.id }}" class="text_black fw_semi">{{ room.roomNumber || 'N/A' }}</a></td>
+          <td><a routerLink="/main/masters/room-master/edit/{{ room.id }}" class="text_black fw_semi">{{ room.roomNumber
+              || 'N/A' }}</a></td>
           <td>{{ room.isActive ? 'Active' : 'Inactive' }}</td>
           <td>
             <div class="d-flex align-items-center">
               <a routerLink="/main/masters/room-master/edit/{{ room.id }}">
-                <img 
-                  src="assets/images/edit_icon.svg" 
-                  alt="" 
-                  class="cursor-pointer mr_10"
-                >
+                <img src="assets/images/edit_icon.svg" alt="" class="cursor-pointer mr_10">
               </a>
-              <img 
-                src="assets/images/delete_icon.svg" 
-                alt="" 
-                class="cursor-pointer"
-                (click)="deleteRoom(room.id!)"
-              >
+              <img src="assets/images/delete_icon.svg" alt="" class="cursor-pointer mr_10"
+                (click)="deleteRoom(room.id!)">
+              <button class="btn btn-sm btn-outline-primary" (click)="printQr(room)">
+                Print QR
+              </button>
             </div>
           </td>
         </tr>
@@ -96,7 +80,8 @@
 
   <!-- Pagination -->
   <div class="d-flex align-items-center justify-content-between">
-    <span class="d-block font_12 fw_reg text_black">Showing {{ filteredRooms.length }} of {{ allRooms.length }} Results</span>
+    <span class="d-block font_12 fw_reg text_black">Showing {{ filteredRooms.length }} of {{ allRooms.length }}
+      Results</span>
     <div class="pagination_blk d-flex align-items-center">
       <img src="assets/images/left_arrow.svg" alt="" class="cursor-pointer mr_12">
       <span class="active font_12 fw_med cursor-pointer">1</span>
@@ -107,3 +92,37 @@
   </div>
 </div>
 
+<!-- QR Code Modal -->
+<div class="modal fade" [class.show]="showQrModal" [style.display]="showQrModal ? 'block' : 'none'" tabindex="-1"
+  role="dialog" *ngIf="showQrModal" style="z-index: 1050;">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 400px;">
+    <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+      <div class="modal-header"
+        style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E0E0E0; padding: 20px 30px; border-radius: 20px 20px 0 0;">
+        <h5 class="modal-title font_20 fw_semi text_black mb_0">Room QR Code</h5>
+        <button type="button" class="close" (click)="closeQrModal()" aria-label="Close"
+          style="background: none; border: none; font-size: 28px; opacity: 0.5; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+          <span aria-hidden="true" style="line-height: 1;">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body text-center" style="padding: 30px;">
+        <h6 class="font_16 fw_med mb_20">Room: {{ selectedRoomNumber }}</h6>
+        <div class="qr-code-container mb_20">
+          <img [src]="selectedRoomQrUrl" alt="Room QR Code"
+            style="max-width: 100%; height: auto; border: 1px solid #ddd; padding: 10px; border-radius: 8px;">
+        </div>
+        <p class="font_12 text-muted mb_0">Scan this QR code to access room services.</p>
+      </div>
+      <div class="modal-footer"
+        style="border-top: 1px solid #E0E0E0; padding: 20px 30px; border-radius: 0 0 20px 20px; justify-content: center;">
+        <button type="button" class="btn_primary" (click)="downloadQr()" style="min-width: 150px;">
+          Download PDF
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Backdrop -->
+<div class="modal-backdrop fade" [class.show]="showQrModal" *ngIf="showQrModal" (click)="closeQrModal()"
+  style="z-index: 1040; background-color: rgba(0, 0, 0, 0.5);"></div>

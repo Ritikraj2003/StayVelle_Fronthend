@@ -118,6 +118,10 @@ export class ApiService {
     return this.get<any>(`Room/roomnumber/${roomNumber}`);
   }
 
+  getRoomByToken(token: string): Observable<any> {
+    return this.get<any>(`Room/get-by-token/${token}`);
+  }
+
   getRoomsByStatus(status: string): Observable<any> {
     return this.get<any>(`Room/status/${status}`);
   }

@@ -103,6 +103,26 @@ export class CheckoutComponent implements OnInit {
       });
     }
 
+    // Merge duplicate services with status 'Ordered'
+    if (this.bookingData.bookingServices && this.bookingData.bookingServices.length > 0) {
+      const mergedServices: any[] = [];
+      this.bookingData.bookingServices.forEach((service: any) => {
+        if (service.serviceStatus === 'Ordered') {
+          const existingService = mergedServices.find(
+            (s) => s.serviceId === service.serviceId && s.serviceStatus === 'Ordered'
+          );
+          if (existingService) {
+            existingService.quantity += service.quantity;
+          } else {
+            mergedServices.push({ ...service });
+          }
+        } else {
+          mergedServices.push(service);
+        }
+      });
+      this.bookingData.bookingServices = mergedServices;
+    }
+
     this.isLoading = false;
     this.loaderService.hide();
   }

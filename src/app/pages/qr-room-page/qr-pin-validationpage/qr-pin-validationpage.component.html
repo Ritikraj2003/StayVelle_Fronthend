@@ -1,0 +1,44 @@
+<div class="page-container">
+    <ng-container *ngIf="isValidToken === true">
+        <!-- Valid Token UI -->
+        <div class="validation-card">
+            <div class="icon-container">
+                <img src="assets/images/hms_logo.svg" alt="Welcome" class="star-icon"
+                    onerror="this.src='assets/images/Logo.png'">
+            </div>
+
+            <h1 class="title">Welcome to Your Room</h1>
+            <p class="subtitle">Please enter the PIN or code provided<br>at check-in or on your TV screen</p>
+
+            <div class="input-group">
+                <input type="text" [(ngModel)]="pinCode" placeholder="Enter Code" class="pin-input">
+            </div>
+
+            <button class="btn-verify" (click)="verifyCode()">Verify Code</button>
+
+            <a href="javascript:void(0)" class="forgot-link">Forgot your code?</a>
+
+            <div class="footer-actions">
+                <p class="need-help">Need help?</p>
+                <button class="btn-reception" (click)="callReception()">
+                    <i class="fa fa-phone"></i> Call Reception
+                </button>
+            </div>
+        </div>
+    </ng-container>
+
+    <ng-container *ngIf="isValidToken === false">
+        <ng-container *ngTemplateOutlet="notFoundTemplate"></ng-container>
+    </ng-container>
+</div>
+
+<!-- Page Not Found Template -->
+<ng-template #notFoundTemplate>
+    <div class="not-found-overlay">
+        <div class="not-found-card">
+            <div class="not-found-icon">!</div>
+            <h2>Page Not Found</h2>
+            <p>The link you used is invalid or has expired.</p>
+        </div>
+    </div>
+</ng-template>
