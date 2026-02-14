@@ -1,19 +1,14 @@
 <div class="add_services_container">
   <h3 class="font_20 fw_semi text_black mb_2">Users</h3>
   <span class="text_pri fw_med font_12 d-block mb_13">User Management <span class="text_black">~ User</span></span>
-  
+
   <!-- Search and Filter Section -->
   <div class="services_info_blk position-relative mb_24">
     <div class="row">
       <div class="col-md-4">
         <div class="d-flex flex-column">
           <label class="font_14 fw_med text_black mb_5">Name</label>
-          <input 
-            type="text" 
-            class="form-control" 
-            placeholder="Search by name"
-            [(ngModel)]="filterName"
-          >
+          <input type="text" class="form-control" placeholder="Search by name" [(ngModel)]="filterName">
         </div>
       </div>
       <div class="col-md-4">
@@ -21,7 +16,8 @@
           <label class="font_14 fw_med text_black mb_5">Role</label>
           <select class="custom-select" [(ngModel)]="filterRole">
             <option value="">Select</option>
-            <option *ngFor="let role of roles" [value]="role.role_name || role.name">{{ role.role_name || role.name }}</option>
+            <option *ngFor="let role of roles" [value]="role.role_name || role.name">{{ role.role_name || role.name }}
+            </option>
           </select>
         </div>
       </div>
@@ -44,22 +40,16 @@
   <!-- Filter Tags and Add User Button -->
   <div class="d-flex align-items-center justify-content-between mb_24">
     <div class="d-flex align-items-center">
-      <div 
-        class="d-flex align-items-center mr_20" 
-        *ngFor="let filter of activeFilters"
-      >
+      <div class="d-flex align-items-center mr_20" *ngFor="let filter of activeFilters">
         <div class="luxury_info_blk d-flex align-items-center">
           <span class="font_10 fw_reg text_black luxury_txt d-block">{{ filter.label }}</span>
-          <img 
-            src="assets/images/cross_svgrepo.com.svg" 
-            alt="" 
-            class="cursor-pointer pl_8"
-            (click)="removeFilter(filter.type)"
-          >
+          <img src="assets/images/cross_svgrepo.com.svg" alt="" class="cursor-pointer pl_8"
+            (click)="removeFilter(filter.type)">
         </div>
       </div>
     </div>
-    <a *ngIf="permissionService.hasPermission('UA')" routerLink="/main/users/add" class="text-decoration-none btn_primary services_pd">Add User</a>
+    <a *ngIf="permissionService.hasPermission('UA')" routerLink="/main/users/add"
+      class="text-decoration-none btn_primary services_pd">Add User</a>
   </div>
 
   <!-- Users Table -->
@@ -80,42 +70,33 @@
       <tbody>
         <tr *ngFor="let user of filteredUsers">
           <td>
-            <img 
-              *ngIf="user.ImageUrl || user.imageUrl" 
-              [src]="user.ImageUrl || user.imageUrl" 
-              alt="User Image" 
-              class="user-avatar"
+            <!-- Check for documents array first, then ImageUrl properties -->
+            <img *ngIf="(user.documents && user.documents.length > 0) || user.ImageUrl || user.imageUrl"
+              [src]="(user.documents && user.documents.length > 0) ? user.documents[0].filePath : (user.ImageUrl || user.imageUrl)"
+              alt="User Image" class="user-avatar"
               style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd;"
-              onerror="this.src='assets/images/Logo.png'; this.onerror=null;"
-            >
-            <div 
-              *ngIf="!user.ImageUrl && !user.imageUrl" 
+              onerror="this.src='assets/images/Logo.png'; this.onerror=null;">
+            <!-- Show placeholder if no image in documents OR ImageUrl properties -->
+            <div *ngIf="!(user.documents && user.documents.length > 0) && !user.ImageUrl && !user.imageUrl"
               class="user-avatar-placeholder"
-              style="width: 40px; height: 40px; border-radius: 50%; background-color: #ddd; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: #999;"
-            >
+              style="width: 40px; height: 40px; border-radius: 50%; background-color: #ddd; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: #999;">
               {{ (user.Name || user.name || 'U').charAt(0).toUpperCase() }}
             </div>
           </td>
-          <td><a href="" class="text_black fw_semi">{{ user.Name || user.name || 'N/A' }}</a></td>
+          <td><a class="text_black fw_semi cursor-pointer" (click)="editUser(user.Id || user.id)">{{ user.Name ||
+              user.name || 'N/A' }}</a></td>
           <td>{{ user.Email || user.email || 'N/A' }}</td>
           <td>{{ user.Username || user.username || 'N/A' }}</td>
           <td>{{ user.Phone || user.phone || 'N/A' }}</td>
           <td>{{ user.role_name || user.role?.name || user.role || 'N/A' }}</td>
-          <td>{{ (user.isactive !== undefined ? user.isactive : (user.is_active !== undefined ? user.is_active : user.isActive)) ? 'Active' : 'Inactive' }}</td>
+          <td>{{ (user.isactive !== undefined ? user.isactive : (user.is_active !== undefined ? user.is_active :
+            user.isActive)) ? 'Active' : 'Inactive' }}</td>
           <td>
             <div class="d-flex align-items-center">
-              <img 
-                src="assets/images/edit_icon.svg" 
-                alt="Edit" 
-                class="cursor-pointer mr_10"
-                (click)="editUser(user.Id || user.id)"
-              >
-              <img 
-                src="assets/images/delete_icon.svg" 
-                alt="Delete" 
-                class="cursor-pointer"
-                (click)="deleteUser(user.Id || user.id)"
-              >
+              <img src="assets/images/edit_icon.svg" alt="Edit" class="cursor-pointer mr_10"
+                (click)="editUser(user.Id || user.id)">
+              <img src="assets/images/delete_icon.svg" alt="Delete" class="cursor-pointer"
+                (click)="deleteUser(user.Id || user.id)">
             </div>
           </td>
         </tr>
@@ -128,7 +109,8 @@
 
   <!-- Pagination -->
   <div class="d-flex align-items-center justify-content-between">
-    <span class="d-block font_12 fw_reg text_black">Showing {{ filteredUsers.length }} of {{ allUsers.length }} Results</span>
+    <span class="d-block font_12 fw_reg text_black">Showing {{ filteredUsers.length }} of {{ allUsers.length }}
+      Results</span>
     <div class="pagination_blk d-flex align-items-center">
       <img src="assets/images/left_arrow.svg" alt="" class="cursor-pointer mr_12">
       <span class="active font_12 fw_med cursor-pointer">1</span>
@@ -138,4 +120,3 @@
     </div>
   </div>
 </div>
-

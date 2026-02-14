@@ -42,7 +42,8 @@ export class UserAddComponent implements OnInit {
       role_id: ['', [Validators.required]],
       role_name: [''],
       isstaff: [false],
-      isadmin: [false]
+      isadmin: [false],
+      isHousekeeping: [false]
     });
 
     // Update role_name when role_id changes
@@ -56,7 +57,7 @@ export class UserAddComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadRoles();
-    
+
     // Check if we're in edit mode
     this.route.params.subscribe(params => {
       if (params['id']) {
@@ -87,7 +88,7 @@ export class UserAddComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0]; // Take only the first file
-      
+
       // Validate file type
       const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/svg+xml'];
       if (validTypes.includes(file.type)) {
@@ -98,7 +99,7 @@ export class UserAddComponent implements OnInit {
           input.value = ''; // Clear the input
           return;
         }
-        
+
         this.selectedImage = file;
         const reader = new FileReader();
         reader.onload = (e: any) => {
@@ -145,19 +146,24 @@ export class UserAddComponent implements OnInit {
             isactive: user.isactive !== undefined ? user.isactive : true,
             isstaff: user.isstaff !== undefined ? user.isstaff : false,
             isadmin: user.isadmin !== undefined ? user.isadmin : false,
+            isHousekeeping: user.isHousekeeping !== undefined ? user.isHousekeeping : false,
             role_id: user.role_id || user.roleId || '',
             role_name: user.role_name || user.roleName || ''
           });
-          
+
           // Load image if exists
-          if (user.ImageUrl || user.imageUrl) {
+          if (user.documents && user.documents.length > 0) {
+            const existingImageUrl = user.documents[0].filePath;
+            this.imagePreview = existingImageUrl;
+            this.originalImageUrl = existingImageUrl; // Store original image URL
+          } else if (user.ImageUrl || user.imageUrl) {
             const existingImageUrl = user.ImageUrl || user.imageUrl;
             this.imagePreview = existingImageUrl;
             this.originalImageUrl = existingImageUrl; // Store original image URL
           } else {
             this.originalImageUrl = null;
           }
-          
+
           // Remove password requirement in edit mode
           this.userForm.get('password')?.clearValidators();
           this.userForm.get('password')?.updateValueAndValidity();
@@ -178,7 +184,7 @@ export class UserAddComponent implements OnInit {
       this.isLoading = true;
       this.loaderService.show();
       const formData = this.prepareFormData();
-      
+
       if (this.isEditMode && this.userId) {
         // Update existing user
         this.apiService.updateUser(this.userId, formData).subscribe({
@@ -215,49 +221,59 @@ export class UserAddComponent implements OnInit {
     }
   }
 
-  private prepareFormData(): any {
+  private prepareFormData(): FormData {
+    const formData = new FormData();
     const formValue = this.userForm.value;
     const selectedRole = this.roles.find(r => (r.Id || r.id) == formValue.role_id);
     const currentUser = this.authService.getCurrentUser()?.email || 'system';
-    
-    const data: any = {
-      Name: formValue.name,
-      Email: formValue.email,
-      Username: formValue.username,
-      isactive: formValue.isactive === true || formValue.isactive === 'true',
-      Phone: formValue.phone,
-      role_id: parseInt(formValue.role_id),
-      role_name: selectedRole ? (selectedRole.role_name || selectedRole.name) : formValue.role_name,
-      isstaff: formValue.isstaff === true || formValue.isstaff === 'true',
-      isadmin: formValue.isadmin === true || formValue.isadmin === 'true'
-    };
-    
-    // Handle image: 
-    // 1. If new image was selected (selectedImage is not null), use the new base64 image
-    // 2. If in edit mode and no new image selected, preserve the original image
-    // 3. Otherwise, use whatever is in imagePreview (for new users)
-    if (this.selectedImage !== null && this.imagePreview) {
-      // New image was selected - use the new base64 string
-      data.ImageUrl = this.imagePreview;
-    } else if (this.isEditMode) {
-      // In edit mode and no new image selected - preserve original image
-      data.ImageUrl = this.originalImageUrl || this.imagePreview || null;
-    } else {
-      // Creating new user - use imagePreview if available
-      data.ImageUrl = this.imagePreview || null;
-    }
-    
-    // Only include password if provided (for edit mode) or required (for create mode)
+
+    formData.append('name', formValue.name);
+    formData.append('email', formValue.email);
+    formData.append('username', formValue.username);
+    formData.append('phone', formValue.phone);
+    formData.append('role_id', formValue.role_id);
+    formData.append('role_name', selectedRole ? (selectedRole.role_name || selectedRole.name) : formValue.role_name);
+
+    // Boolean fields - Convert to string or check backend requirement (usually 'true'/'false' works)
+    formData.append('isactive', String(formValue.isactive === true || formValue.isactive === 'true'));
+    formData.append('isstaff', String(formValue.isstaff === true || formValue.isstaff === 'true'));
+    formData.append('isadmin', String(formValue.isadmin === true || formValue.isadmin === 'true'));
+    formData.append('isHousekeeping', String(formValue.isHousekeeping === true || formValue.isHousekeeping === 'true'));
+
+    // Handle Metadata
     if (!this.isEditMode) {
-      data.Password = formValue.password;
-      data.CreatedBy = currentUser;
-      data.CreatedOn = new Date().toISOString();
-    } else if (formValue.password && formValue.password.trim() !== '') {
-      // Only update password if user provided a new one
-      data.Password = formValue.password;
+      formData.append('createdBy', currentUser);
+      formData.append('createdOn', new Date().toISOString());
+    } else {
+      formData.append('modifiedBy', currentUser);
+      formData.append('modifiedOn', new Date().toISOString());
     }
-    
-    return data;
+
+    // Password
+    if (!this.isEditMode) {
+      formData.append('password', formValue.password);
+    } else if (formValue.password && formValue.password.trim() !== '') {
+      formData.append('password', formValue.password);
+    }
+
+    // Handle Image Upload as Document
+    if (this.selectedImage) {
+      // New file selected
+      formData.append('documents[0].file', this.selectedImage);
+      formData.append('documents[0].fileName', this.selectedImage.name);
+      formData.append('documents[0].documentType', 'ProfileImage');
+      formData.append('documents[0].isPrimary', 'true');
+      formData.append('documents[0].description', 'User Profile Image');
+      formData.append('documents[0].entityType', 'USER');
+      // entityId will be set by backend on creation, or we can send 0
+      formData.append('documents[0].entityId', this.userId ? String(this.userId) : '0');
+    }
+    // Note: If no new image is selected in Edit mode, we don't send anything for documents 
+    // to preserve existing, OR we might need logic to handle 'remove image'.
+    // Given the current requirement "remove base64 ok now i need in iform", 
+    // we focus on sending the file when present.
+
+    return formData;
   }
 
   cancel(): void {

@@ -36,13 +36,7 @@ export class RoomBookingComponent implements OnInit {
 
   // Maintenance modal properties
   maintenanceForm: FormGroup;
-  staffList: any[] = [
-    { id: 1, name: 'John Doe' },
-    { id: 2, name: 'Jane Smith' },
-    { id: 3, name: 'Mike Johnson' },
-    { id: 4, name: 'Sarah Williams' },
-    { id: 5, name: 'David Brown' }
-  ];
+  housekeepingUsers: any[] = [];
   selectedRoom: any = null;
   showMaintenanceModal: boolean = false;
 
@@ -71,6 +65,18 @@ export class RoomBookingComponent implements OnInit {
 
   ngOnInit(): void {
     this.getRooms();
+    this.getHousekeepingUser();
+  }
+
+  getHousekeepingUser(): void {
+    this.apiService.getallhousekeepingUser().subscribe({
+      next: (users: any) => {
+        this.housekeepingUsers = users || [];
+      },
+      error: (error: any) => {
+        console.error('Error loading housekeeping users:', error);
+      }
+    });
   }
 
 

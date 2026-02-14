@@ -1,7 +1,9 @@
 <div class="add_services_container">
   <h3 class="font_20 fw_semi text_black mb_2">Check Out</h3>
-  <span class="text_pri fw_med font_12 d-block mb_13">Reservations <span class="text_black">~ <a routerLink="/main/room-booking" class="text_pri text-decoration-none">Room Booking</a> <span class="text_black">~ Check Out</span></span></span>
-  
+  <span class="text_pri fw_med font_12 d-block mb_13">Reservations <span class="text_black">~ <a
+        routerLink="/main/room-booking" class="text_pri text-decoration-none">Room Booking</a> <span
+        class="text_black">~ Check Out</span></span></span>
+
   <!-- Error State -->
   <div *ngIf="error" class="alert alert-danger mb_24">
     <span class="font_14 fw_med">{{ error }}</span>
@@ -9,7 +11,7 @@
 
   <!-- Booking Details -->
   <div *ngIf="bookingData" class="booking-details-container">
-    
+
     <!-- Booking Information Card -->
     <div class="info-card mb_24">
       <h4 class="font_16 fw_semi text_black mb_16">Booking Information</h4>
@@ -23,7 +25,8 @@
         <div class="col-md-3 mb_12">
           <div class="info-item">
             <span class="font_12 fw_med text_black label">Booking Status:</span>
-            <span class="font_14 fw_reg text_black value status-badge" [class.status-checkedout]="bookingData.bookingStatus === 'CheckedOut'">
+            <span class="font_14 fw_reg text_black value status-badge"
+              [class.status-checkedout]="bookingData.bookingStatus === 'CheckedOut'">
               {{ bookingData.bookingStatus }}
             </span>
           </div>
@@ -163,17 +166,42 @@
             </div>
             <div class="guest-image-column">
               <div class="guest-image-placeholder">
-                <img 
-                  [src]="guest.idProofImagePath || 'assets/images/file_upload_img.svg'" 
-                  [alt]="guest.guestName + ' ID Proof Image'"
-                  class="guest-image"
-                  (error)="$any($event.target).src='assets/images/file_upload_img.svg'"
-                />
+                <img [src]="guest.idProofImagePath || 'assets/images/file_upload_img.svg'"
+                  [alt]="guest.guestName + ' ID Proof Image'" class="guest-image"
+                  (error)="$any($event.target).src='assets/images/file_upload_img.svg'" />
               </div>
             </div>
           </div>
           <hr *ngIf="!last" class="guest-separator">
         </div>
+      </div>
+    </div>
+
+    <!-- Booked Services Card -->
+    <div class="info-card mb_24" *ngIf="bookingData.bookingServices && bookingData.bookingServices.length > 0">
+      <h4 class="font_16 fw_semi text_black mb_16">Booked Services</h4>
+      <div class="table-responsive">
+        <table class="table table-borderless">
+          <thead>
+            <tr>
+              <th scope="col" class="font_12 fw_med text_black opacity_5">Service Name</th>
+              <th scope="col" class="font_12 fw_med text_black opacity_5">Category</th>
+              <th scope="col" class="font_12 fw_med text_black opacity_5 text-right">Price</th>
+              <th scope="col" class="font_12 fw_med text_black opacity_5 text-center">Qty</th>
+              <th scope="col" class="font_12 fw_med text_black opacity_5 text-right">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let service of bookingData.bookingServices">
+              <td class="font_14 fw_med text_black">{{ service.serviceName }}</td>
+              <td class="font_14 fw_reg text_black">{{ service.serviceCategory }} <span *ngIf="service.subCategory">({{
+                  service.subCategory }})</span></td>
+              <td class="font_14 fw_reg text_black text-right">₹{{ service.price }}</td>
+              <td class="font_14 fw_reg text_black text-center">{{ service.quantity }} {{ service.unit }}</td>
+              <td class="font_14 fw_med text_black text-right">₹{{ (service.price * service.quantity).toFixed(2) }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -190,11 +218,15 @@
           <span class="font_14 fw_reg text_black">{{ calculateNights() }}</span>
         </div>
         <div class="amount-row d-flex justify-content-between align-items-center mb_12">
-          <span class="font_14 fw_med text_black">Subtotal:</span>
+          <span class="font_14 fw_med text_black">Room Subtotal:</span>
           <span class="font_14 fw_reg text_black">₹{{ calculateSubtotal().toFixed(2) }}</span>
         </div>
         <div class="amount-row d-flex justify-content-between align-items-center mb_12">
-          <span class="font_14 fw_med text_black">GST (18%):</span>
+          <span class="font_14 fw_med text_black">Services Total:</span>
+          <span class="font_14 fw_reg text_black">₹{{ calculateServiceTotal().toFixed(2) }}</span>
+        </div>
+        <div class="amount-row d-flex justify-content-between align-items-center mb_12">
+          <span class="font_14 fw_med text_black">GST (18% on Room):</span>
           <span class="font_14 fw_reg text_black">₹{{ calculateTax().toFixed(2) }}</span>
         </div>
         <hr class="amount-separator mb_16">
@@ -208,10 +240,10 @@
   </div>
 </div>
 <div class="right_side_footer_blk d-flex align-items-center justify-content-center" *ngIf="bookingData">
-  <button type="button" class="btn_primary btn_secondary mr_20 w-200px" (click)="cancel()" [disabled]="isSaving">Cancel</button>
+  <button type="button" class="btn_primary btn_secondary mr_20 w-200px" (click)="cancel()"
+    [disabled]="isSaving">Cancel</button>
   <button type="button" class="btn_primary mr_20 w-200px" (click)="save()" [disabled]="isSaving">
     <span *ngIf="!isSaving">Save</span>
     <span *ngIf="isSaving">Saving...</span>
   </button>
 </div>
-

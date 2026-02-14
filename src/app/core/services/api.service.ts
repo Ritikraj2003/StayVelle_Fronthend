@@ -50,6 +50,10 @@ export class ApiService {
     return this.delete<any>(`Users/${id}`);
   }
 
+  getallhousekeepingUser(): Observable<any> {
+    return this.get<any>('Users/housekeeping');
+  }
+
   ///////////////////////////////
   // Role APIs
   getRoles(search?: string): Observable<any> {
@@ -178,6 +182,10 @@ export class ApiService {
 
   checkOutBooking(id: number): Observable<any> {
     return this.post<any>(`Booking/${id}/checkout`, {});
+  }
+
+  addUpdateBookingServices(data: any): Observable<any> {
+    return this.post<any>('Booking/InsertDataByBookingId', data);
   }
 
   ///////////////////////////////

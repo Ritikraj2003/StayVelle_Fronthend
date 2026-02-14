@@ -183,8 +183,17 @@ export class CheckoutComponent implements OnInit {
     return subtotal * 0.18;
   }
 
+  calculateServiceTotal(): number {
+    if (!this.bookingData?.bookingServices || this.bookingData.bookingServices.length === 0) {
+      return 0;
+    }
+    return this.bookingData.bookingServices.reduce((total: number, service: any) => {
+      return total + (service.price * service.quantity);
+    }, 0);
+  }
+
   calculateTotal(): number {
-    return this.calculateSubtotal() + this.calculateTax();
+    return this.calculateSubtotal() + this.calculateTax() + this.calculateServiceTotal();
   }
 
   getPrimaryGuest(): any {

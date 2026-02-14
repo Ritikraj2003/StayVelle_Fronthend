@@ -213,7 +213,7 @@
                   formControlName="assignedToUserId"
                 >
                   <option value="">Select Staff</option>
-                  <option *ngFor="let staff of staffList" [value]="staff.id">
+                  <option *ngFor="let staff of housekeepingUsers" [value]="staff.id">
                     {{ staff.name }}
                   </option>
                 </select>

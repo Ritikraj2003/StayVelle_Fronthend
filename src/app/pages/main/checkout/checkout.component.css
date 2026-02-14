@@ -222,3 +222,7 @@
   }
 }
 
+/* Remove global table shadow/shade within info cards */
+.info-card table {
+  box-shadow: none !important;
+}

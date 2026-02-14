@@ -19,6 +19,7 @@ import { BookingHistoryComponent } from './booking-history/booking-history.compo
 import { AuthGuard } from '../../core/guards/auth.guard';
 import { ServiceMasterComponent } from './masters/service-master/service-master.component';
 import { ServiceAddUpdateComponent } from './masters/service-master/service-add-update/service-add-update.component';
+import { AddUpdateServcieComponent } from './add-update-servcie/add-update-servcie.component';
 
 const routes: Routes = [
   {
@@ -69,6 +70,11 @@ const routes: Routes = [
   {
     path: 'users',
     component: UserListComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'add-update-servcie',
+    component: AddUpdateServcieComponent,
     canActivate: [AuthGuard]
   },
   {

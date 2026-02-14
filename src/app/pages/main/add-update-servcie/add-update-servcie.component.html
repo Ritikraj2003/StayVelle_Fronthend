@@ -1,0 +1,162 @@
+<div class="reserve_availbilty_blk">
+    <div class="d-flex align-items-center justify-content-between mb_24">
+        <div>
+            <h3 class="font_20 fw_semi text_black mb_2">Services</h3>
+            <div class="d-flex align-items-center">
+                <a class="text_pri fw_med font_12 cursor-pointer">Services</a>
+                <span class="text_black text-decoration-none fw_med font_12">~ List</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content: Service List -->
+        <div class="col-md-9">
+
+            <!-- Filters Section -->
+            <div class="services_info_blk mb_24">
+                <!-- Top Bar: Category, Search, Sort -->
+                <div class="filter-bar d-flex align-items-center mb_20" style="gap: 15px;">
+                    <!-- Category Dropdown -->
+                    <div class="filter-dropdown-container">
+                        <select class="form-control custom-select" [ngModel]="selectedCategory"
+                            (ngModelChange)="onCategoryChange($event)"
+                            style="height: 45px; border-radius: 8px; min-width: 180px; cursor: pointer;">
+                            <option *ngFor="let cat of categories" [value]="cat">
+                                {{ cat === 'All' ? 'All Categories' : cat }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Search -->
+                    <div class="flex-grow-1 position-relative">
+                        <input type="text" class="form-control" placeholder="Search services..."
+                            [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()"
+                            style="height: 45px; border-radius: 8px;">
+                    </div>
+
+                    <!-- Price Sort -->
+                    <div class="filter-dropdown-container">
+                        <select class="form-control custom-select" [ngModel]="sortBy"
+                            (ngModelChange)="onSortChange($event)"
+                            style="height: 45px; border-radius: 8px; min-width: 180px; cursor: pointer;">
+                            <option value="low-high">Price: Low to High</option>
+                            <option value="high-low">Price: High to Low</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Subcategory Horizontal Scroller -->
+                <div *ngIf="subCategories.length > 0">
+                    <div class="subcategory-scroller d-flex align-items-center">
+                        <div *ngFor="let sub of subCategories" class="subcategory-item"
+                            [class.active]="selectedSubCategory === sub" (click)="onSubCategoryChange(sub)">
+                            {{ sub }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Cards Grid -->
+            <div class="service-grid-wrapper custom-scroll">
+                <div class="row" *ngIf="filteredServices.length > 0">
+                    <div class="col-md-3 mb_24" *ngFor="let service of filteredServices">
+                        <div class="service-card">
+                            <div class="service-img-container">
+                                <img [src]="service.documents.length ? service.documents[0].filePath : 'assets/images/placeholder.svg'"
+                                    onerror="this.src='assets/images/placeholder.svg'" alt="{{ service.serviceName }}"
+                                    class="service-img">
+                                <span class="service-badge" [class.complementary]="service.isComplementary">
+                                    {{ service.isComplementary ? 'Complementary' : 'Paid' }}
+                                </span>
+                            </div>
+                            <div class="service-details">
+                                <div class="d-flex justify-content-between align-items-start mb_5">
+                                    <h4 class="font_16 fw_semi text_black mb_0 text-truncate"
+                                        title="{{ service.serviceName }}" style="max-width: 70%;">
+                                        {{ service.serviceName }}
+                                    </h4>
+                                    <!-- <span class="status-dot" [class.active]="service.isActive"></span> -->
+                                </div>
+                                <div class="d-flex align-items-center mb_10">
+                                    <span class="font_12 fw_med text_pri mr_10">{{ service.serviceCategory }}</span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-end">
+                                    <div class="d-flex flex-column">
+                                        <span class="font_16 fw_bold text_black">₹ {{ service.price }} </span>
+                                    </div>
+                                    <button class="add-btn" (click)="addToCart(service)">
+                                        <span>+</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div *ngIf="filteredServices.length === 0" class="text-center py-5">
+                    <p class="font_16 fw_med text_black opacity_5">No services found.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Sidebar: Cart -->
+        <div class="col-md-3">
+            <div class="cart-sidebar">
+                <div class="d-flex align-items-center mb_20">
+                    <i class="fa fa-shopping-cart font_20 mr_10 text_pri"></i>
+                    <div>
+                        <h4 class="font_18 fw_semi text_black mb_0">Service Cart</h4>
+                        <span *ngIf="roomNumber" class="font_12 fw_med text_black opacity_5">Room {{ roomNumber
+                            }}</span>
+                    </div>
+                </div>
+
+                <div class="cart-items-container">
+                    <div *ngIf="cart.length > 0; else emptyCartList">
+                        <div class="cart-item mb_15" *ngFor="let item of cart; let i = index">
+                            <div class="d-flex justify-content-between align-items-start mb_5">
+                                <span class="font_14 fw_med text_black text-truncate w-75">{{ item.serviceName }}</span>
+                                <span class="cursor-pointer text-danger font_12" (click)="removeFromCart(i)">x</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="qty-control d-flex align-items-center">
+                                    <span class="qty-btn" (click)="updateQuantity(i, -1)">-</span>
+                                    <span class="qty-val font_14 fw_med">{{ item.quantity }}</span>
+                                    <span class="qty-btn" (click)="updateQuantity(i, 1)">+</span>
+                                </div>
+                                <span class="font_14 fw_semi text_black">₹ {{ item.price * item.quantity}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <ng-template #emptyCartList>
+                        <div class="text-center py-4">
+                            <p class="font_14 text_black opacity_5">Cart is empty</p>
+                        </div>
+                    </ng-template>
+                </div>
+
+                <div class="cart-footer mt_20">
+                    <div class="d-flex justify-content-between mb_5">
+                        <span class="font_14 text_black opacity_5">Subtotal</span>
+                        <span class="font_14 fw_med text_black">₹ {{ subTotal.toFixed(2) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb_5">
+                        <span class="font_14 text_black opacity_5">Tax (18%)</span>
+                        <span class="font_14 fw_med text_black">₹ {{ taxAmount.toFixed(2) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb_15">
+                        <span class="font_16 fw_bold text_black">Total</span>
+                        <span class="font_16 fw_bold text_pri">₹ {{ totalAmount.toFixed(2) }}</span>
+                    </div>
+                    <button class="btn_primary w-100" (click)="placeOrder()">
+                        Confirm and Add
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

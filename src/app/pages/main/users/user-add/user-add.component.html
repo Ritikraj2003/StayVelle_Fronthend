@@ -1,19 +1,16 @@
 <div class="add_services_container">
   <h3 class="font_20 fw_semi text_black mb_2">Users</h3>
-  <span class="text_pri fw_med font_12 d-block mb_24">User Management <a routerLink="/main/users" class="text_black">~ User</a> <span class="text_black">~ {{ isEditMode ? 'Edit User' : 'Add User' }}</span></span>
+  <span class="text_pri fw_med font_12 d-block mb_24">User Management <a routerLink="/main/users" class="text_black">~
+      User</a> <span class="text_black">~ {{ isEditMode ? 'Edit User' : 'Add User' }}</span></span>
   <div class="services_info_blk add_services_info_blk">
     <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
       <div class="row">
         <div class="col-md-6">
           <div class="d-flex flex-column">
             <label class="font_14 fw_med text_black mb_7">Name</label>
-            <input
-              type="text"
-              formControlName="name"
-              class="form-control"
-              placeholder="Enter name"
-            />
-            <div *ngIf="userForm.get('name')?.invalid && userForm.get('name')?.touched" class="error-message font_12 text-danger mt_5">
+            <input type="text" formControlName="name" class="form-control" placeholder="Enter name" />
+            <div *ngIf="userForm.get('name')?.invalid && userForm.get('name')?.touched"
+              class="error-message font_12 text-danger mt_5">
               Name is required
             </div>
           </div>
@@ -21,13 +18,9 @@
         <div class="col-md-3">
           <div class="d-flex flex-column">
             <label class="font_14 fw_med text_black mb_7">Email</label>
-            <input
-              type="email"
-              formControlName="email"
-              class="form-control"
-              placeholder="Enter email"
-            />
-            <div *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched" class="error-message font_12 text-danger mt_5">
+            <input type="email" formControlName="email" class="form-control" placeholder="Enter email" />
+            <div *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched"
+              class="error-message font_12 text-danger mt_5">
               <span *ngIf="userForm.get('email')?.errors?.['required']">Email is required</span>
               <span *ngIf="userForm.get('email')?.errors?.['email']">Invalid email format</span>
             </div>
@@ -36,13 +29,9 @@
         <div class="col-md-3">
           <div class="d-flex flex-column">
             <label class="font_14 fw_med text_black mb_7">Username</label>
-            <input
-              type="text"
-              formControlName="username"
-              class="form-control"
-              placeholder="Enter username"
-            />
-            <div *ngIf="userForm.get('username')?.invalid && userForm.get('username')?.touched" class="error-message font_12 text-danger mt_5">
+            <input type="text" formControlName="username" class="form-control" placeholder="Enter username" />
+            <div *ngIf="userForm.get('username')?.invalid && userForm.get('username')?.touched"
+              class="error-message font_12 text-danger mt_5">
               Username is required
             </div>
           </div>
@@ -50,13 +39,9 @@
         <div class="col-md-3">
           <div class="d-flex flex-column">
             <label class="font_14 fw_med text_black mb_7">Phone</label>
-            <input
-              type="text"
-              formControlName="phone"
-              class="form-control"
-              placeholder="Enter phone number"
-            />
-            <div *ngIf="userForm.get('phone')?.invalid && userForm.get('phone')?.touched" class="error-message font_12 text-danger mt_5">
+            <input type="text" formControlName="phone" class="form-control" placeholder="Enter phone number" />
+            <div *ngIf="userForm.get('phone')?.invalid && userForm.get('phone')?.touched"
+              class="error-message font_12 text-danger mt_5">
               Phone is required
             </div>
           </div>
@@ -69,7 +54,8 @@
               <option *ngFor="let role of roles" [value]="role.Id || role.id">{{ role.role_name || role.name }}</option>
             </select>
             <div *ngIf="roles.length === 0" class="font_12 text-muted mt_5">Loading roles...</div>
-            <div *ngIf="userForm.get('role_id')?.invalid && userForm.get('role_id')?.touched" class="error-message font_12 text-danger mt_5">
+            <div *ngIf="userForm.get('role_id')?.invalid && userForm.get('role_id')?.touched"
+              class="error-message font_12 text-danger mt_5">
               Role is required
             </div>
           </div>
@@ -101,48 +87,59 @@
             </select>
           </div>
         </div>
+        <div class="col-md-3">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Is Housekeeping</label>
+            <select formControlName="isHousekeeping" class="custom-select">
+              <option [value]="false">No</option>
+              <option [value]="true">Yes</option>
+            </select>
+          </div>
+        </div>
         <div class="col-md-6">
           <div class="d-flex flex-column">
-            <label class="font_14 fw_med text_black mb_7">Password <span *ngIf="isEditMode" class="font_12 text-muted">(Leave blank to keep current password)</span></label>
-            <input
-              type="password"
-              formControlName="password"
-              class="form-control"
-              [placeholder]="isEditMode ? 'Enter new password (optional)' : 'Enter password'"
-            />
-            <div *ngIf="!isEditMode && userForm.get('password')?.invalid && userForm.get('password')?.touched" class="error-message font_12 text-danger mt_5">
+            <label class="font_14 fw_med text_black mb_7">Password <span *ngIf="isEditMode"
+                class="font_12 text-muted">(Leave blank to keep current password)</span></label>
+            <input type="password" formControlName="password" class="form-control"
+              [placeholder]="isEditMode ? 'Enter new password (optional)' : 'Enter password'" />
+            <div *ngIf="!isEditMode && userForm.get('password')?.invalid && userForm.get('password')?.touched"
+              class="error-message font_12 text-danger mt_5">
               <span *ngIf="userForm.get('password')?.errors?.['required']">Password is required</span>
-              <span *ngIf="userForm.get('password')?.errors?.['minlength']">Password must be at least 6 characters</span>
+              <span *ngIf="userForm.get('password')?.errors?.['minlength']">Password must be at least 6
+                characters</span>
             </div>
-            <div *ngIf="isEditMode && userForm.get('password')?.value && userForm.get('password')?.value.length > 0 && userForm.get('password')?.value.length < 6" class="error-message font_12 text-danger mt_5">
+            <div
+              *ngIf="isEditMode && userForm.get('password')?.value && userForm.get('password')?.value.length > 0 && userForm.get('password')?.value.length < 6"
+              class="error-message font_12 text-danger mt_5">
               Password must be at least 6 characters
             </div>
           </div>
         </div>
         <div class="col-md-12">
-          <label class="font_14 fw_semi text_black mb_7">User Image <span class="font_12 text-muted">(Optional)</span></label>
+          <label class="font_14 fw_semi text_black mb_7">User Image <span
+              class="font_12 text-muted">(Optional)</span></label>
           <div *ngIf="!imagePreview" class="dragBox d-flex align-items-center flex-column">
             <img src="assets/images/file_upload_img.svg" class="mb_7" alt="Upload">
-            <div class="font_16 fw_med text_black">Add User Image <span class="font_12">(jpg, jpeg, png, svg - max 5MB)</span></div>
-            <input type="file" (change)="onFileSelected($event)" accept="image/jpeg,image/jpg,image/png,image/svg+xml" />
+            <div class="font_16 fw_med text_black">Add User Image <span class="font_12">(jpg, jpeg, png, svg - max
+                5MB)</span></div>
+            <input type="file" (change)="onFileSelected($event)"
+              accept="image/jpeg,image/jpg,image/png,image/svg+xml" />
           </div>
           <div *ngIf="imagePreview" class="d-flex align-items-center">
             <div class="mr_15 position-relative">
-              <img [src]="imagePreview" alt="User Image Preview" class="user-image-preview mb_5" style="width: 150px; height: 150px; object-fit: cover; border-radius: 8px; border: 2px solid #ddd;">
-              <button 
-                type="button" 
-                class="btn btn-sm btn-danger position-absolute" 
+              <img [src]="imagePreview" alt="User Image Preview" class="user-image-preview mb_5"
+                style="width: 150px; height: 150px; object-fit: cover; border-radius: 8px; border: 2px solid #ddd;">
+              <button type="button" class="btn btn-sm btn-danger position-absolute"
                 style="top: 5px; right: 5px; border-radius: 50%; width: 30px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center;"
-                (click)="removeImage()"
-                title="Remove Image"
-              >
+                (click)="removeImage()" title="Remove Image">
                 ×
               </button>
             </div>
             <div class="dragBox d-flex align-items-center flex-column">
               <img src="assets/images/file_upload_logo.svg" class="mb_10" alt="Upload">
               <div class="font_16 fw_med text_black">Change Image</div>
-              <input type="file" (change)="onFileSelected($event)" accept="image/jpeg,image/jpg,image/png,image/svg+xml" />
+              <input type="file" (change)="onFileSelected($event)"
+                accept="image/jpeg,image/jpg,image/png,image/svg+xml" />
             </div>
           </div>
         </div>
@@ -151,10 +148,11 @@
   </div>
 </div>
 <div class="right_side_footer_blk d-flex align-items-center justify-content-center" *ngIf="!isLoadingUser">
-  <button type="button" class="btn_primary btn_secondary mr_20 w-200px" (click)="cancel()" [disabled]="isLoading">Cancel</button>
-  <button type="button" class="btn_primary mr_20 w-200px" (click)="onSubmit()" [disabled]="userForm.invalid || isLoading">
+  <button type="button" class="btn_primary btn_secondary mr_20 w-200px" (click)="cancel()"
+    [disabled]="isLoading">Cancel</button>
+  <button type="button" class="btn_primary mr_20 w-200px" (click)="onSubmit()"
+    [disabled]="userForm.invalid || isLoading">
     <span *ngIf="!isLoading">{{ isEditMode ? 'Update' : 'Save' }}</span>
     <span *ngIf="isLoading">{{ isEditMode ? 'Updating...' : 'Saving...' }}</span>
   </button>
 </div>
-

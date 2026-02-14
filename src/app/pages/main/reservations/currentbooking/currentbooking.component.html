@@ -51,7 +51,7 @@
   <div *ngIf="showResults && availableRooms.length > 0" class="mb_40">
     <div *ngFor="let room of availableRooms" class="room_category_blk mb_21">
       <div class="row">
-        <div class="col-md-4 d-flex align-items-start border_right_reserve">
+        <div class="col-md-3 d-flex align-items-start border_right_reserve">
           <label class="custom_checkbox_container mr_15">
             <input type="checkbox" [checked]="isRoomSelected(room.id)" (change)="toggleRoomSelection(room)">
             <span class="checkmark"></span>
@@ -65,7 +65,7 @@
             </div>
           </div>
         </div>
-        <div class="col-md-3 d-flex flex-column">
+        <div class="col-md-2 d-flex flex-column">
           <div class="d-flex align-items-center mb_10">
             <span class="font_14 fw_med text_black opacity_5 mr_3">Adult Occupancy :</span>
             <span class="font_14 fw_med text_black">{{ room.adultOccupancy }}</span>
@@ -93,12 +93,17 @@
           <span class="font_20 fw_semi text_black mb_10">Room Number</span>
           <button class="btn_primary btn_secondary room_no_pd">{{ room.roomNumber }}</button>
         </div>
+        <div class="col-md-2 d-flex align-items-center flex-column">
+          <span class="font_20 fw_semi text_black mb_10">Add Services</span>
+          <button class="btn_primary btn_secondary room_no_pd" [routerLink]="['/main/add-update-servcie']"
+            [queryParams]="{ bookingId: room.id, roomNumber: room.roomNumber }">click</button>
+        </div>
+
       </div>
     </div>
 
     <!-- Make Reservations Button -->
     <div class="make_reserv_pos">
-      <button class="btn_primary w-100" (click)="makeReservations()">Make Reservations</button>
     </div>
   </div>
 
