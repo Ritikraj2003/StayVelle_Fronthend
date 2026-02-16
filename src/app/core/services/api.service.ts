@@ -238,5 +238,13 @@ export class ApiService {
   deleteService(id: number): Observable<any> {
     return this.delete<any>(`Service/${id}`);
   }
+
+  getRoomServices(data: any): Observable<any> {
+    return this.post<any>('Service/GetRoomServices', data);
+  }
+
+  verifyBooking(data: any): Observable<any> {
+    return this.post<any>('Service/VerifyBooking', data);
+  }
 }
 

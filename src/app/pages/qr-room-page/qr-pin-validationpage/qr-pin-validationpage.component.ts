@@ -52,16 +52,34 @@ export class QrPinValidationpageComponent implements OnInit {
   }
 
   verifyCode(): void {
-    console.log('Verifying code:', this.pinCode);
-    console.log('Room Data:', this.roomData);
+    if (!this.pinCode || !this.roomData) {
+      alert('Please enter a valid PIN code.');
+      return;
+    }
 
-    // Logic to verify pin would go here if needed, 
-    // for now we just log and redirect as requested
+    const requestData = {
+      RoomId: this.roomData.id,
+      AccessPin: this.pinCode
+    };
 
-    // Redirect to homepage with the token or room details
-    this.router.navigate(['/qr-room-page/homepage'], {
-      queryParams: { token: this.token },
-      state: { roomData: this.roomData }
+    this.apiService.verifyBooking(requestData).subscribe({
+      next: (res: any) => {
+        if (res.success && res.data) {
+          // Redirect to homepage with the bookingId
+          this.router.navigate(['/qr-room-page/homepage'], {
+            queryParams: {
+              bookingId: res.data.bookingId,
+              roomId: this.roomData.roomId
+            }
+          });
+        } else {
+          alert(res.message || 'Invalid PIN or no active booking found.');
+        }
+      },
+      error: (err: any) => {
+        console.error('Error verifying booking:', err);
+        alert('An error occurred while verifying. Please try again.');
+      }
     });
   }
 
