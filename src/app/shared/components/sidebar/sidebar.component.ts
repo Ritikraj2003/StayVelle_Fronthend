@@ -66,8 +66,13 @@ export class SidebarComponent implements OnInit {
     },
     {
       label: 'Masters',
-      route: '/main/masters',
-      permissionCode: 'MS' // Masters permission code
+      hasDropdown: true,
+      permissionCode: 'MS', // Masters permission code
+      children: [
+        { label: 'Room Master', route: '/main/masters/room-master', permissionCode: 'MS' },
+        { label: 'Hotel Registration', route: '/main/masters/hotel-registration', permissionCode: 'MS' },
+        { label: 'Service Master', route: '/main/masters/service-master', permissionCode: 'MS' }
+      ]
     },
     {
       label: 'Property Setup',

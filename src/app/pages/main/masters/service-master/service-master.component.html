@@ -1,19 +1,14 @@
-<div class="add_services_container">
+<div class="reserve_availbilty_blk">
   <h3 class="font_20 fw_semi text_black mb_2">Service Master</h3>
   <span class="text_pri fw_med font_12 d-block mb_13">Masters <span class="text_black">~ Service Master</span></span>
-  
+
   <!-- Search and Filter Section -->
   <div class="services_info_blk position-relative mb_24">
     <div class="row">
       <div class="col-md-4">
         <div class="d-flex flex-column">
           <label class="font_14 fw_med text_black mb_5">Name</label>
-          <input 
-            type="text" 
-            class="form-control" 
-            placeholder="Search by name"
-            [(ngModel)]="filterName"
-          >
+          <input type="text" class="form-control" placeholder="Search by name" [(ngModel)]="filterName">
         </div>
       </div>
       <div class="col-md-4">
@@ -35,22 +30,16 @@
   <!-- Filter Tags and Add Room Button -->
   <div class="d-flex align-items-center justify-content-between mb_24">
     <div class="d-flex align-items-center">
-      <div 
-        class="d-flex align-items-center mr_20" 
-        *ngFor="let filter of activeFilters"
-      >
+      <div class="d-flex align-items-center mr_20" *ngFor="let filter of activeFilters">
         <div class="luxury_info_blk d-flex align-items-center">
           <span class="font_10 fw_reg text_black luxury_txt d-block">{{ filter.label }}</span>
-          <img 
-            src="assets/images/cross_svgrepo.com.svg" 
-            alt="" 
-            class="cursor-pointer pl_8"
-            (click)="removeFilter(filter.type)"
-          >
+          <img src="assets/images/cross_svgrepo.com.svg" alt="" class="cursor-pointer pl_8"
+            (click)="removeFilter(filter.type)">
         </div>
       </div>
     </div>
-    <a routerLink="/main/masters/service-master/add" class="text-decoration-none btn_primary services_pd">Add Service</a>
+    <a routerLink="/main/masters/service-master/add" class="text-decoration-none btn_primary services_pd">Add
+      Service</a>
   </div>
 
   <!-- Rooms Table -->
@@ -70,24 +59,17 @@
         <tr *ngFor="let service of filteredService">
           <td>{{ service.serviceId }}</td>
           <td>{{ service.serviceCategory || 'N/A' }}</td>
-          <td><a routerLink="/main/masters/service-master/edit/{{ service.serviceId }}" class="text_black fw_semi">{{ service.serviceName || 'N/A' }}</a></td>
+          <td><a routerLink="/main/masters/service-master/edit/{{ service.serviceId }}" class="text_black fw_semi">{{
+              service.serviceName || 'N/A' }}</a></td>
           <td>{{ service.price || 'N/A' }}</td>
           <td>{{ service.isActive ? 'Active' : 'Inactive' }}</td>
           <td>
             <div class="d-flex align-items-center">
               <a routerLink="/main/masters/service-master/edit/{{ service.serviceId }}">
-                <img 
-                  src="assets/images/edit_icon.svg" 
-                  alt="" 
-                  class="cursor-pointer mr_10"
-                >
+                <img src="assets/images/edit_icon.svg" alt="" class="cursor-pointer mr_10">
               </a>
-              <img 
-                src="assets/images/delete_icon.svg" 
-                alt="" 
-                class="cursor-pointer"
-                (click)="deleteRoom(service.serviceId)"
-              >
+              <img src="assets/images/delete_icon.svg" alt="" class="cursor-pointer"
+                (click)="deleteRoom(service.serviceId)">
             </div>
           </td>
         </tr>
@@ -100,7 +82,8 @@
 
   <!-- Pagination -->
   <div class="d-flex align-items-center justify-content-between">
-    <span class="d-block font_12 fw_reg text_black">Showing {{ filteredService.length }} of {{ allService.length }} Results</span>
+    <span class="d-block font_12 fw_reg text_black">Showing {{ filteredService.length }} of {{ allService.length }}
+      Results</span>
     <div class="pagination_blk d-flex align-items-center">
       <img src="assets/images/left_arrow.svg" alt="" class="cursor-pointer mr_12">
       <span class="active font_12 fw_med cursor-pointer">1</span>
@@ -110,4 +93,3 @@
     </div>
   </div>
 </div>
-
