@@ -43,6 +43,11 @@ const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
+    path: 'room-booking/add-service',
+    component: AddUpdateServcieComponent,
+    canActivate: [AuthGuard]
+  },
+  {
     path: 'reservations/reservation/:roomId',
     component: ReservationComponent,
     canActivate: [AuthGuard]

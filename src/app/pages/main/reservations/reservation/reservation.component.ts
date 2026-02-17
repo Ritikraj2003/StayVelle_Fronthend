@@ -229,7 +229,9 @@ export class ReservationComponent implements OnInit {
           this.isLoading = false;
           this.loaderService.hide();
           alert('Reservation submitted successfully!');
-          this.router.navigate(['/main/room-booking']);
+          const bookingId = response.bookingId || response.data?.bookingId;
+          const roomNumber = this.getRoomNumber();
+          this.router.navigate(['/main/room-booking/add-service'], { queryParams: { bookingId: bookingId, roomNumber: roomNumber } });
         },
         error: (error: any) => {
           console.error('Error creating booking:', error);

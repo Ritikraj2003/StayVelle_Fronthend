@@ -190,7 +190,8 @@ export class SidebarComponent implements OnInit {
         if (item.label === 'Reservations' && !isOnChildRoute) {
           isOnChildRoute = currentUrl.includes('/main/reservations/reservation') ||
             currentUrl.includes('/main/checkout') ||
-            currentUrl.includes('/main/add-update-servcie');
+            currentUrl.includes('/main/add-update-servcie') ||
+            currentUrl.includes('/main/room-booking/add-service');
         }
 
         this.dropdownStates[dropdownKey] = isOnChildRoute;
@@ -248,7 +249,8 @@ export class SidebarComponent implements OnInit {
     if (childLabel === 'Room Booking' && childRoute === '/main/room-booking') {
       return currentUrl === '/main/room-booking' ||
         currentUrl.includes('/main/reservations/reservation') ||
-        currentUrl.includes('/main/checkout');
+        currentUrl.includes('/main/checkout') ||
+        currentUrl.includes('/main/room-booking/add-service');
     }
 
     // Special handling for Current Booking
