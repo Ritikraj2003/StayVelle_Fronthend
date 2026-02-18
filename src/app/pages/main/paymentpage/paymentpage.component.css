@@ -1,0 +1,259 @@
+/* Layout & Grid */
+.payment-grid-container {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  /* 2 parts left, 1 part right */
+  gap: 24px;
+}
+
+.left-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.right-column {
+  position: relative;
+}
+
+.sticky-summary {
+  position: sticky;
+  top: 20px;
+  /* Adjust based on header height */
+}
+
+/* Card Styles */
+.payment-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  /* Softer shadow */
+  border: 1px solid #f0f0f0;
+}
+
+/* Typography Overrides & Utilities */
+.text_blue {
+  color: #0038BC;
+}
+
+.text_green {
+  color: #28a745;
+}
+
+.text_gray {
+  color: #6c757d;
+}
+
+.text_pri {
+  color: #0038BC;
+}
+
+/* Primary Brand Color */
+
+.fw_extra_bold {
+  font-weight: 800;
+}
+
+.font_11 {
+  font-size: 11px;
+}
+
+.font_12 {
+  font-size: 12px;
+}
+
+.font_13 {
+  font-size: 13px;
+}
+
+.font_14 {
+  font-size: 14px;
+}
+
+.font_16 {
+  font-size: 16px;
+}
+
+.font_18 {
+  font-size: 18px;
+}
+
+.font_20 {
+  font-size: 20px;
+}
+
+.font_24 {
+  font-size: 24px;
+}
+
+.letter-spacing-1 {
+  letter-spacing: 1px;
+}
+
+/* Status Badges */
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-standard {
+  background-color: #e6f4ea;
+  color: #1e7e34;
+}
+
+/* Service List Styles */
+.service-list-scroll {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* Custom Scrollbar for Service List */
+.service-list-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.service-list-scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.service-list-scroll::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+.service-table th {
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 12px;
+}
+
+.service-table td {
+  padding: 12px 8px 12px 0;
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.border-top-light {
+  border-top: 1px solid #f0f0f0;
+}
+
+/* Form Elements */
+.coupon-input {
+  height: 48px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background-color: #fafafa;
+  font-size: 14px;
+}
+
+.coupon-input:focus {
+  border-color: #0038BC;
+  box-shadow: none;
+  background-color: #fff;
+}
+
+
+/* Icon Images */
+.icon-img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.icon-img-sm {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  /* Make it white for the blue button */
+}
+
+.border-bottom-light {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.pb_20 {
+  padding-bottom: 20px;
+}
+
+/* Buttons */
+.btn-payment {
+  background-color: #007bff;
+  /* Bright Blue */
+  border: none;
+  height: 52px;
+  /* Slightly taller */
+  border-radius: 12px;
+  /* More rounded */
+  font-weight: 600;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 56, 188, 0.2);
+  /* Slight shadow */
+  transition: all 0.2s ease;
+}
+
+.btn-payment:hover {
+  background-color: #0069d9;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 8px rgba(0, 56, 188, 0.3);
+}
+
+.btn-save {
+  height: 52px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #555;
+  border: 1px solid #e0e0e0;
+  background-color: white;
+  transition: all 0.2s ease;
+}
+
+.btn-save:hover {
+  background-color: #f8f9fa;
+  color: #333;
+  border-color: #ccc;
+}
+
+/* Separator */
+.separator {
+  border: 0;
+  border-top: 1px solid #f0f0f0;
+  margin: 24px 0;
+}
+
+/* Secure Badge */
+.secure-badge {
+  background-color: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .payment-grid-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Remove global table shadow/shade within payment cards */
+.payment-card table {
+  box-shadow: none !important;
+}
+
+.mb_40 {
+  margin-bottom: 30px;
+}

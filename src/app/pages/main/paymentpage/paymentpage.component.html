@@ -1,0 +1,179 @@
+<div class="add_services_container">
+
+  <div class="d-flex align-items-center justify-content-between mb_40">
+    <div>
+      <h3 class="font_20 fw_semi text_black mb_2">Payment</h3>
+      <span class="text_pri fw_med font_12 d-block">Check Out <span class="text_black">~ Payment</span></span>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="alert alert-danger mb_24">
+    <span class="font_14 fw_med">{{ error }}</span>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div *ngIf="bookingData" class="payment-grid-container">
+
+    <!-- Left Column -->
+    <div class="left-column">
+
+      <!-- Room Charges Card -->
+      <div class="payment-card mb_24">
+        <div class="d-flex justify-content-between align-items-center mb_20 pb_20 border-bottom-light">
+          <div class="d-flex align-items-center gap-2">
+            <!-- <span class="material-icons text_pri">hotel</span> -->
+            <img src="assets/images/hotel.png" alt="Hotel" class="icon-img">
+            <h4 class="font_16 fw_bold text_black m-0">Room Charges</h4>
+          </div>
+          <span class="status-badge status-standard">Standard Rate</span>
+        </div>
+
+        <div class="row mb_20">
+          <div class="col-md-4">
+            <span class="font_11 fw_bold text_gray text-uppercase d-block mb_1">STAY DURATION</span>
+            <span class="font_14 fw_semi text_black d-block">{{ calculateNights() }} Nights</span>
+            <span class="font_12 fw_reg text_gray">{{ formatDate(bookingData.checkInDate) }} &rarr; {{
+              formatDateWithYear(bookingData.checkOutDate) }}</span>
+          </div>
+          <div class="col-md-4">
+            <span class="font_11 fw_bold text_gray text-uppercase d-block mb_1">BASE RATE</span>
+            <div>
+              <span class="font_14 fw_semi text_black">₹{{ bookingData.room?.price || 0 }}</span>
+              <span class="font_12 fw_reg text_gray"> / night</span>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <span class="font_11 fw_bold text_gray text-uppercase d-block mb_1">OCCUPANCY</span>
+            <span class="font_14 fw_semi text_black">{{ bookingData.numberOfGuests }} Adults</span>
+          </div>
+        </div>
+
+        <hr class="separator">
+
+        <div class="d-flex justify-content-between align-items-center mt_20">
+          <span class="font_14 fw_med text_gray">Room Subtotal</span>
+          <span class="font_18 fw_bold text_black">₹{{ calculateRoomSubtotal() | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <!-- Service List Card -->
+      <div class="payment-card">
+        <div class="d-flex align-items-center gap-2 mb_20">
+          <!-- <span class="material-icons text_pri">restaurant</span> -->
+          <img src="assets/images/service_icon.svg" alt="Service" class="icon-img">
+          <h4 class="font_16 fw_bold text_black m-0">Service List</h4>
+        </div>
+
+        <div class="table-responsive service-list-scroll">
+          <table class="table table-borderless service-table">
+            <thead>
+              <tr>
+                <th scope="col" class="font_11 fw_bold text_gray text-uppercase opacity_5 pl-0">DATE</th>
+                <th scope="col" class="font_11 fw_bold text_gray text-uppercase opacity_5">SERVICE</th>
+                <th scope="col" class="font_11 fw_bold text_gray text-uppercase opacity_5">CATEGORY</th>
+                <th scope="col" class="font_11 fw_bold text_gray text-uppercase opacity_5 text-right pr-0">PRICE</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let service of bookingData.bookingServices">
+                <td class="font_13 fw_reg text_black pl-0">{{ getCurrentDateTime() }}</td>
+                <!-- Using current date as placeholder if service date is missing -->
+                <td class="font_13 fw_med text_black">{{ service.serviceName }} <span
+                    class="text_gray font_12">({{service.quantity}} items)</span></td>
+                <td>
+                  <span class="category-badge">{{ service.serviceCategory }}</span>
+                </td>
+                <td class="font_13 fw_bold text_black text-right pr-0">₹{{ (service.price * service.quantity) |
+                  number:'1.2-2' }}</td>
+              </tr>
+              <tr *ngIf="!bookingData.bookingServices || bookingData.bookingServices.length === 0">
+                <td colspan="4" class="text-center font_13 text_gray py-4">No services added yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt_20 pt_20 border-top-light">
+          <span class="font_13 fw_reg text_gray">{{ bookingData.bookingServices?.length || 0 }} items listed</span>
+          <div class="d-flex align-items-center gap-2">
+            <span class="font_14 fw_reg text_black">Services Subtotal</span>
+            <span class="font_16 fw_bold text_black">₹{{ calculateServiceTotal() | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column -->
+    <div class="right-column">
+
+      <!-- Order Summary Card -->
+      <div class="payment-card sticky-summary">
+        <h4 class="font_16 fw_bold text_black mb_1">Order Summary</h4>
+        <p class="font_12 fw_reg text_gray mb_24">Review items before finalizing payment</p>
+
+        <div class="form-group mb_24">
+          <label class="font_11 fw_bold text_gray text-uppercase mb_1">COUPON CODE</label>
+          <div class="input-group">
+            <input type="text" class="form-control coupon-input" placeholder="e.g. SUMMER20">
+          </div>
+        </div>
+
+        <div class="summary-details mb_24">
+          <div class="d-flex justify-content-between align-items-center mb_12">
+            <span class="font_13 fw_med text_gray">Room Total</span>
+            <span class="font_13 fw_med text_black">₹{{ calculateRoomSubtotal() | number:'1.2-2' }}</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb_12">
+            <span class="font_13 fw_med text_gray">Service Charges</span>
+            <span class="font_13 fw_med text_black">₹{{ calculateServiceTotal() | number:'1.2-2' }}</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb_12">
+            <span class="font_13 fw_med text_gray">Taxes (18% GST)</span>
+            <span class="font_13 fw_med text_black">₹{{ calculateTax() | number:'1.2-2' }}</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb_12">
+            <span class="font_13 fw_med text_gray">Paid Amount</span>
+            <span class="font_13 fw_med text_black">₹{{ calculatePaidAmount() | number:'1.2-2' }}</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb_12">
+            <span class="font_13 fw_med text_green">Discount</span>
+            <span class="font_13 fw_bold text_green">-₹0.00</span>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb_24 total-section">
+          <span class="font_12 fw_bold text_gray text-uppercase letter-spacing-1">TOTAL<br>AMOUNT DUE</span>
+          <span class="font_24 fw_extra_bold text_pri">₹{{ calculateAmountDue() | number:'1.2-2' }}</span>
+        </div>
+
+        <div class="d-flex align-items-center gap-2 mb_12">
+          <button class="btn btn-primary flex-grow-1 btn-payment" (click)="processPayment()" [disabled]="isSaving">
+            <!-- <span class="material-icons icon-sm mr-2" *ngIf="!isSaving">payments</span>  -->
+            <img src="assets/images/payment_white_icon.svg" alt="" class="icon-img-sm mr-2" *ngIf="!isSaving">
+            <span class="spinner-border spinner-border-sm mr-2" *ngIf="isSaving" role="status"
+              aria-hidden="true"></span>
+            {{ isSaving ? 'Processing...' : 'Process Payment' }}
+          </button>
+
+          <button class="btn btn-outline-secondary flex-grow-1 btn-save" (click)="cancel()">
+            Cancel / Save for Later
+          </button>
+        </div>
+
+        <div class="secure-badge mt_24 d-flex gap-2">
+          <span class="material-icons text_gray font_16">verified_user</span>
+          <span class="font_10 text_gray lh-sm">Secure checkout powered by StayVelle. All transactions are encrypted and
+            logged.</span>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div *ngIf="!bookingData && !isLoading && !error" class="alert alert-info">
+    No booking selected for payment.
+  </div>
+</div>

@@ -20,6 +20,7 @@ import { AuthGuard } from '../../core/guards/auth.guard';
 import { ServiceMasterComponent } from './masters/service-master/service-master.component';
 import { ServiceAddUpdateComponent } from './masters/service-master/service-add-update/service-add-update.component';
 import { AddUpdateServcieComponent } from './add-update-servcie/add-update-servcie.component';
+import { PaymentpageComponent } from './paymentpage/paymentpage.component';
 
 const routes: Routes = [
   {
@@ -50,6 +51,11 @@ const routes: Routes = [
   {
     path: 'reservations/reservation/:roomId',
     component: ReservationComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'paymentpage',
+    component: PaymentpageComponent,
     canActivate: [AuthGuard]
   },
   {

@@ -45,7 +45,8 @@ export class SidebarComponent implements OnInit {
         { label: 'Room Booking', route: '/main/room-booking', permissionCode: 'RB' },
         { label: 'Current Booking', route: '/main/reservations/current-booking', permissionCode: 'RB' },
         { label: 'Set Room Availability', route: '/main/reservations/set-availability', permissionCode: 'RB' },
-        { label: 'Booking History', route: '/main/booking-history', permissionCode: 'RB' }, // Using same permission as Reservations
+        // { label: 'Booking History', route: '/main/booking-history', permissionCode: 'RB' }, // Using same permission as Reservations
+        { label: 'Booking History', route: '/main/paymentpage', permissionCode: 'RB' }, // Using same permission as Reservations
       ]
     },
     {

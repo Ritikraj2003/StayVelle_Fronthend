@@ -246,5 +246,10 @@ export class ApiService {
   verifyBooking(data: any): Observable<any> {
     return this.post<any>('Service/VerifyBooking', data);
   }
+
+  // Payment API
+  processPayment(data: any): Observable<any> {
+    return this.post<any>('Payment', data);
+  }
 }
 
