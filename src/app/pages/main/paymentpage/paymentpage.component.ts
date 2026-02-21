@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ApiService } from '../../../core/services/api.service';
 import { LoaderService } from '../../../core/services/loader.service';
 import { forkJoin, of } from 'rxjs';
@@ -9,7 +11,7 @@ import { catchError } from 'rxjs/operators';
 @Component({
   selector: 'app-paymentpage',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './paymentpage.component.html',
   styleUrl: './paymentpage.component.css'
 })
@@ -21,11 +23,20 @@ export class PaymentpageComponent implements OnInit {
   isSaving: boolean = false;
   error: string = '';
 
+  // Payment Modal variables
+  showPaymentModal: boolean = false;
+  selectedPaymentMethod: 'Razorpay' | 'Cash' = 'Razorpay';
+  amountReceived: number = 0;
+  paymentNotes: string = '';
+
+  @ViewChild('paymentModalContent') paymentModalContent!: TemplateRef<any>;
+
   constructor(
     private apiService: ApiService,
     private route: ActivatedRoute,
     private router: Router,
-    private loaderService: LoaderService
+    private loaderService: LoaderService,
+    private modalService: NgbModal
   ) { }
 
   ngOnInit(): void {
@@ -197,28 +208,41 @@ export class PaymentpageComponent implements OnInit {
     }
   }
 
+  openPaymentModal(): void {
+    this.amountReceived = this.calculateAmountDue();
+    this.selectedPaymentMethod = 'Razorpay';
+    this.paymentNotes = '';
+    this.modalService.open(this.paymentModalContent, { size: 'lg', centered: true, backdrop: 'static', modalDialogClass: 'custom-payment-dialog' });
+  }
+
+  closePaymentModal(): void {
+    this.modalService.dismissAll();
+  }
+
   processPayment(): void {
     this.isSaving = true;
     this.error = '';
     this.loaderService.show();
 
     const totalAmount = this.calculateTotal();
-    const amountToPay = this.calculateAmountDue();
-    const paymentType = amountToPay === totalAmount ? 'Final' : 'Advance';
+    const amountToPay = this.selectedPaymentMethod === 'Cash' ? this.amountReceived : this.calculateAmountDue();
+    const paymentType = amountToPay >= this.calculateAmountDue() ? 'Final' : 'Advance';
 
     const paymentData = {
       bookingId: this.bookingId,
       amount: amountToPay,
-      paymentMode: 'Cash',
+      paymentMode: this.selectedPaymentMethod === 'Cash' ? 'Cash' : 'Online',
       paymentStatus: 'Completed',
       paymentType: paymentType,
       referenceNumber: '',
-      notes: 'Payment processed via Payment Page'
+      notes: this.selectedPaymentMethod === 'Cash' ? this.paymentNotes : 'Payment processed via Razorpay'
     };
+
     this.apiService.processPayment(paymentData).subscribe({
       next: (response: any) => {
         this.isSaving = false;
         this.loaderService.hide();
+        this.closePaymentModal();
         alert(`Payment of ₹${amountToPay} Processed Successfully!`);
         this.router.navigate(['/main/booking-history']);
       },
