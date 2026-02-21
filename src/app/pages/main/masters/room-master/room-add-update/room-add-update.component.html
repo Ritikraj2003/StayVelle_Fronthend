@@ -44,6 +44,73 @@
           </div>
         </div>
 
+        <div class="col-md-4">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Base Occupancy</label>
+            <input type="number" formControlName="baseOccupancy" class="form-control" placeholder="Enter base occupancy"
+              min="1" />
+            <div *ngIf="roomForm.get('baseOccupancy')?.invalid && roomForm.get('baseOccupancy')?.touched"
+              class="error-message font_12 text-danger mt_5">
+              <span *ngIf="roomForm.get('baseOccupancy')?.errors?.['required']">Base occupancy is required</span>
+              <span *ngIf="roomForm.get('baseOccupancy')?.errors?.['min']">Base occupancy must be at least 1</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Standard Occupancy</label>
+            <input type="number" formControlName="standardOccupancy" class="form-control"
+              placeholder="Enter standard occupancy" min="1" />
+            <div *ngIf="roomForm.get('standardOccupancy')?.invalid && roomForm.get('standardOccupancy')?.touched"
+              class="error-message font_12 text-danger mt_5">
+              <span *ngIf="roomForm.get('standardOccupancy')?.errors?.['required']">Standard occupancy is
+                required</span>
+              <span *ngIf="roomForm.get('standardOccupancy')?.errors?.['min']">Standard occupancy must be at least
+                1</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Extra Adult Charge</label>
+            <input type="number" formControlName="extraAdultCharge" class="form-control"
+              placeholder="Enter extra adult charge" min="0" />
+            <div *ngIf="roomForm.get('extraAdultCharge')?.invalid && roomForm.get('extraAdultCharge')?.touched"
+              class="error-message font_12 text-danger mt_5">
+              <span *ngIf="roomForm.get('extraAdultCharge')?.errors?.['required']">Extra adult charge is required</span>
+              <span *ngIf="roomForm.get('extraAdultCharge')?.errors?.['min']">Charge must be non-negative</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Child Charge <span
+                class="text-muted font_12">(Optional)</span></label>
+            <input type="number" formControlName="childCharge" class="form-control" placeholder="Enter child charge"
+              min="0" />
+            <div *ngIf="roomForm.get('childCharge')?.invalid && roomForm.get('childCharge')?.touched"
+              class="error-message font_12 text-danger mt_5">
+              <span *ngIf="roomForm.get('childCharge')?.errors?.['min']">Charge must be non-negative</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="d-flex flex-column">
+            <label class="font_14 fw_med text_black mb_7">Infant Charge <span
+                class="text-muted font_12">(Optional)</span></label>
+            <input type="number" formControlName="infantCharge" class="form-control" placeholder="Enter infant charge"
+              min="0" />
+            <div *ngIf="roomForm.get('infantCharge')?.invalid && roomForm.get('infantCharge')?.touched"
+              class="error-message font_12 text-danger mt_5">
+              <span *ngIf="roomForm.get('infantCharge')?.errors?.['min']">Charge must be non-negative</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Second Row: Floor, No. of Beds, Room AC Type -->
         <div class="col-md-4">
           <div class="d-flex flex-column">

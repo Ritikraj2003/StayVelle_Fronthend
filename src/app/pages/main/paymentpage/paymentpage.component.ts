@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 import { LoaderService } from '../../../core/services/loader.service';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-paymentpage',
@@ -14,6 +16,7 @@ import { LoaderService } from '../../../core/services/loader.service';
 export class PaymentpageComponent implements OnInit {
   bookingId: number | null = null;
   bookingData: any = null;
+  paidAmount: number = 0;
   isLoading: boolean = false;
   isSaving: boolean = false;
   error: string = '';
@@ -26,36 +29,49 @@ export class PaymentpageComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.loadBookingData();
     const params = this.route.snapshot.params;
-    if (params['id']) {
+    // Support both /paymentpage/:bookingId (route param) and ?bookingId= (query param)
+    if (params['bookingId']) {
+      this.bookingId = +params['bookingId'];
+      this.loadAllData();
+    } else if (params['id']) {
       this.bookingId = +params['id'];
-      this.loadBookingData();
+      this.loadAllData();
     } else {
-      // Fallback or handle missing ID
-      // For now, we'll just log it or maybe check query params
       this.route.queryParams.subscribe(queryParams => {
         if (queryParams['bookingId']) {
           this.bookingId = +queryParams['bookingId'];
-          this.loadBookingData();
+          this.loadAllData();
         }
       });
     }
   }
 
-  loadBookingData(): void {
-    //if (!this.bookingId) return;
+  /** Calls both booking API and payments API in parallel; keeps loader until both respond */
+  loadAllData(): void {
+    if (!this.bookingId) return;
 
     this.isLoading = true;
     this.error = '';
     this.loaderService.show();
 
-    this.apiService.getBookingById(7).subscribe({
-      next: (data: any) => {
-        this.processBookingData(data);
+    forkJoin({
+      booking: this.apiService.getBookingById(this.bookingId),
+      payments: this.apiService.getPaymentsByBookingId(this.bookingId).pipe(
+        catchError(() => of([]))   // if payment history fails, treat as empty
+      )
+    }).subscribe({
+      next: ({ booking, payments }) => {
+        this.processBookingData(booking);
+        // Sum all previously completed payments
+        this.paidAmount = (payments || []).reduce(
+          (sum: number, p: any) => sum + (Number(p.amount) || 0), 0
+        );
+        this.isLoading = false;
+        this.loaderService.hide();
       },
       error: (error: any) => {
-        console.error('Error loading booking:', error);
+        console.error('Error loading payment page data:', error);
         this.error = 'Failed to load booking data. Please try again.';
         this.isLoading = false;
         this.loaderService.hide();
@@ -142,8 +158,6 @@ export class PaymentpageComponent implements OnInit {
       return 0;
     }
     return this.bookingData.bookingServices.reduce((total: number, service: any) => {
-      // Handle potential duplicate services logic if needed, but assuming backend sends flat list or we process it
-      // For now simple sum
       return total + (service.price * service.quantity);
     }, 0);
   }
@@ -153,18 +167,16 @@ export class PaymentpageComponent implements OnInit {
   }
 
   calculatePaidAmount(): number {
-    // Return 0 for now as we don't have this field in the booking data yet
-    // If it becomes available, e.g., this.bookingData.paidAmount, we use that
-    return this.bookingData?.paidAmount || 0;
+    return this.paidAmount;
   }
 
   calculateAmountDue(): number {
-    return this.calculateTotal() - this.calculatePaidAmount();
+    return Math.max(this.calculateTotal() - this.paidAmount, 0);
   }
 
   processBookingData(data: any): void {
     this.bookingData = data;
-    // Merge duplicate services logic similar to checkout if needed
+    // Merge duplicate services
     if (this.bookingData.bookingServices && this.bookingData.bookingServices.length > 0) {
       const mergedServices: any[] = [];
       this.bookingData.bookingServices.forEach((service: any) => {
@@ -183,17 +195,9 @@ export class PaymentpageComponent implements OnInit {
       });
       this.bookingData.bookingServices = mergedServices;
     }
-
-    this.isLoading = false;
-    this.loaderService.hide();
   }
 
   processPayment(): void {
-    // if (!this.bookingId) {
-    //   this.error = 'Booking ID is required';
-    //   return;
-    // }
-
     this.isSaving = true;
     this.error = '';
     this.loaderService.show();
@@ -203,20 +207,18 @@ export class PaymentpageComponent implements OnInit {
     const paymentType = amountToPay === totalAmount ? 'Final' : 'Advance';
 
     const paymentData = {
-      bookingId: 7,
+      bookingId: this.bookingId,
       amount: amountToPay,
-      paymentMode: 'Cash', // Hardcoded as requested
-      paymentStatus: 'Completed', // Assuming completed for now
+      paymentMode: 'Cash',
+      paymentStatus: 'Completed',
       paymentType: paymentType,
       referenceNumber: '',
       notes: 'Payment processed via Payment Page'
     };
-    debugger
     this.apiService.processPayment(paymentData).subscribe({
       next: (response: any) => {
         this.isSaving = false;
         this.loaderService.hide();
-        // Redirect to booking history or show success
         alert(`Payment of ₹${amountToPay} Processed Successfully!`);
         this.router.navigate(['/main/booking-history']);
       },
@@ -230,6 +232,7 @@ export class PaymentpageComponent implements OnInit {
   }
 
   cancel(): void {
-    this.router.navigate(['/main/room-booking']);
+    this.router.navigate(['/main/reservations/current-booking']);
   }
 }
+

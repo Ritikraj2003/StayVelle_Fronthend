@@ -1,0 +1,120 @@
+<div class="add_services_container">
+    <h3 class="font_20 fw_semi text_black mb_2">Tax Master</h3>
+    <span class="text_pri fw_med font_12 d-block mb_13">Masters <span class="text_black">~ Tax Master</span></span>
+
+    <!-- Search Section -->
+    <div class="services_info_blk position-relative mb_24">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="d-flex flex-column">
+                    <label class="font_14 fw_med text_black mb_5">Tax Name</label>
+                    <input type="text" class="form-control" placeholder="Search by tax name" [(ngModel)]="filterName">
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-center">
+            <button class="btn_primary search_pos" (click)="onSearch()">Search</button>
+        </div>
+    </div>
+
+    <!-- Header row with Add button -->
+    <div class="d-flex align-items-center justify-content-end mb_24">
+        <button class="btn_primary services_pd" (click)="openAddModal()">+ Add Tax</button>
+    </div>
+
+    <!-- Tax Table -->
+    <div class="mb_21 rounded table-responsive">
+        <table class="">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Tax Name</th>
+                    <th>Tax %</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let tax of filteredTaxes; let i = index">
+                    <td>{{ i + 1 }}</td>
+                    <td class="fw_semi text_black">{{ tax.taxName }}</td>
+                    <td>{{ tax.taxPercent }}%</td>
+                    <td>
+                        <span class="status-pill" [class.pill-active]="tax.isActive"
+                            [class.pill-inactive]="!tax.isActive">
+                            {{ tax.isActive ? 'Active' : 'Inactive' }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <img src="assets/images/edit_icon.svg" alt="Edit" class="cursor-pointer mr_10"
+                                (click)="openEditModal(tax)">
+                            <img src="assets/images/delete_icon.svg" alt="Delete" class="cursor-pointer"
+                                (click)="deleteTax(tax.taxId)">
+                        </div>
+                    </td>
+                </tr>
+                <tr *ngIf="filteredTaxes.length === 0">
+                    <td colspan="5" class="text-center">No taxes found</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination row -->
+    <div class="d-flex align-items-center justify-content-between">
+        <span class="d-block font_12 fw_reg text_black">Showing {{ filteredTaxes.length }} of {{ taxes.length }}
+            Results</span>
+    </div>
+</div>
+
+<!-- Add / Edit Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+
+        <div class="modal-header-row">
+            <h4 class="font_18 fw_semi text_black m-0">{{ isEditMode ? 'Edit Tax' : 'Add Tax' }}</h4>
+            <button class="modal-close-btn" (click)="closeModal()">&#x2715;</button>
+        </div>
+
+        <div class="modal-body-content">
+            <!-- Error -->
+            <div *ngIf="error" class="alert alert-danger font_13 mb_16">{{ error }}</div>
+
+            <!-- Tax Name -->
+            <div class="form-group mb_16">
+                <label class="font_14 fw_med text_black mb_5">Tax Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" placeholder="e.g. GST" [(ngModel)]="taxName">
+            </div>
+
+            <!-- Tax Percent -->
+            <div class="form-group mb_16">
+                <label class="font_14 fw_med text_black mb_5">Tax Percent (%) <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" placeholder="e.g. 18" [(ngModel)]="taxPercent" min="0"
+                    max="100">
+            </div>
+
+            <!-- Status -->
+            <div class="form-group mb_24">
+                <label class="font_14 fw_med text_black mb_5">Status</label>
+                <div class="d-flex align-items-center gap-3">
+                    <label class="d-flex align-items-center gap-1 cursor-pointer font_14">
+                        <input type="radio" [value]="true" [(ngModel)]="isActive"> Active
+                    </label>
+                    <label class="d-flex align-items-center gap-1 cursor-pointer font_14">
+                        <input type="radio" [value]="false" [(ngModel)]="isActive"> Inactive
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer-row">
+            <button class="btn btn-outline-secondary mr_10" (click)="closeModal()" [disabled]="isSaving">Cancel</button>
+            <button class="btn_primary services_pd" (click)="saveTax()" [disabled]="isSaving">
+                <span *ngIf="isSaving" class="spinner-border spinner-border-sm mr-2" role="status"></span>
+                {{ isSaving ? 'Saving...' : 'Save' }}
+            </button>
+        </div>
+
+    </div>
+</div>

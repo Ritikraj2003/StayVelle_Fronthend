@@ -45,8 +45,7 @@ export class SidebarComponent implements OnInit {
         { label: 'Room Booking', route: '/main/room-booking', permissionCode: 'RB' },
         { label: 'Current Booking', route: '/main/reservations/current-booking', permissionCode: 'RB' },
         { label: 'Set Room Availability', route: '/main/reservations/set-availability', permissionCode: 'RB' },
-        // { label: 'Booking History', route: '/main/booking-history', permissionCode: 'RB' }, // Using same permission as Reservations
-        { label: 'Booking History', route: '/main/paymentpage', permissionCode: 'RB' }, // Using same permission as Reservations
+        { label: 'Booking History', route: '/main/booking-history', permissionCode: 'RB' }, // Using same permission as Reservations
       ]
     },
     {
@@ -72,7 +71,9 @@ export class SidebarComponent implements OnInit {
       children: [
         { label: 'Room Master', route: '/main/masters/room-master', permissionCode: 'MS' },
         { label: 'Hotel Registration', route: '/main/masters/hotel-registration', permissionCode: 'MS' },
-        { label: 'Service Master', route: '/main/masters/service-master', permissionCode: 'MS' }
+        { label: 'Service Master', route: '/main/masters/service-master', permissionCode: 'MS' },
+        { label: 'Tax Master', route: '/main/masters/tax-master', permissionCode: 'MS' },
+        { label: 'Bill Master', route: '/main/masters/bill-master', permissionCode: 'MS' }
       ]
     },
     {
@@ -197,7 +198,8 @@ export class SidebarComponent implements OnInit {
           isOnChildRoute = currentUrl.includes('/main/reservations/reservation') ||
             currentUrl.includes('/main/checkout') ||
             currentUrl.includes('/main/add-update-servcie') ||
-            currentUrl.includes('/main/room-booking/add-service');
+            currentUrl.includes('/main/room-booking/add-service') ||
+            currentUrl.includes('/main/paymentpage');
         }
 
         this.dropdownStates[dropdownKey] = isOnChildRoute;
@@ -263,7 +265,8 @@ export class SidebarComponent implements OnInit {
     // Keep it active when navigating to add/update service page
     if (childLabel === 'Current Booking' && childRoute === '/main/reservations/current-booking') {
       return currentUrl === '/main/reservations/current-booking' ||
-        currentUrl.includes('/main/add-update-servcie');
+        currentUrl.includes('/main/add-update-servcie') ||
+        currentUrl.includes('/main/paymentpage');
     }
 
     // Default behavior: check if current URL matches or starts with the route

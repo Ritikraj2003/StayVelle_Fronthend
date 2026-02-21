@@ -52,12 +52,9 @@
     <div *ngFor="let room of availableRooms" class="room_category_blk mb_21">
       <div class="row">
         <div class="col-md-3 d-flex align-items-start border_right_reserve">
-          <label class="custom_checkbox_container mr_15">
-            <input type="checkbox" [checked]="isRoomSelected(room.id)" (change)="toggleRoomSelection(room)">
-            <span class="checkmark"></span>
-          </label>
           <div class="d-flex flex-column">
-            <span class="font_20 fw_semi text_black mb_13">{{ room.roomType }}</span>
+            <span class="font_20 fw_semi text_black mb_13">{{ room.roomType }}
+              <button class="btn_primary room_no_pd  btn_secondary">{{ room.roomNumber }}</button></span>
             <div class="d-flex align-items-center font_14 fw_med text_black opacity_5">
               <span class="mr_15">{{ room.fromDate }}</span>
               <span class="mr_15">To</span>
@@ -77,26 +74,37 @@
         </div>
         <div class="col-md-3 d-flex flex-column">
           <div class="d-flex align-items-center mb_10">
-            <span class="font_14 fw_med text_black opacity_5 mr_3 w-85px">Price</span>
-            <span class="font_14 fw_med text_black">: ₹ {{ room.price.toFixed(2) }}</span>
+            <span class="font_14 fw_med text_black opacity_5 mr_3 w-85px">Room </span>
+            <span class="font_14 fw_med text_black">
+              : ₹ {{ (room.roomAmount + room.extraAdultCharge).toFixed(2) }}
+              <span *ngIf="room.extraAdults > 0" class="font_12 text-muted">
+                (Extra Adult ₹ {{ room.extraAdultCharge.toFixed(2) }})
+              </span>
+            </span>
           </div>
           <div class="d-flex align-items-center mb_10">
-            <span class="font_14 fw_med text_black opacity_5 mr_3 w-85px">Tax</span>
-            <span class="font_14 fw_med text_black">: {{ room.tax }}</span>
+            <span class="font_14 fw_med text_black opacity_5 mr_3 w-85px">Services</span>
+            <span class="font_14 fw_med text_black">: ₹ {{ room.serviceTotal.toFixed(2) }}</span>
           </div>
           <div class="d-flex align-items-center mb_10">
             <span class="font_14 fw_med text_black opacity_5 mr_3 w-85px">Net Amount</span>
-            <span class="font_14 fw_med text_black">: ₹ {{ room.netAmount.toFixed(2) }}</span>
+            <span class="font_14 fw_semi text_black">: ₹ {{ room.netAmount.toFixed(2) }}</span>
           </div>
         </div>
-        <div class="col-md-2 d-flex align-items-center flex-column">
-          <span class="font_20 fw_semi text_black mb_10">Room Number</span>
-          <button class="btn_primary btn_secondary room_no_pd">{{ room.roomNumber }}</button>
+
+        <div class="col-md-1 d-flex align-items-center flex-column">
+          <span class="font_20 fw_semi text_black mb_10">View</span>
+          <button class="btn_primary room_no_pd"
+            [routerLink]="['/main/reservations/reservation', room.id]">View</button>
+        </div>
+        <div class="col-md-1 d-flex align-items-center flex-column">
+          <span class="font_20 fw_semi text_black mb_10">Services</span>
+          <button class="btn_primary room_no_pd" [routerLink]="['/main/add-update-servcie']"
+            [queryParams]="{ bookingId: room.id, roomNumber: room.roomNumber }">Add</button>
         </div>
         <div class="col-md-2 d-flex align-items-center flex-column">
-          <span class="font_20 fw_semi text_black mb_10">Add Services</span>
-          <button class="btn_primary btn_secondary room_no_pd" [routerLink]="['/main/add-update-servcie']"
-            [queryParams]="{ bookingId: room.id, roomNumber: room.roomNumber }">click</button>
+          <span class="font_20 fw_semi text_black mb_10">Payment</span>
+          <button class="btn_primary room_no_pd" (click)="payNow(room.id)">Pay Now</button>
         </div>
 
       </div>

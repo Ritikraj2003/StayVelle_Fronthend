@@ -21,6 +21,8 @@ import { ServiceMasterComponent } from './masters/service-master/service-master.
 import { ServiceAddUpdateComponent } from './masters/service-master/service-add-update/service-add-update.component';
 import { AddUpdateServcieComponent } from './add-update-servcie/add-update-servcie.component';
 import { PaymentpageComponent } from './paymentpage/paymentpage.component';
+import { TaxmasterComponent } from './masters/taxmaster/taxmaster.component';
+import { BillmasterComponent } from './masters/billmaster/billmaster.component';
 
 const routes: Routes = [
   {
@@ -51,6 +53,11 @@ const routes: Routes = [
   {
     path: 'reservations/reservation/:roomId',
     component: ReservationComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'paymentpage/:bookingId',
+    component: PaymentpageComponent,
     canActivate: [AuthGuard]
   },
   {
@@ -160,6 +167,14 @@ const routes: Routes = [
       {
         path: 'service-master/edit/:id',
         component: ServiceAddUpdateComponent
+      },
+      {
+        path: 'tax-master',
+        component: TaxmasterComponent
+      },
+      {
+        path: 'bill-master',
+        component: BillmasterComponent
       },
     ]
   }

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { ApiService } from '../../../../core/services/api.service';
 
 @Component({
@@ -14,11 +14,9 @@ import { ApiService } from '../../../../core/services/api.service';
 export class CurrentBookingComponent implements OnInit {
   searchForm: FormGroup;
   showResults = false;
-  selectedRooms: any[] = [];
 
-  // Static data - API calls will be added later
   availableRooms: any[] = [];
-  allBookings: any[] = []; // Store all bookings for filtering
+  allBookings: any[] = [];
 
 
   roomTypes = [
@@ -32,7 +30,8 @@ export class CurrentBookingComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private router: Router
   ) {
     this.searchForm = this.fb.group({
       fromDate: [''],
@@ -96,21 +95,49 @@ export class CurrentBookingComponent implements OnInit {
     this.availableRooms = filtered.map((b: any) => {
       const checkIn = new Date(b.checkInDate);
       const checkOut = new Date(b.checkOutDate);
-      const price = b.room?.price || 0;
-      const taxPercent = 10;
-      const taxAmount = (price * taxPercent) / 100;
+
+      // Nights calculation (min 1)
+      const diffMs = checkOut.getTime() - checkIn.getTime();
+      const nights = Math.max(Math.round(diffMs / (1000 * 60 * 60 * 24)), 1);
+
+      const pricePerNight = Number(b.room?.price) || 0;
+      const baseOccupancy = Number(b.room?.baseOccupancy) || 0;
+      const extraAdultRate = Number(b.room?.extraAdultCharge) || 0;
+
+      // Count only guests with guestType === 'Adult'
+      const adultCount = (b.guests || []).filter((g: any) => g.guestType === 'Adult').length;
+      const childCount = (b.guests || []).filter((g: any) => g.guestType !== 'Adult').length;
+
+      // Room amount = price per night × nights
+      const roomAmount = pricePerNight * nights;
+
+      // Extra adult charge: adults beyond baseOccupancy × rate × nights
+      const extraAdults = Math.max(adultCount - baseOccupancy, 0);
+      const extraAdultCharge = extraAdults * extraAdultRate * nights;
+
+      // Service total
+      const serviceTotal = (b.bookingServices || []).reduce((sum: number, s: any) => {
+        return sum + (Number(s.price) * Number(s.quantity));
+      }, 0);
+
+      // Net = room amount + extra adult charge + services
+      const netAmount = roomAmount + extraAdultCharge + serviceTotal;
 
       return {
         id: b.bookingId,
         roomType: b.room?.roomType || 'Unknown',
         fromDate: this.formatDate(checkIn),
         toDate: this.formatDate(checkOut),
-        adultOccupancy: b.guests.filter((g: any) => g.age >= 12).length,
-        childOccupancy: b.guests.filter((g: any) => g.age < 12).length,
-        price: price,
-        tax: `Occupancy Tax - ${taxPercent}%`,
-        taxPercent: taxPercent,
-        netAmount: price + taxAmount,
+        nights,
+        adultOccupancy: adultCount,
+        childOccupancy: childCount,
+        infantsOccupancy: (b.guests || []).filter((g: any) => g.guestType === 'Infant').length,
+        pricePerNight,
+        roomAmount,
+        extraAdults,
+        extraAdultCharge,
+        serviceTotal,
+        netAmount,
         roomNumber: b.roomNumber,
         originalBooking: b
       };
@@ -128,27 +155,8 @@ export class CurrentBookingComponent implements OnInit {
 
 
 
-  toggleRoomSelection(room: any): void {
-    const index = this.selectedRooms.findIndex(r => r.id === room.id);
-    if (index > -1) {
-      this.selectedRooms.splice(index, 1);
-    } else {
-      this.selectedRooms.push(room);
-    }
-  }
-
-  isRoomSelected(roomId: number): boolean {
-    return this.selectedRooms.some(r => r.id === roomId);
-  }
-
-  makeReservations(): void {
-    if (this.selectedRooms.length > 0) {
-      console.log('Making reservations for:', this.selectedRooms);
-      // Static action - API calls will be added later
-      alert(`Reservation will be made for ${this.selectedRooms.length} room(s)`);
-    } else {
-      alert('Please select at least one room');
-    }
+  payNow(bookingId: number): void {
+    this.router.navigate(['/main/paymentpage', bookingId]);
   }
 }
 

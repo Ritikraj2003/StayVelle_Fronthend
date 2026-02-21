@@ -34,6 +34,12 @@ export class ReservationComponent implements OnInit {
     { value: 'other', label: 'Other' }
   ];
 
+  guestTypes = [
+    { value: 'Adult', label: 'Adult' },
+    { value: 'Child', label: 'Child' },
+    { value: 'Infant', label: 'Infant' }
+  ];
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -49,12 +55,14 @@ export class ReservationComponent implements OnInit {
       checkInDate: [todayString, [Validators.required]],
       checkOutDate: ['', [Validators.required]],
       numberOfGuests: ['', [Validators.required]],
+      numberOfInfants: [0],
       guests: this.fb.array([this.createGuestForm(true)]) // Start with one guest form, set as primary by default
     });
   }
 
-  createGuestForm(isPrimary: boolean = false): FormGroup {
+  createGuestForm(isPrimary: boolean = false, defaultType: string = 'Adult'): FormGroup {
     return this.fb.group({
+      guestType: [defaultType, [Validators.required]],
       guestName: ['', [Validators.required]],
       age: ['', [Validators.required]],
       gender: ['', [Validators.required]],
@@ -77,6 +85,7 @@ export class ReservationComponent implements OnInit {
         this.roomId = +params['roomId'];
         // Check if room data is in history state
         const state = history.state;
+        debugger;
         if (state && state['room']) {
           this.roomData = state['room'];
           this.initializeForm();
@@ -117,8 +126,57 @@ export class ReservationComponent implements OnInit {
     // You can pre-fill any fields here if needed
   }
 
+  get maxOccupancy(): number {
+    return +(this.roomData?.maxOccupancy || 0); // Ensure number type
+  }
+
+  get occupancyUnits(): number {
+    return this.guestsFormArray.controls.reduce((total, guest) => {
+      const type = guest.get('guestType')?.value;
+      return total + (type === 'Adult' ? 1 : 0); // Only Adults count
+    }, 0);
+  }
+
   addGuest(): void {
-    this.guestsFormArray.push(this.createGuestForm(false));
+    // Determine default type based on current occupancy
+    let defaultType = 'Adult';
+    if (this.occupancyUnits >= this.maxOccupancy) {
+      defaultType = 'Child'; // Default to Child if Adults are full
+    }
+
+    this.guestsFormArray.push(this.createGuestForm(false, defaultType));
+  }
+
+  onGuestTypeChange(index: number, previousValue: string): void {
+    const control = this.guestsFormArray.at(index).get('guestType');
+    const newValue = control?.value;
+
+    // Calculate units with new value
+    const currentUnits = this.occupancyUnits;
+
+    if (currentUnits > this.maxOccupancy) {
+      // Only Adult selection can cause overflow now
+      alert('Maximum adult occupancy reached. Please select Child or Infant.');
+
+      if (newValue === 'Adult') {
+        // Revert to Child (safe default)
+        control?.setValue('Child', { emitEvent: false });
+      }
+    }
+  }
+
+  isOptionDisabled(optionValue: string, guestIndex: number): boolean {
+    if (optionValue === 'Infant' || optionValue === 'Child') return false; // Child and Infant always enabled
+
+    // Only Adult option needs checking
+    const otherGuestsUnits = this.guestsFormArray.controls.reduce((total, guest, idx) => {
+      if (idx === guestIndex) return total;
+      const type = guest.get('guestType')?.value;
+      return total + (type === 'Adult' ? 1 : 0);
+    }, 0);
+
+    // If adding 1 unit (for this guest being Adult) would exceed max, disable
+    return (otherGuestsUnits + 1) > this.maxOccupancy;
   }
 
   onPrimaryChange(index: number, event: any): void {
@@ -211,8 +269,7 @@ export class ReservationComponent implements OnInit {
     });
   }
 
-  async onSubmit(): Promise<void> {
-    // Check if at least one guest is marked as primary
+  async onSubmit(destination?: 'service' | 'payment'): Promise<void> {
     if (!this.hasPrimaryGuest()) {
       alert('Please select at least one guest as primary.');
       return;
@@ -223,15 +280,22 @@ export class ReservationComponent implements OnInit {
       this.loaderService.show();
       const formData = this.prepareFormData();
 
-      // Call booking API
       this.apiService.createBooking(formData).subscribe({
         next: (response: any) => {
           this.isLoading = false;
           this.loaderService.hide();
-          alert('Reservation submitted successfully!');
           const bookingId = response.bookingId || response.data?.bookingId;
           const roomNumber = this.getRoomNumber();
-          this.router.navigate(['/main/room-booking/add-service'], { queryParams: { bookingId: bookingId, roomNumber: roomNumber } });
+
+          if (destination === 'service') {
+            this.router.navigate(['/main/room-booking/add-service'], {
+              queryParams: { bookingId, roomNumber }
+            });
+          } else if (destination === 'payment') {
+            this.router.navigate(['/main/paymentpage', bookingId]);
+          } else {
+            this.router.navigate(['/main/room-booking']);
+          }
         },
         error: (error: any) => {
           console.error('Error creating booking:', error);
@@ -256,9 +320,11 @@ export class ReservationComponent implements OnInit {
     formData.append('CheckInDate', formValue.checkInDate);
     formData.append('CheckOutDate', formValue.checkOutDate);
     formData.append('NumberOfGuests', formValue.numberOfGuests.toString());
+    formData.append('NumberOfInfants', (formValue.numberOfInfants || 0).toString());
 
     // Iterate guests
     formValue.guests.forEach((guest: any, index: number) => {
+      formData.append(`Guests[${index}].GuestType`, guest.guestType);
       formData.append(`Guests[${index}].GuestName`, guest.guestName);
       formData.append(`Guests[${index}].Age`, guest.age.toString());
       formData.append(`Guests[${index}].Gender`, guest.gender);

@@ -251,5 +251,30 @@ export class ApiService {
   processPayment(data: any): Observable<any> {
     return this.post<any>('Payment', data);
   }
+
+  getPaymentsByBookingId(bookingId: number): Observable<any[]> {
+    return this.get<any[]>(`Payment/booking/${bookingId}`);
+  }
+
+  // Tax APIs
+  getTaxes(): Observable<any[]> {
+    return this.get<any[]>('Tax');
+  }
+
+  getTaxById(id: number): Observable<any> {
+    return this.get<any>(`Tax/${id}`);
+  }
+
+  createTax(data: any): Observable<any> {
+    return this.post<any>('Tax', data);
+  }
+
+  updateTax(id: number, data: any): Observable<any> {
+    return this.put<any>(`Tax/${id}`, data);
+  }
+
+  deleteTax(id: number): Observable<any> {
+    return this.delete<any>(`Tax/${id}`);
+  }
 }
 

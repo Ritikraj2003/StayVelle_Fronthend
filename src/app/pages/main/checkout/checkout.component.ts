@@ -151,7 +151,6 @@ export class CheckoutComponent implements OnInit {
   }
 
   calculateDays(): number {
-    debugger;
     if (!this.bookingData?.checkInDate || !this.bookingData?.checkOutDate) {
       return 0;
     }
@@ -159,13 +158,13 @@ export class CheckoutComponent implements OnInit {
     let checkOut = new Date(this.bookingData.checkOutDate);
     const today = new Date();
 
-    // Normalize dates to start of day for accurate comparison
+    // Normalize to start of day for accurate comparison
     checkIn.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
     checkOut.setHours(0, 0, 0, 0);
 
-    // If checkout date is greater than today, use today's date
-    if (checkOut < today) {
+    // If customer checks out early (before scheduled checkout), use today instead
+    if (checkOut > today) {
       checkOut = new Date(today);
     }
 
@@ -174,17 +173,14 @@ export class CheckoutComponent implements OnInit {
       checkOut = new Date(checkIn);
     }
 
-    // Calculate difference in days
     const diffTime = checkOut.getTime() - checkIn.getTime();
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
     return Math.max(diffDays, 0);
   }
 
   calculateNights(): number {
-    debugger;
     const days = this.calculateDays();
-    // Nights = days (if check-in and check-out are on different days)
-    // For same day checkout, it's still 1 night minimum
+    // Minimum 1 night even for same-day checkout
     return Math.max(days, 1);
   }
 
@@ -197,10 +193,26 @@ export class CheckoutComponent implements OnInit {
     return pricePerNight * nights;
   }
 
+  // Extra adults = guests beyond baseOccupancy (only if positive)
+  calculateExtraAdults(): number {
+    const numberOfGuests = Number(this.bookingData?.numberOfGuests) || 0;
+    const baseOccupancy = Number(this.bookingData?.room?.baseOccupancy) || 0;
+    return Math.max(numberOfGuests - baseOccupancy, 0);
+  }
+
+  // Extra adult charge per night × extra adults × nights
+  calculateExtraAdultCharge(): number {
+    const extraAdults = this.calculateExtraAdults();
+    if (extraAdults <= 0) return 0;
+    const extraAdultRate = Number(this.bookingData?.room?.extraAdultCharge) || 0;
+    const nights = this.calculateNights();
+    return extraAdults * extraAdultRate * nights;
+  }
+
   calculateTax(): number {
-    const subtotal = this.calculateSubtotal();
-    // Assuming 18% GST
-    return subtotal * 0.18;
+    // 18% GST applies on room subtotal + extra adult charge
+    const taxableAmount = this.calculateSubtotal() + this.calculateExtraAdultCharge();
+    return taxableAmount * 0.18;
   }
 
   calculateServiceTotal(): number {
@@ -213,7 +225,7 @@ export class CheckoutComponent implements OnInit {
   }
 
   calculateTotal(): number {
-    return this.calculateSubtotal() + this.calculateTax() + this.calculateServiceTotal();
+    return this.calculateSubtotal() + this.calculateExtraAdultCharge() + this.calculateTax() + this.calculateServiceTotal();
   }
 
   getPrimaryGuest(): any {

@@ -62,7 +62,6 @@
   padding: 4px 8px;
   font-size: 12px;
   border: none;
-  background: transparent;
   cursor: pointer;
 }
 
@@ -118,4 +117,3 @@ input[type="checkbox"] {
   z-index: 3;
   pointer-events: auto;
 }
-

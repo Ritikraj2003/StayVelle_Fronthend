@@ -52,6 +52,11 @@ export class RoomAddUpdateComponent implements OnInit {
       roomNumber: ['', [Validators.required]],
       price: ['', [Validators.required, Validators.min(0)]],
       maxOccupancy: ['', [Validators.required, Validators.min(1)]],
+      baseOccupancy: ['', [Validators.required, Validators.min(1)]],
+      standardOccupancy: ['', [Validators.required, Validators.min(1)]],
+      extraAdultCharge: ['', [Validators.required, Validators.min(0)]],
+      childCharge: ['', [Validators.min(0)]],
+      infantCharge: ['', [Validators.min(0)]],
       floor: ['', [Validators.required]],
       numberOfBeds: ['', [Validators.required]],
       acType: ['', [Validators.required]],
@@ -83,6 +88,11 @@ export class RoomAddUpdateComponent implements OnInit {
           roomNumber: room.roomNumber,
           price: room.price,
           maxOccupancy: room.maxOccupancy,
+          baseOccupancy: room.baseOccupancy,
+          standardOccupancy: room.standardOccupancy,
+          extraAdultCharge: room.extraAdultCharge,
+          childCharge: room.childCharge,
+          infantCharge: room.infantCharge,
           floor: room.floor,
           numberOfBeds: room.numberOfBeds,
           acType: room.acType,
@@ -278,6 +288,11 @@ export class RoomAddUpdateComponent implements OnInit {
     formData.append('RoomNumber', formValue.roomNumber);
     formData.append('Price', formValue.price);
     formData.append('MaxOccupancy', formValue.maxOccupancy);
+    formData.append('BaseOccupancy', formValue.baseOccupancy);
+    formData.append('StandardOccupancy', formValue.standardOccupancy);
+    formData.append('ExtraAdultCharge', formValue.extraAdultCharge);
+    formData.append('ChildCharge', formValue.childCharge || '0');
+    formData.append('InfantCharge', formValue.infantCharge || '0');
     formData.append('Floor', formValue.floor);
     formData.append('NumberOfBeds', formValue.numberOfBeds);
     formData.append('AcType', formValue.acType);

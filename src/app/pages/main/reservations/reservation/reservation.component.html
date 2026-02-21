@@ -16,9 +16,22 @@
                     <span class="font_12 fw_med text-muted d-block mb_5">Room Type</span>
                     <span class="font_18 fw_semi text_black">{{ getRoomType() }}</span>
                 </div>
-                <div>
+                <div class="mr_30">
                     <span class="font_12 fw_med text-muted d-block mb_5">Price</span>
                     <span class="font_18 fw_semi text_pri">{{ getPrice() }}</span>
+                </div>
+
+                <div class="mr_30">
+                    <span class="font_12 fw_med text-muted d-block mb_5">Base Occupancy</span>
+                    <span class="font_18 fw_semi text_black">{{ roomData?.baseOccupancy }}</span>
+                </div>
+                <div class="mr_30">
+                    <span class="font_12 fw_med text-muted d-block mb_5">Child Charge</span>
+                    <span class="font_18 fw_semi text_pri">{{ roomData?.childCharge }}</span>
+                </div>
+                <div class="mr_30">
+                    <span class="font_12 fw_med text-muted d-block mb_5">Extra Adult Charge</span>
+                    <span class="font_18 fw_semi text_black">{{ roomData?.extraAdultCharge }}</span>
                 </div>
             </div>
         </div>
@@ -28,22 +41,14 @@
         <form [formGroup]="reservationForm" (ngSubmit)="onSubmit()">
             <!-- First Div: Check-in, Check-out, Number of Guests -->
             <div class="row mb_24">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="d-flex flex-column">
                         <label class="font_14 fw_med text_black mb_7">Check-in Date</label>
                         <div class="date-field position-relative">
-                            <input 
-                                type="date" 
-                                formControlName="checkInDate" 
-                                class="form-control date-input" 
-                                id="checkInDate"
-                            />
-                            <img 
-                                src="assets/images/calendar_icon.svg" 
-                                alt="Calendar" 
-                                class="custom_calendar_picker"
-                                (click)="openDatePicker('checkInDate')"
-                            />
+                            <input type="date" formControlName="checkInDate" class="form-control date-input"
+                                id="checkInDate" />
+                            <img src="assets/images/calendar_icon.svg" alt="Calendar" class="custom_calendar_picker"
+                                (click)="openDatePicker('checkInDate')" />
                         </div>
                         <div *ngIf="reservationForm.get('checkInDate')?.invalid && reservationForm.get('checkInDate')?.touched"
                             class="error-message font_12 text-danger mt_5">
@@ -51,22 +56,14 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="d-flex flex-column">
                         <label class="font_14 fw_med text_black mb_7">Check-out Date</label>
                         <div class="date-field position-relative">
-                            <input 
-                                type="date" 
-                                formControlName="checkOutDate" 
-                                class="form-control date-input"
-                                id="checkOutDate"
-                            />
-                            <img 
-                                src="assets/images/calendar_icon.svg" 
-                                alt="Calendar" 
-                                class="custom_calendar_picker"
-                                (click)="openDatePicker('checkOutDate')"
-                            />
+                            <input type="date" formControlName="checkOutDate" class="form-control date-input"
+                                id="checkOutDate" />
+                            <img src="assets/images/calendar_icon.svg" alt="Calendar" class="custom_calendar_picker"
+                                (click)="openDatePicker('checkOutDate')" />
                         </div>
                         <div *ngIf="reservationForm.get('checkOutDate')?.invalid && reservationForm.get('checkOutDate')?.touched"
                             class="error-message font_12 text-danger mt_5">
@@ -74,7 +71,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="d-flex flex-column">
                         <label class="font_14 fw_med text_black mb_7">Number of Guests</label>
                         <input type="number" formControlName="numberOfGuests" class="form-control"
@@ -83,6 +80,15 @@
                             class="error-message font_12 text-danger mt_5">
                             Number of guests is required
                         </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="d-flex flex-column">
+                        <label class="font_14 fw_med text_black mb_7">Number of Infants
+                            <span class="font_12 text-muted">(Optional)</span>
+                        </label>
+                        <input type="number" formControlName="numberOfInfants" class="form-control"
+                            placeholder="Enter number of infants" min="0" />
                     </div>
                 </div>
             </div>
@@ -107,15 +113,36 @@
                 <!-- Loop through each guest form -->
                 <div *ngFor="let guest of guestsFormArray.controls; let i = index" [formGroupName]="i"
                     class="col-md-12 guest-form-section mb_24">
-                    <div class="d-flex align-items-center justify-content-between mb_15" *ngIf="i > 0">
+                    <div class="d-flex align-items-center justify-content-between mb_15">
                         <h5 class="font_14 fw_semi text_black mb-0">Guest {{ i + 1 }}</h5>
-                        <button type="button" class="btn btn-sm btn-danger" (click)="removeGuest(i)"
+                        <button type="button" class="btn btn-sm btn-danger d-flex align-items-center"
+                            (click)="removeGuest(i)" *ngIf="i > 0"
                             style="padding: 4px 12px; border-radius: 5px; border: none; cursor: pointer;">
+                            <img src="assets/images/delete_icon.svg" alt="Remove"
+                                style="width: 14px; height: 14px; filter: brightness(0) invert(1); margin-right: 5px;">
                             Remove
                         </button>
                     </div>
                     <div class="row">
-                        <div class="col-md-3">
+                        <!-- Row 1: Guest Type, Name, Age, Gender, Is Primary -->
+                        <div class="col-md-2">
+                            <div class="d-flex flex-column">
+                                <label class="font_14 fw_med text_black mb_7">Guest Type</label>
+                                <select formControlName="guestType" class="custom-select"
+                                    (change)="onGuestTypeChange(i, '')">
+                                    <option *ngFor="let type of guestTypes" [value]="type.value"
+                                        [disabled]="isOptionDisabled(type.value, i)">
+                                        {{ type.label }}
+                                    </option>
+                                </select>
+                                <div *ngIf="guest.get('guestType')?.invalid && guest.get('guestType')?.touched"
+                                    class="error-message font_12 text-danger mt_5">
+                                    Guest Type is required
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
                             <div class="d-flex flex-column">
                                 <label class="font_14 fw_med text_black mb_7">Name</label>
                                 <input type="text" formControlName="guestName" class="form-control"
@@ -158,11 +185,13 @@
                                         (change)="onPrimaryChange(i, $event)"
                                         style="width: 18px; height: 18px; margin-right: 8px; cursor: pointer;" />
                                     <label for="isPrimary_{{i}}" class="font_14 fw_med text_black mb-0"
-                                        style="cursor: pointer; margin-bottom: 0;">Mark as Primary Guest</label>
+                                        style="cursor: pointer; margin-bottom: 0;">Primary</label>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
+
+                        <!-- Row 2: Phone, Email, ID Proof, ID Image -->
+                        <div class="col-md-3 mt_15">
                             <div class="d-flex flex-column">
                                 <label class="font_14 fw_med text_black mb_7">Phone Number</label>
                                 <input type="text" formControlName="guestPhone" class="form-control"
@@ -173,7 +202,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3 mt_15">
                             <div class="d-flex flex-column">
                                 <label class="font_14 fw_med text_black mb_7">Email <span
                                         class="font_12 text-muted">(Optional)</span></label>
@@ -185,8 +214,8 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="col-md-2">
+
+                        <div class="col-md-2 mt_15">
                             <div class="d-flex flex-column">
                                 <label class="font_14 fw_med text_black mb_7">ID Proof</label>
                                 <select formControlName="idProof" class="custom-select">
@@ -199,13 +228,13 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-7">
+                        <div class="col-md-4 mt_15">
                             <label class="font_14 fw_semi text_black mb_7">ID Proof Image <span
                                     class="font_12 text-muted">(Optional)</span></label>
                             <div *ngIf="!guestImagePreviews[i]" class="dragBox d-flex align-items-center flex-column">
                                 <img src="assets/images/file_upload_img.svg" class="mb_7" alt="Upload">
-                                <div class="font_16 fw_med text_black">Upload ID Proof Image <span class="font_12">(jpg,
-                                        jpeg, png, svg - max 5MB)</span></div>
+                                <div class="font_16 fw_med text_black">Upload ID Proof <span class="font_12">(max
+                                        5MB)</span></div>
                                 <input type="file" [attr.data-guest-index]="i" (change)="onIdImageSelected($event, i)"
                                     accept="image/jpeg,image/jpg,image/png,image/svg+xml" />
                             </div>
@@ -241,6 +270,16 @@
     <button type="button" class="btn_primary mr_20 w-200px" (click)="onSubmit()"
         [disabled]="reservationForm.invalid || isLoading">
         <span *ngIf="!isLoading">Save</span>
+        <span *ngIf="isLoading">Saving...</span>
+    </button>
+    <button type="button" class="btn_primary btn_secondary mr_20 w-200px" (click)="onSubmit('service')"
+        [disabled]="reservationForm.invalid || isLoading">
+        <span *ngIf="!isLoading">Continue for Service</span>
+        <span *ngIf="isLoading">Saving...</span>
+    </button>
+    <button type="button" class="btn_primary mr_20 w-200px" (click)="onSubmit('payment')"
+        [disabled]="reservationForm.invalid || isLoading">
+        <span *ngIf="!isLoading">Continue for Payment</span>
         <span *ngIf="isLoading">Saving...</span>
     </button>
 </div>
