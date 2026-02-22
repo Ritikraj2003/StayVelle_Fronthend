@@ -7,6 +7,7 @@ import { ApiService } from '../../../core/services/api.service';
 import { LoaderService } from '../../../core/services/loader.service';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { ViewBillComponent } from '../view-bill/view-bill.component';
 
 @Component({
   selector: 'app-paymentpage',
@@ -219,8 +220,11 @@ export class PaymentpageComponent implements OnInit {
     this.modalService.dismissAll();
   }
 
-  processPayment(): void {
+  isCheckoutProcessing: boolean = false;
+
+  processPayment(isCheckout: boolean = false): void {
     this.isSaving = true;
+    this.isCheckoutProcessing = isCheckout;
     this.error = '';
     this.loaderService.show();
 
@@ -240,18 +244,77 @@ export class PaymentpageComponent implements OnInit {
 
     this.apiService.processPayment(paymentData).subscribe({
       next: (response: any) => {
-        this.isSaving = false;
-        this.loaderService.hide();
-        this.closePaymentModal();
-        alert(`Payment of ₹${amountToPay} Processed Successfully!`);
-        this.router.navigate(['/main/booking-history']);
+        if (isCheckout) {
+          // If checkOut is requested, call the checkout API
+          this.apiService.checkOutBooking(this.bookingId!).subscribe({
+            next: () => {
+              this.isSaving = false;
+              this.isCheckoutProcessing = false;
+              this.loaderService.hide();
+              this.closePaymentModal();
+              alert(`Payment of ₹${amountToPay} and Check Out Processed Successfully!`);
+              this.openBillModal();
+            },
+            error: (checkoutError: any) => {
+              console.error('Error during checkout after payment:', checkoutError);
+              this.error = checkoutError?.error?.message || 'Payment succeeded, but failed to process checkout. Please try again or checkout later.';
+              this.isSaving = false;
+              this.isCheckoutProcessing = false;
+              this.loaderService.hide();
+            }
+          });
+        } else {
+          // Regular payment processing without checkout
+          this.isSaving = false;
+          this.isCheckoutProcessing = false;
+          this.loaderService.hide();
+          this.closePaymentModal();
+          alert(`Payment of ₹${amountToPay} Processed Successfully!`);
+          this.router.navigate(['/main/booking-history']);
+        }
       },
       error: (error: any) => {
         console.error('Error processing payment:', error);
         this.error = error?.error?.message || 'Failed to process payment. Please try again.';
         this.isSaving = false;
+        this.isCheckoutProcessing = false;
         this.loaderService.hide();
       }
+    });
+  }
+
+  checkout(): void {
+    this.openBillModal();
+    if (!this.bookingId) return;
+
+    this.isSaving = true;
+    this.error = '';
+    this.loaderService.show();
+
+    this.apiService.checkOutBooking(this.bookingId).subscribe({
+      next: (response: any) => {
+        this.isSaving = false;
+        this.loaderService.hide();
+        alert('Check Out Processed Successfully!');
+        this.openBillModal();
+      },
+      error: (error: any) => {
+        console.error('Error during checkout:', error);
+        this.error = error?.error?.message || 'Failed to process checkout. Please try again.';
+        this.isSaving = false;
+        this.loaderService.hide();
+      }
+    });
+  }
+
+  openBillModal(): void {
+    const modalRef = this.modalService.open(ViewBillComponent, { size: 'lg', centered: true, backdrop: 'static' });
+    modalRef.componentInstance.bookingData = this.bookingData;
+
+    modalRef.result.then(() => {
+      this.router.navigate(['/main/booking-history']);
+    }).catch(() => {
+      this.router.navigate(['/main/booking-history']);
     });
   }
 

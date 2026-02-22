@@ -160,6 +160,10 @@ export class ApiService {
     return this.get<any>(`Booking/${id}`);
   }
 
+  getBookingByBookingId(id: number): Observable<any> {
+    return this.get<any>(`Booking/getbookingdeatilsbyBookingId/${id}`);
+  }
+
   getBookingByGuestId(guestId: number): Observable<any> {
     return this.get<any>(`Booking/guest/${guestId}`);
   }

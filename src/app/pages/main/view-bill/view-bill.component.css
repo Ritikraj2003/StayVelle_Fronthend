@@ -1,0 +1,41 @@
+.invoice-modal {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.invoice-table th, .invoice-table td {
+  vertical-align: middle;
+}
+
+@media print {
+  /* Hide unnecessary UI elements */
+  nav, header, aside, .sidebar, .d-print-none {
+    display: none !important;
+  }
+  
+  /* Make everything outside the modal hidden */
+  body * {
+    visibility: hidden;
+  }
+  
+  /* Make only the invoice visible and position it absolutely */
+  .invoice-container, .invoice-container * {
+    visibility: visible;
+  }
+  
+  .invoice-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 20px !important;
+  }
+
+  /* Force background colors on print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

@@ -4,6 +4,8 @@ import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { LoaderService } from '../../../core/services/loader.service';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ViewBillComponent } from '../view-bill/view-bill.component';
 
 @Component({
   selector: 'app-booking-history',
@@ -15,14 +17,14 @@ import { LoaderService } from '../../../core/services/loader.service';
 export class BookingHistoryComponent implements OnInit {
   allBookings: any[] = []; // Store all bookings from API
   filteredBookings: any[] = []; // Store filtered bookings for display
-  
+
   // Filter properties
   filterBookingId: string = '';
   filterGuestName: string = '';
   filterStatus: string = '';
-  
+
   // Active filters array
-  activeFilters: Array<{type: string, label: string, value: string}> = [];
+  activeFilters: Array<{ type: string, label: string, value: string }> = [];
   isLoading: boolean = false;
 
   // View modal properties
@@ -33,8 +35,9 @@ export class BookingHistoryComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private router: Router,
-    private loaderService: LoaderService
-  ) {}
+    private loaderService: LoaderService,
+    private modalService: NgbModal
+  ) { }
 
   ngOnInit(): void {
     this.getBookings();
@@ -56,7 +59,7 @@ export class BookingHistoryComponent implements OnInit {
         this.allBookings = [];
         this.filteredBookings = [];
         this.isLoading = false;
-       this.loaderService.hide();
+        this.loaderService.hide();
       }
     });
   }
@@ -73,22 +76,22 @@ export class BookingHistoryComponent implements OnInit {
 
   applyFilters(): void {
     let filtered = [...this.allBookings];
-    
+
     // Filter by booking ID
     if (this.filterBookingId && this.filterBookingId.trim() !== '') {
       const idFilter = this.filterBookingId.trim();
-      filtered = filtered.filter(booking => 
+      filtered = filtered.filter(booking =>
         (booking.bookingId && booking.bookingId.toString().includes(idFilter)) ||
         (booking.id && booking.id.toString().includes(idFilter))
       );
     }
-    
+
     // Filter by guest name
     if (this.filterGuestName && this.filterGuestName.trim() !== '') {
       const nameFilter = this.filterGuestName.toLowerCase().trim();
       filtered = filtered.filter(booking => {
         if (booking.guests && booking.guests.length > 0) {
-          return booking.guests.some((guest: any) => 
+          return booking.guests.some((guest: any) =>
             (guest.guestName && guest.guestName.toLowerCase().includes(nameFilter)) ||
             (guest.guestPhone && guest.guestPhone.includes(nameFilter))
           );
@@ -96,7 +99,7 @@ export class BookingHistoryComponent implements OnInit {
         return false;
       });
     }
-    
+
     // Filter by status
     if (this.filterStatus && this.filterStatus !== 'Select' && this.filterStatus !== '') {
       filtered = filtered.filter(booking => {
@@ -104,14 +107,14 @@ export class BookingHistoryComponent implements OnInit {
         return bookingStatus === this.filterStatus;
       });
     }
-    
+
     this.filteredBookings = filtered;
   }
 
   onSearch(): void {
     // Clear previous filters
     this.activeFilters = [];
-    
+
     // Add active filters based on selected values
     if (this.filterBookingId && this.filterBookingId.trim() !== '') {
       this.activeFilters.push({
@@ -120,7 +123,7 @@ export class BookingHistoryComponent implements OnInit {
         value: this.filterBookingId
       });
     }
-    
+
     if (this.filterGuestName && this.filterGuestName.trim() !== '') {
       this.activeFilters.push({
         type: 'guestName',
@@ -128,7 +131,7 @@ export class BookingHistoryComponent implements OnInit {
         value: this.filterGuestName
       });
     }
-    
+
     if (this.filterStatus && this.filterStatus !== 'Select' && this.filterStatus !== '') {
       this.activeFilters.push({
         type: 'status',
@@ -136,7 +139,7 @@ export class BookingHistoryComponent implements OnInit {
         value: this.filterStatus
       });
     }
-    
+
     // Apply filters to the data
     this.applyFilters();
   }
@@ -150,7 +153,7 @@ export class BookingHistoryComponent implements OnInit {
     } else if (filterType === 'status') {
       this.filterStatus = '';
     }
-    
+
     // Re-apply search with remaining filters (this will update activeFilters)
     this.onSearch();
   }
@@ -158,9 +161,9 @@ export class BookingHistoryComponent implements OnInit {
   formatDate(dateString: string | null): string {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB', { 
-      day: '2-digit', 
-      month: '2-digit', 
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
       year: 'numeric'
     });
   }
@@ -185,22 +188,22 @@ export class BookingHistoryComponent implements OnInit {
     const checkIn = new Date(this.selectedBookingData.checkInDate);
     let checkOut = new Date(this.selectedBookingData.checkOutDate);
     const today = new Date();
-    
+
     // Normalize dates to start of day for accurate comparison
     checkIn.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
     checkOut.setHours(0, 0, 0, 0);
-    
+
     // If checkout date is greater than today, use today's date
     if (checkOut > today) {
       checkOut = new Date(today);
     }
-    
+
     // Ensure check-out is not before check-in
     if (checkOut < checkIn) {
       checkOut = new Date(checkIn);
     }
-    
+
     // Calculate difference in days
     const diffTime = checkOut.getTime() - checkIn.getTime();
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -243,13 +246,19 @@ export class BookingHistoryComponent implements OnInit {
   formatDateTime(dateString: string | null): string {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB', { 
-      day: '2-digit', 
-      month: '2-digit', 
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+
+  openBillModal(booking: any): void {
+    const modalRef = this.modalService.open(ViewBillComponent, { size: 'lg', centered: true, backdrop: 'static' });
+    modalRef.componentInstance.bookingData = booking;
   }
 }
 

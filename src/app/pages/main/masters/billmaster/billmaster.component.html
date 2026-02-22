@@ -1,0 +1,575 @@
+﻿<!-- ══════════════════════════════════════════════════
+     LIST VIEW  (shown when designer is closed)
+══════════════════════════════════════════════════ -->
+<ng-container *ngIf="!designerOpen">
+    <div class="add_services_container">
+        <h3 class="font_20 fw_semi text_black mb_2">Bill Master</h3>
+        <span class="text_pri fw_med font_12 d-block mb_13">
+            Masters <span class="text_black">~ Bill</span>
+        </span>
+
+        <!-- Search -->
+        <div class="services_info_blk position-relative mb_24">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="d-flex flex-column">
+                        <label class="font_14 fw_med text_black mb_5">Template Name</label>
+                        <input type="text" class="form-control" placeholder="Search templates" [(ngModel)]="filterName">
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-center">
+                <button class="btn_primary search_pos" (click)="onSearch()">Search</button>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between mb_24">
+            <span class="font_13 fw_reg text_black">{{ templates.length }} template(s)</span>
+            <button class="btn_primary services_pd" (click)="openDesigner()">+ Design New Bill</button>
+        </div>
+
+        <!-- Saved Templates List -->
+        <div class="mb_21 rounded table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Template Name</th>
+                        <th>Default</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let t of templates; let i = index">
+                        <td>{{ i + 1 }}</td>
+                        <td class="fw_semi text_black">{{ t.name }}</td>
+                        <td>
+                            <span class="status-pill pill-active" *ngIf="t.isDefault">Default</span>
+                            <button class="btn-sm-link" *ngIf="!t.isDefault" (click)="setDefault(t)">Set
+                                Default</button>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <button class="btn-sm-link text_pri"
+                                    (click)="loadTemplate(t); openDesigner()">Edit</button>
+                                <img src="assets/images/delete_icon.svg" alt="Delete" class="cursor-pointer"
+                                    (click)="deleteTemplate(t)">
+                            </div>
+                        </td>
+                    </tr>
+                    <tr *ngIf="templates.length === 0">
+                        <td colspan="4" class="text-center text_gray font_13">No templates saved yet. Click "+ Design
+                            New Bill" to create one.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</ng-container>
+
+
+<!-- ══════════════════════════════════════════════════
+     DESIGNER VIEW  (2-panel: left=editor, right=preview)
+══════════════════════════════════════════════════ -->
+<div class="designer-root" *ngIf="designerOpen">
+
+    <!-- Toolbar -->
+    <div class="designer-toolbar">
+        <button class="toolbar-back-btn" (click)="closeDesigner()">Back</button>
+        <span class="toolbar-title">Invoice Designer</span>
+        <div class="toolbar-center">
+            <input type="text" class="toolbar-tpl-name" [(ngModel)]="templateName" placeholder="Template name">
+        </div>
+        <div class="toolbar-actions">
+            <button class="toolbar-btn" (click)="saveTemplate()">Save</button>
+            <button class="toolbar-btn" (click)="printBill()">Print / PDF</button>
+        </div>
+    </div>
+
+    <div class="designer-body">
+
+        <!-- ═══════════════════════════════════════════════════════
+             LEFT PANEL: Section Chips + Section-Specific Editor
+        ══════════════════════════════════════════════════════════ -->
+        <div class="designer-left">
+
+            <!-- Horizontal Section Chips -->
+            <div class="sections-bar">
+                <div class="sections-bar-label">Sections</div>
+                <div class="sections-chips-wrap">
+                    <div class="section-chip" [class.section-chip--active]="selectedSection?.id === sec.id"
+                        [class.section-chip--hidden]="!sec.visible" [class.section-chip--dragging]="dragSrcIndex === i"
+                        *ngFor="let sec of sections; let i = index" draggable="true" (dragstart)="onDragStart(i)"
+                        (dragover)="onDragOver($event, i)" (dragend)="onDragEnd()" (click)="selectSection(sec)">
+                        <span class="chip-drag">::</span>
+                        <span class="chip-label">{{ sec.label }}</span>
+                        <button class="chip-eye" (click)="toggleSection(sec); $event.stopPropagation()">{{ sec.visible ?
+                            'Show' : 'Hide' }}</button>
+                        <button class="chip-del" (click)="removeSection(sec); $event.stopPropagation()">X</button>
+                    </div>
+                    <button class="chip-add" (click)="addSection()">+ Add</button>
+                </div>
+            </div>
+
+            <!-- Editor Area -->
+            <div class="editor-area">
+
+                <!-- No section selected -->
+                <div *ngIf="!selectedSection" class="no-section-msg">
+                    Click a section above to edit it
+                </div>
+
+                <!-- ─── HEADER SECTION EDITOR ─── -->
+                <ng-container *ngIf="selectedSection?.type === 'header'">
+
+                    <!-- Logo Settings -->
+                    <div class="editor-card">
+                        <div class="editor-card-title">Logo</div>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <label class="upload-btn">
+                                Upload Logo
+                                <input type="file" accept="image/*" (change)="onLogoUpload($event)" hidden>
+                            </label>
+                            <button class="chip-del-inline" *ngIf="logoBase64" (click)="removeLogo()">Remove
+                                Logo</button>
+                        </div>
+                        <div class="branding-grid">
+                            <div class="style-row">
+                                <label>Position</label>
+                                <select [(ngModel)]="logoPosition">
+                                    <option value="left">Left</option>
+                                    <option value="center">Center</option>
+                                    <option value="right">Right</option>
+                                </select>
+                            </div>
+                            <div class="style-row">
+                                <label>Width (px)</label>
+                                <input type="number" [(ngModel)]="logoWidth" min="40" max="250" class="field-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Invoice Title -->
+                    <div class="editor-card">
+                        <div class="editor-card-title">Invoice Title</div>
+                        <div class="style-row">
+                            <label>Title Text</label>
+                            <input type="text" [(ngModel)]="invoiceTitle" class="field-input">
+                        </div>
+                    </div>
+
+                    <!-- Hotel Info Fields -->
+                    <div class="editor-card">
+                        <div class="editor-card-title-row">
+                            <span class="editor-card-title">Hotel Information Fields</span>
+                            <button class="chip-add" (click)="addField(selectedSection!)">+ Field</button>
+                        </div>
+                        <p class="hint-text">Each field will appear in the preview. Binding pulls data automatically.
+                        </p>
+                        <div class="field-design-block" *ngFor="let f of selectedSection!.fields">
+                            <div class="fdb-row1">
+                                <input [(ngModel)]="f.label" class="fdb-label-inp"
+                                    placeholder="Label (e.g. Hotel Name)">
+
+                                <button class="fdb-vis" (click)="f.visible = !f.visible">{{ f.visible ? 'Show' :
+                                    'Hidden' }}</button>
+                                <button class="fdb-del" (click)="removeField(selectedSection!, f)">X</button>
+                            </div>
+                            <div class="fdb-row2">
+                                <label class="fdb-style-lbl">Size
+                                    <input type="number" [(ngModel)]="f.fontSize" min="8" max="32" class="tiny-num">
+                                </label>
+                                <label class="fdb-style-lbl">Color
+                                    <input type="color" [(ngModel)]="f.color" class="tiny-color">
+                                </label>
+                                <label class="fdb-style-lbl">Align
+                                    <select [(ngModel)]="f.align" class="tiny-sel">
+                                        <option value="left">Left</option>
+                                        <option value="center">Center</option>
+                                        <option value="right">Right</option>
+                                    </select>
+                                </label>
+                                <label class="fdb-check"><input type="checkbox" [(ngModel)]="f.bold"> Bold</label>
+                                <label class="fdb-check"><input type="checkbox" [(ngModel)]="f.italic"> Italic</label>
+                            </div>
+                        </div>
+                    </div>
+
+                </ng-container>
+
+                <!-- ─── BILL TO SECTION EDITOR ─── -->
+                <ng-container *ngIf="selectedSection?.type === 'bill-to'">
+                    <div class="editor-card">
+                        <div class="editor-card-title-row">
+                            <span class="editor-card-title">Customer / Guest Fields</span>
+                            <button class="chip-add" (click)="addField(selectedSection!)">+ Field</button>
+                        </div>
+                        <p class="hint-text">Design how each customer detail appears on the bill.</p>
+                        <div class="field-design-block" *ngFor="let f of selectedSection!.fields">
+                            <div class="fdb-row1">
+                                <input [(ngModel)]="f.label" class="fdb-label-inp" placeholder="Label">
+
+                                <button class="fdb-vis" (click)="f.visible = !f.visible">{{ f.visible ? 'Show' :
+                                    'Hidden' }}</button>
+                                <button class="fdb-del" (click)="removeField(selectedSection!, f)">X</button>
+                            </div>
+                            <div class="fdb-row2">
+                                <label class="fdb-style-lbl">Size <input type="number" [(ngModel)]="f.fontSize" min="8"
+                                        max="32" class="tiny-num"></label>
+                                <label class="fdb-style-lbl">Color <input type="color" [(ngModel)]="f.color"
+                                        class="tiny-color"></label>
+                                <label class="fdb-style-lbl">Align
+                                    <select [(ngModel)]="f.align" class="tiny-sel">
+                                        <option value="left">Left</option>
+                                        <option value="center">Center</option>
+                                        <option value="right">Right</option>
+                                    </select>
+                                </label>
+                                <label class="fdb-check"><input type="checkbox" [(ngModel)]="f.bold"> Bold</label>
+                                <label class="fdb-check"><input type="checkbox" [(ngModel)]="f.italic"> Italic</label>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+
+                <!-- ─── INVOICE DETAILS SECTION EDITOR ─── -->
+                <ng-container *ngIf="selectedSection?.type === 'invoice-details'">
+                    <div class="editor-card">
+                        <div class="editor-card-title-row">
+                            <span class="editor-card-title">Invoice Details Fields</span>
+                            <button class="chip-add" (click)="addField(selectedSection!)">+ Field</button>
+                        </div>
+                        <p class="hint-text">These appear on the right side: invoice number, dates, room info, payment
+                            mode.</p>
+                        <div class="field-design-block" *ngFor="let f of selectedSection!.fields">
+                            <div class="fdb-row1">
+                                <input [(ngModel)]="f.label" class="fdb-label-inp" placeholder="Label">
+
+                                <button class="fdb-vis" (click)="f.visible = !f.visible">{{ f.visible ? 'Show' :
+                                    'Hidden' }}</button>
+                                <button class="fdb-del" (click)="removeField(selectedSection!, f)">X</button>
+                            </div>
+                            <div class="fdb-row2">
+                                <label class="fdb-style-lbl">Size <input type="number" [(ngModel)]="f.fontSize" min="8"
+                                        max="32" class="tiny-num"></label>
+                                <label class="fdb-style-lbl">Color <input type="color" [(ngModel)]="f.color"
+                                        class="tiny-color"></label>
+                                <label class="fdb-style-lbl">Align
+                                    <select [(ngModel)]="f.align" class="tiny-sel">
+                                        <option value="left">Left</option>
+                                        <option value="center">Center</option>
+                                        <option value="right">Right</option>
+                                    </select>
+                                </label>
+                                <label class="fdb-check"><input type="checkbox" [(ngModel)]="f.bold"> Bold</label>
+                                <label class="fdb-check"><input type="checkbox" [(ngModel)]="f.italic"> Italic</label>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+
+                <!-- ─── ITEMS TABLE SECTION EDITOR ─── -->
+                <ng-container *ngIf="selectedSection?.type === 'items-table'">
+                    <div class="editor-card">
+                        <div class="editor-card-title-row">
+                            <span class="editor-card-title">Table Columns</span>
+                            <button class="chip-add" (click)="addColumn(selectedSection!)">+ Column</button>
+                        </div>
+                        <p class="hint-text">Configure visible columns and their header labels.</p>
+                        <div class="tbl-col-row" *ngFor="let col of selectedSection!.columns">
+                            <div class="tbl-col-inner">
+                                <input [(ngModel)]="col.header" class="fdb-label-inp" placeholder="Column header">
+                                <select [(ngModel)]="col.align" class="tiny-sel">
+                                    <option value="left">Left</option>
+                                    <option value="center">Center</option>
+                                    <option value="right">Right</option>
+                                </select>
+                                <button class="fdb-vis" (click)="col.visible = !col.visible">{{ col.visible ? 'Show' :
+                                    'Hidden' }}</button>
+                                <button class="fdb-del" (click)="removeColumn(selectedSection!, col)">X</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Table section style -->
+                    <div class="editor-card">
+                        <div class="editor-card-title">Table Style</div>
+                        <div class="style-grid">
+                            <div class="style-row">
+                                <label>Header Font Size</label>
+                                <input type="number" [(ngModel)]="selectedSection!.style.fontSize" min="8" max="16"
+                                    class="field-input">
+                            </div>
+                            <div class="style-row">
+                                <label>Header Color</label>
+                                <input type="color" [(ngModel)]="selectedSection!.style.color" class="field-input">
+                            </div>
+                            <div class="style-row">
+                                <label>Header Background</label>
+                                <input type="color" [(ngModel)]="selectedSection!.style.background" class="field-input">
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+
+                <!-- ─── CALCULATION SECTION EDITOR ─── -->
+                <ng-container *ngIf="selectedSection?.type === 'calculation'">
+                    <div class="editor-card">
+                        <div class="editor-card-title-row">
+                            <span class="editor-card-title">Calculation Fields</span>
+                            <button class="chip-add" (click)="addField(selectedSection!)">+ Field</button>
+                        </div>
+                        <p class="hint-text">Design each total row (Sub Total, Tax, Grand Total). Each row appears
+                            right-aligned in the preview.</p>
+                        <div class="field-design-block" *ngFor="let f of selectedSection!.fields">
+                            <div class="fdb-row1">
+                                <input [(ngModel)]="f.label" class="fdb-label-inp"
+                                    placeholder="Label (e.g. Grand Total)">
+
+                                <button class="fdb-vis" (click)="f.visible = !f.visible">{{ f.visible ? 'Show' :
+                                    'Hidden' }}</button>
+                                <button class="fdb-del" (click)="removeField(selectedSection!, f)">X</button>
+                            </div>
+                            <div class="fdb-row2">
+                                <label class="fdb-style-lbl">Size <input type="number" [(ngModel)]="f.fontSize" min="8"
+                                        max="32" class="tiny-num"></label>
+                                <label class="fdb-style-lbl">Color <input type="color" [(ngModel)]="f.color"
+                                        class="tiny-color"></label>
+                                <label class="fdb-check"><input type="checkbox" [(ngModel)]="f.bold"> Bold</label>
+                                <label class="fdb-check"><input type="checkbox" [(ngModel)]="f.italic"> Italic</label>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+
+                <!-- ─── FOOTER SECTION EDITOR ─── -->
+                <ng-container *ngIf="selectedSection?.type === 'footer'">
+                    <div class="editor-card">
+                        <div class="editor-card-title-row">
+                            <span class="editor-card-title">Footer Fields</span>
+                            <button class="chip-add" (click)="addField(selectedSection!)">+ Field</button>
+                        </div>
+                        <p class="hint-text">Thank you note, amount in words, signature label.</p>
+                        <div class="field-design-block" *ngFor="let f of selectedSection!.fields">
+                            <div class="fdb-row1">
+                                <input [(ngModel)]="f.label" class="fdb-label-inp" placeholder="Label">
+
+                                <button class="fdb-vis" (click)="f.visible = !f.visible">{{ f.visible ? 'Show' :
+                                    'Hidden' }}</button>
+                                <button class="fdb-del" (click)="removeField(selectedSection!, f)">X</button>
+                            </div>
+                            <div class="fdb-row2">
+                                <label class="fdb-style-lbl">Size <input type="number" [(ngModel)]="f.fontSize" min="8"
+                                        max="32" class="tiny-num"></label>
+                                <label class="fdb-style-lbl">Color <input type="color" [(ngModel)]="f.color"
+                                        class="tiny-color"></label>
+                                <label class="fdb-style-lbl">Align
+                                    <select [(ngModel)]="f.align" class="tiny-sel">
+                                        <option value="left">Left</option>
+                                        <option value="center">Center</option>
+                                        <option value="right">Right</option>
+                                    </select>
+                                </label>
+                                <label class="fdb-check"><input type="checkbox" [(ngModel)]="f.bold"> Bold</label>
+                                <label class="fdb-check"><input type="checkbox" [(ngModel)]="f.italic"> Italic</label>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+
+                <!-- ─── GENERIC / CUSTOM SECTION EDITOR ─── -->
+                <ng-container
+                    *ngIf="selectedSection && selectedSection.type !== 'header' && selectedSection.type !== 'bill-to' && selectedSection.type !== 'invoice-details' && selectedSection.type !== 'items-table' && selectedSection.type !== 'calculation' && selectedSection.type !== 'footer'">
+                    <div class="editor-card">
+                        <div class="editor-card-title-row">
+                            <span class="editor-card-title">{{ selectedSection.label }} Fields</span>
+                            <button class="chip-add" (click)="addField(selectedSection!)">+ Field</button>
+                        </div>
+                        <div class="field-design-block" *ngFor="let f of selectedSection!.fields">
+                            <div class="fdb-row1">
+                                <input [(ngModel)]="f.label" class="fdb-label-inp" placeholder="Label">
+
+                                <button class="fdb-vis" (click)="f.visible = !f.visible">{{ f.visible ? 'Show' :
+                                    'Hidden' }}</button>
+                                <button class="fdb-del" (click)="removeField(selectedSection!, f)">X</button>
+                            </div>
+                            <div class="fdb-row2">
+                                <label class="fdb-style-lbl">Size <input type="number" [(ngModel)]="f.fontSize" min="8"
+                                        max="32" class="tiny-num"></label>
+                                <label class="fdb-style-lbl">Color <input type="color" [(ngModel)]="f.color"
+                                        class="tiny-color"></label>
+                                <label class="fdb-style-lbl">Align
+                                    <select [(ngModel)]="f.align" class="tiny-sel">
+                                        <option value="left">Left</option>
+                                        <option value="center">Center</option>
+                                        <option value="right">Right</option>
+                                    </select>
+                                </label>
+                                <label class="fdb-check"><input type="checkbox" [(ngModel)]="f.bold"> Bold</label>
+                                <label class="fdb-check"><input type="checkbox" [(ngModel)]="f.italic"> Italic</label>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+
+            </div><!-- /editor-area -->
+        </div><!-- /designer-left -->
+
+
+        <!-- ═══════════════════════════════════════════════════════
+             RIGHT PANEL: Live Preview
+        ══════════════════════════════════════════════════════════ -->
+        <div class="designer-right" id="bill-preview">
+            <div class="preview-paper">
+
+                <!-- ── HEADER: Logo + Hotel Info ── -->
+                <ng-container *ngFor="let sec of sections">
+                    <ng-container *ngIf="sec.visible && sec.type === 'header'">
+                        <div class="inv-header">
+                            <!-- Logo -->
+                            <div class="inv-logo-cell" [style.order]="logoPosition === 'right' ? 2 : 0">
+                                <img *ngIf="logoBase64" [src]="logoBase64" class="preview-logo"
+                                    [style.width.px]="logoWidth" alt="Logo">
+                                <div *ngIf="!logoBase64" class="logo-placeholder" [style.width.px]="logoWidth">LOGO
+                                </div>
+                            </div>
+                            <!-- Hotel Info -->
+                            <div class="inv-hotel-block" [class.inv-hotel-center]="logoPosition === 'center'">
+                                <ng-container *ngFor="let f of sec.fields">
+                                    <div *ngIf="f.visible" [ngStyle]="fieldStyleObj(f)" class="inv-hotel-line">{{
+                                        fieldDisplay(f) }}</div>
+                                </ng-container>
+                            </div>
+                        </div>
+                        <!-- Invoice title bar -->
+                        <div class="inv-title-bar">{{ invoiceTitle }}</div>
+                    </ng-container>
+                </ng-container>
+
+                <!-- ── BILL TO + INVOICE DETAILS (2 column) ── -->
+                <div class="inv-meta-row">
+                    <!-- Left: Bill To -->
+                    <div class="inv-billed-to">
+                        <ng-container *ngFor="let sec of sections">
+                            <ng-container *ngIf="sec.visible && sec.type === 'bill-to'">
+                                <div class="inv-meta-heading">Billed To:</div>
+                                <ng-container *ngFor="let f of sec.fields">
+                                    <div *ngIf="f.visible" [ngStyle]="fieldStyleObj(f)" class="inv-billed-line">{{
+                                        fieldDisplay(f) }}</div>
+                                </ng-container>
+                            </ng-container>
+                        </ng-container>
+                    </div>
+                    <!-- Right: Invoice Details -->
+                    <div class="inv-details-right">
+                        <ng-container *ngFor="let sec of sections">
+                            <ng-container *ngIf="sec.visible && sec.type === 'invoice-details'">
+                                <ng-container *ngFor="let f of sec.fields">
+                                    <div *ngIf="f.visible" class="inv-detail-row">
+                                        <span class="inv-detail-label">{{ f.label }}:</span>
+                                        <span class="inv-detail-value" [ngStyle]="fieldStyleObj(f)">{{ fieldDisplay(f)
+                                            }}</span>
+                                    </div>
+                                </ng-container>
+                            </ng-container>
+                        </ng-container>
+                    </div>
+                </div>
+
+                <!-- ── ITEMS TABLE ── -->
+                <ng-container *ngFor="let sec of sections">
+                    <ng-container *ngIf="sec.visible && sec.type === 'items-table'">
+                        <table class="inv-table">
+                            <thead [ngStyle]="sectionStyleObj(sec.style)">
+                                <tr>
+                                    <th class="inv-th-sl">Sl.</th>
+                                    <th *ngFor="let col of visibleColumns(sec)" [style.text-align]="col.align">{{
+                                        col.header }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="inv-td-sl">1</td>
+                                    <td *ngFor="let col of visibleColumns(sec)" [style.text-align]="col.align">
+                                        <span *ngIf="col.binding === 'item'">Room {{ resolve('{RoomNumber}') }}</span>
+                                        <span *ngIf="col.binding === 'qty'">1</span>
+                                        <span *ngIf="col.binding === 'rate'">1000.00</span>
+                                        <span *ngIf="col.binding === 'gst'">12%</span>
+                                        <span *ngIf="col.binding === 'amount'">1120.00</span>
+                                        <span *ngIf="col.binding === 'custom'">-</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="inv-td-sl">2</td>
+                                    <td *ngFor="let col of visibleColumns(sec)" [style.text-align]="col.align">
+                                        <span *ngIf="col.binding === 'item'">Room Laundry</span>
+                                        <span *ngIf="col.binding === 'qty'">1</span>
+                                        <span *ngIf="col.binding === 'rate'">150.00</span>
+                                        <span *ngIf="col.binding === 'gst'">10%</span>
+                                        <span *ngIf="col.binding === 'amount'">165.00</span>
+                                        <span *ngIf="col.binding === 'custom'">-</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="inv-td-sl">3</td>
+                                    <td *ngFor="let col of visibleColumns(sec)" [style.text-align]="col.align">
+                                        <span *ngIf="col.binding === 'item'">Pillow Change</span>
+                                        <span *ngIf="col.binding === 'qty'">1</span>
+                                        <span *ngIf="col.binding === 'rate'">100.00</span>
+                                        <span *ngIf="col.binding === 'gst'">5%</span>
+                                        <span *ngIf="col.binding === 'amount'">105.00</span>
+                                        <span *ngIf="col.binding === 'custom'">-</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </ng-container>
+                </ng-container>
+
+                <!-- ── CALCULATION ── -->
+                <ng-container *ngFor="let sec of sections">
+                    <ng-container *ngIf="sec.visible && sec.type === 'calculation'">
+                        <div class="inv-totals-block">
+                            <ng-container *ngFor="let f of sec.fields; let last = last">
+                                <div *ngIf="f.visible" class="inv-total-row" [class.inv-grand-row]="last"
+                                    [ngStyle]="fieldStyleObj(f)">
+                                    <span class="inv-total-label">{{ f.label }} :</span>
+                                    <span class="inv-total-val">{{ fieldDisplay(f) }}</span>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </ng-container>
+                </ng-container>
+
+                <!-- ── FOOTER ── -->
+                <ng-container *ngFor="let sec of sections">
+                    <ng-container *ngIf="sec.visible && sec.type === 'footer'">
+                        <div class="inv-footer-area">
+                            <ng-container *ngFor="let f of sec.fields; let last = last">
+                                <div *ngIf="f.visible" [ngStyle]="fieldStyleObj(f)" [class.inv-signature]="last"
+                                    class="inv-footer-line">
+                                    {{ fieldDisplay(f) }}
+                                </div>
+                            </ng-container>
+                        </div>
+                    </ng-container>
+                </ng-container>
+
+                <!-- ── CUSTOM SECTIONS ── -->
+                <ng-container *ngFor="let sec of sections">
+                    <ng-container *ngIf="sec.visible && sec.type === 'custom'">
+                        <div class="inv-custom-section">
+                            <ng-container *ngFor="let f of sec.fields">
+                                <div *ngIf="f.visible" [ngStyle]="fieldStyleObj(f)" class="inv-custom-line">
+                                    <span class="inv-custom-label">{{ f.label }}:</span>
+                                    <span>{{ fieldDisplay(f) }}</span>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </ng-container>
+                </ng-container>
+
+            </div><!-- /preview-paper -->
+        </div><!-- /designer-right -->
+
+    </div><!-- /designer-body -->
+</div><!-- /designer-root -->

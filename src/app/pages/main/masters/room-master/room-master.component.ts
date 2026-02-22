@@ -139,7 +139,7 @@ export class RoomMasterComponent implements OnInit {
 
   printQr(room: any): void {
     if (room.roomQrToken) {
-      const url = `http://localhost:4200/qr-room-page?token=${room.roomQrToken}`;
+      const url = `${window.location.origin}/qr-room-page?token=${room.roomQrToken}`;
       console.log(url);
       // Use a public QR code API to generate the image source
       this.selectedRoomQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;

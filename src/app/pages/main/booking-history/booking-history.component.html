@@ -1,30 +1,22 @@
 <div class="add_services_container">
   <h3 class="font_20 fw_semi text_black mb_2">Booking History</h3>
-  <span class="text_pri fw_med font_12 d-block mb_13">Reservations <span class="text_black">~ Booking History</span></span>
-  
+  <span class="text_pri fw_med font_12 d-block mb_13">Reservations <span class="text_black">~ Booking
+      History</span></span>
+
   <!-- Search and Filter Section -->
   <div class="services_info_blk position-relative mb_24">
     <div class="row">
       <div class="col-md-4">
         <div class="d-flex flex-column">
           <label class="font_14 fw_med text_black mb_5">Booking ID</label>
-          <input 
-            type="text" 
-            class="form-control" 
-            placeholder="Search by booking ID"
-            [(ngModel)]="filterBookingId"
-          >
+          <input type="text" class="form-control" placeholder="Search by booking ID" [(ngModel)]="filterBookingId">
         </div>
       </div>
       <div class="col-md-4">
         <div class="d-flex flex-column">
           <label class="font_14 fw_med text_black mb_5">Guest Name/Phone</label>
-          <input 
-            type="text" 
-            class="form-control" 
-            placeholder="Search by guest name or phone"
-            [(ngModel)]="filterGuestName"
-          >
+          <input type="text" class="form-control" placeholder="Search by guest name or phone"
+            [(ngModel)]="filterGuestName">
         </div>
       </div>
       <div class="col-md-4">
@@ -49,18 +41,11 @@
   <!-- Filter Tags -->
   <div class="d-flex align-items-center justify-content-between mb_24">
     <div class="d-flex align-items-center">
-      <div 
-        class="d-flex align-items-center mr_20" 
-        *ngFor="let filter of activeFilters"
-      >
+      <div class="d-flex align-items-center mr_20" *ngFor="let filter of activeFilters">
         <div class="luxury_info_blk d-flex align-items-center">
           <span class="font_10 fw_reg text_black luxury_txt d-block">{{ filter.label }}</span>
-          <img 
-            src="assets/images/cross_svgrepo.com.svg" 
-            alt="" 
-            class="cursor-pointer pl_8"
-            (click)="removeFilter(filter.type)"
-          >
+          <img src="assets/images/cross_svgrepo.com.svg" alt="" class="cursor-pointer pl_8"
+            (click)="removeFilter(filter.type)">
         </div>
       </div>
     </div>
@@ -101,14 +86,11 @@
             </span>
           </td>
           <td>
-            <div class="d-flex align-items-center">
-              <img 
-                src="assets/images/view_icon.svg" 
-                alt="View" 
-                class="cursor-pointer"
-                (click)="viewBooking(booking)"
-                title="View Booking Details"
-              >
+            <div class="d-flex align-items-center gap-2">
+              <img src="assets/images/view_icon.svg" alt="View" class="cursor-pointer" (click)="viewBooking(booking)"
+                title="View Booking Details">
+              <span class="material-icons cursor-pointer text_gray" style="font-size: 20px;"
+                (click)="openBillModal(booking)" title="Print / Download Bill">print</span>
             </div>
           </td>
         </tr>
@@ -121,7 +103,8 @@
 
   <!-- Pagination -->
   <div class="d-flex align-items-center justify-content-between">
-    <span class="d-block font_12 fw_reg text_black">Showing {{ filteredBookings.length }} of {{ allBookings.length }} Results</span>
+    <span class="d-block font_12 fw_reg text_black">Showing {{ filteredBookings.length }} of {{ allBookings.length }}
+      Results</span>
     <div class="pagination_blk d-flex align-items-center">
       <img src="assets/images/left_arrow.svg" alt="" class="cursor-pointer mr_12">
       <span class="active font_12 fw_med cursor-pointer">1</span>
@@ -152,13 +135,15 @@
             <div class="col-md-3 mb_12">
               <div class="info-item">
                 <span class="font_12 fw_med text_black label">Booking ID:</span>
-                <span class="font_14 fw_reg text_black value">#{{ selectedBookingData.bookingId || selectedBookingData.id }}</span>
+                <span class="font_14 fw_reg text_black value">#{{ selectedBookingData.bookingId ||
+                  selectedBookingData.id }}</span>
               </div>
             </div>
             <div class="col-md-3 mb_12">
               <div class="info-item">
                 <span class="font_12 fw_med text_black label">Booking Status:</span>
-                <span class="font_14 fw_reg text_black value status-badge" [class.status-checkedout]="selectedBookingData.bookingStatus === 'CheckedOut'">
+                <span class="font_14 fw_reg text_black value status-badge"
+                  [class.status-checkedout]="selectedBookingData.bookingStatus === 'CheckedOut'">
                   {{ selectedBookingData.bookingStatus || selectedBookingData.status }}
                 </span>
               </div>
@@ -166,25 +151,29 @@
             <div class="col-md-3 mb_12">
               <div class="info-item">
                 <span class="font_12 fw_med text_black label">Check-In Date:</span>
-                <span class="font_14 fw_reg text_black value">{{ formatDateTime(selectedBookingData.checkInDate) }}</span>
+                <span class="font_14 fw_reg text_black value">{{ formatDateTime(selectedBookingData.checkInDate)
+                  }}</span>
               </div>
             </div>
             <div class="col-md-3 mb_12">
               <div class="info-item">
                 <span class="font_12 fw_med text_black label">Check-Out Date:</span>
-                <span class="font_14 fw_reg text_black value">{{ formatDateTime(selectedBookingData.checkOutDate) }}</span>
+                <span class="font_14 fw_reg text_black value">{{ formatDateTime(selectedBookingData.checkOutDate)
+                  }}</span>
               </div>
             </div>
             <div class="col-md-3 mb_12">
               <div class="info-item">
                 <span class="font_12 fw_med text_black label">Actual Check-In:</span>
-                <span class="font_14 fw_reg text_black value">{{ formatDateTime(selectedBookingData.actualCheckInTime) }}</span>
+                <span class="font_14 fw_reg text_black value">{{ formatDateTime(selectedBookingData.actualCheckInTime)
+                  }}</span>
               </div>
             </div>
             <div class="col-md-3 mb_12">
               <div class="info-item">
                 <span class="font_12 fw_med text_black label">Actual Check-Out:</span>
-                <span class="font_14 fw_reg text_black value">{{ formatDateTime(selectedBookingData.actualCheckOutTime) }}</span>
+                <span class="font_14 fw_reg text_black value">{{ formatDateTime(selectedBookingData.actualCheckOutTime)
+                  }}</span>
               </div>
             </div>
             <div class="col-md-3 mb_12">
@@ -298,12 +287,9 @@
                 </div>
                 <div class="guest-image-column">
                   <div class="guest-image-placeholder">
-                    <img 
-                      [src]="guest.idProofImagePath || 'assets/images/file_upload_img.svg'" 
-                      [alt]="guest.guestName + ' ID Proof Image'"
-                      class="guest-image"
-                      (error)="$any($event.target).src='assets/images/file_upload_img.svg'"
-                    />
+                    <img [src]="guest.idProofImagePath || 'assets/images/file_upload_img.svg'"
+                      [alt]="guest.guestName + ' ID Proof Image'" class="guest-image"
+                      (error)="$any($event.target).src='assets/images/file_upload_img.svg'" />
                   </div>
                 </div>
               </div>
@@ -347,4 +333,3 @@
     </div>
   </div>
 </div>
-

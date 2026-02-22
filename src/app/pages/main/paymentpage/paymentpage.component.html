@@ -149,12 +149,20 @@
         </div>
 
         <div class="d-flex align-items-center gap-2 mb_12">
-          <button class="btn btn-primary flex-grow-1 btn-payment" (click)="openPaymentModal()" [disabled]="isSaving">
+          <button *ngIf="calculateAmountDue() > 0" class="btn btn-primary flex-grow-1 btn-payment"
+            (click)="openPaymentModal()" [disabled]="isSaving">
             <!-- <span class="material-icons icon-sm mr-2" *ngIf="!isSaving">payments</span>  -->
             <img src="assets/images/payment_white_icon.svg" alt="" class="icon-img-sm mr-2" *ngIf="!isSaving">
             <span class="spinner-border spinner-border-sm mr-2" *ngIf="isSaving" role="status"
               aria-hidden="true"></span>
             {{ isSaving ? 'Processing...' : 'Process Payment' }}
+          </button>
+
+          <button *ngIf="calculateAmountDue() === 0" class="btn btn-success flex-grow-1 btn-payment text-white"
+            (click)="checkout()" [disabled]="isSaving">
+            <span class="spinner-border spinner-border-sm mr-2" *ngIf="isSaving" role="status"
+              aria-hidden="true"></span>
+            {{ isSaving ? 'Processing...' : 'Check Out' }}
           </button>
 
           <button class="btn btn-outline-secondary flex-grow-1 btn-save" (click)="cancel()">
@@ -315,17 +323,28 @@
 
     <!-- Footer -->
     <div class="modal-footer flex-column p_24 pt_0 border-top-0 content-body-bg rounded-bottom">
-      <button
-        class="btn btn-primary btn-block btn-payment mb_12 d-flex align-items-center justify-content-center gap-2 w-100"
-        (click)="processPayment()" [disabled]="isSaving">
-        <svg *ngIf="!isSaving" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-          class="text-white current-color-svg">
-          <path
-            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-        </svg>
-        <span class="spinner-border spinner-border-sm" *ngIf="isSaving" role="status" aria-hidden="true"></span>
-        <span class="font_15 fw_semi text-white">{{ isSaving ? 'Processing...' : 'Complete Payment' }}</span>
-      </button>
+      <div class="d-flex w-100 gap-3 mb_12">
+        <button class="btn btn-primary flex-grow-1 d-flex align-items-center justify-content-center gap-2"
+          (click)="processPayment(false)" [disabled]="isSaving">
+          <svg *ngIf="!isSaving" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+            class="text-white current-color-svg">
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+          </svg>
+          <span class="spinner-border spinner-border-sm" *ngIf="isSaving && !isCheckoutProcessing" role="status"
+            aria-hidden="true"></span>
+          <span class="font_15 fw_semi text-white">{{ (isSaving && !isCheckoutProcessing) ? 'Processing...' :
+            'Complete Payment' }}</span>
+        </button>
+
+        <button class="btn btn-success flex-grow-1 d-flex align-items-center justify-content-center gap-2 text-white"
+          (click)="processPayment(true)" [disabled]="isSaving">
+          <span class="spinner-border spinner-border-sm" *ngIf="isSaving && isCheckoutProcessing" role="status"
+            aria-hidden="true"></span>
+          <span class="font_15 fw_semi text-white">{{ (isSaving && isCheckoutProcessing) ? 'Processing...' : 'Pay &
+            Check Out' }}</span>
+        </button>
+      </div>
       <button class="btn btn-link text_gray font_12 fw_semi text-uppercase text-decoration-none p-0 mt-2"
         (click)="closePaymentModal()">Cancel and Return</button>
     </div>
