@@ -19,19 +19,41 @@ export class HousekeepingListComponent implements OnInit {
   showEditForm: boolean = false;
   isEditMode: boolean = false;
   currentTaskId: number | null = null;
-  
+
   // Filter properties
   filterStartDate: string = '';
   filterEndDate: string = '';
   filterStatus: string = '';
   filterRoom: string = '';
-  
+
   // Active filters array
-  activeFilters: Array<{type: string, label: string, value: string}> = [];
+  activeFilters: Array<{ type: string, label: string, value: string }> = [];
+  public Math = Math;
+
+  // Pagination properties
+  currentPage: number = 1;
+  pageSize: number = 5;
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredHousekeeping.length / this.pageSize);
+  }
+
+  get pagedHousekeeping(): any[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredHousekeeping.slice(start, start + this.pageSize);
+  }
+
+  get pages(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) this.currentPage = page;
+  }
 
   // Edit form
   housekeepingForm: FormGroup;
-  
+
   // Multiple image upload
   selectedImages: File[] = [];
   imagePreviews: string[] = [];
@@ -82,7 +104,7 @@ export class HousekeepingListComponent implements OnInit {
     this.isEditMode = true;
     this.currentTaskId = task.taskId;
     this.showEditForm = true;
-    
+
     // Populate form with task data
     this.housekeepingForm.patchValue({
       roomId: task.roomId || '',
@@ -92,12 +114,12 @@ export class HousekeepingListComponent implements OnInit {
       roomImage: task.roomImage || '',
       assignedToUserId: task.assignedToUserId || ''
     });
-    
+
     // Load existing images if available
     this.selectedImages = [];
     this.imagePreviews = [];
     this.existingImages = [];
-    
+
     if (task.roomImage) {
       try {
         // Try to parse as JSON array (multiple images)
@@ -128,10 +150,10 @@ export class HousekeepingListComponent implements OnInit {
   async onSubmit(): Promise<void> {
     if (this.housekeepingForm.valid) {
       const formData = await this.prepareFormData();
-      
+
       // Log to console as requested
       console.log('Housekeeping Task Data:', formData);
-      
+
       this.isLoading = true;
 
       if (this.isEditMode && this.currentTaskId) {
@@ -179,22 +201,22 @@ export class HousekeepingListComponent implements OnInit {
 
   private async prepareFormData(): Promise<any> {
     const formValue = this.housekeepingForm.value;
-    
+
     // Collect all images: existing + newly selected
     const allImages: string[] = [];
-    
+
     // Add existing images (not removed)
     allImages.push(...this.existingImages);
-    
+
     // Convert newly selected images to base64
     for (const file of this.selectedImages) {
       const base64 = await this.fileToBase64(file);
       allImages.push(base64);
     }
-    
+
     // Store as JSON array string
     const roomImageJson = allImages.length > 0 ? JSON.stringify(allImages) : null;
-    
+
     return {
       roomId: parseInt(formValue.roomId),
       bookingId: formValue.bookingId ? parseInt(formValue.bookingId) : null,
@@ -221,27 +243,27 @@ export class HousekeepingListComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const files = Array.from(input.files);
-      
+
       // Validate and process each file
       const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/svg+xml'];
       const maxSize = 5 * 1024 * 1024; // 5MB
-      
+
       for (const file of files) {
         // Validate file type
         if (!validTypes.includes(file.type)) {
           alert(`File ${file.name} is not a valid image type. Please select only jpg, jpeg, png, or svg files`);
           continue;
         }
-        
+
         // Validate file size
         if (file.size > maxSize) {
           alert(`Image ${file.name} size should be less than 5MB`);
           continue;
         }
-        
+
         // Add to selected images
         this.selectedImages.push(file);
-        
+
         // Create preview
         const reader = new FileReader();
         reader.onload = (e: any) => {
@@ -249,7 +271,7 @@ export class HousekeepingListComponent implements OnInit {
         };
         reader.readAsDataURL(file);
       }
-      
+
       input.value = ''; // Clear the input
     }
   }
@@ -299,16 +321,16 @@ export class HousekeepingListComponent implements OnInit {
 
   applyFilters(): void {
     let filtered = [...this.allHousekeeping];
-    
+
     // Filter by date range (using createdOn)
     if (this.filterStartDate || this.filterEndDate) {
       filtered = filtered.filter(item => {
         if (!item.createdOn) return false;
-        
+
         const createdDate = new Date(item.createdOn);
         const startDate = this.filterStartDate ? new Date(this.filterStartDate) : null;
         const endDate = this.filterEndDate ? new Date(this.filterEndDate) : null;
-        
+
         // Set time to start of day for accurate comparison
         if (startDate) {
           startDate.setHours(0, 0, 0, 0);
@@ -317,21 +339,21 @@ export class HousekeepingListComponent implements OnInit {
           endDate.setHours(23, 59, 59, 999);
         }
         createdDate.setHours(0, 0, 0, 0);
-        
+
         const afterStart = !startDate || createdDate >= startDate;
         const beforeEnd = !endDate || createdDate <= endDate;
-        
+
         return afterStart && beforeEnd;
       });
     }
-    
+
     // Filter by status
     if (this.filterStatus && this.filterStatus !== 'Select' && this.filterStatus !== '') {
       filtered = filtered.filter(item => {
         return item.taskStatus && item.taskStatus.toLowerCase() === this.filterStatus.toLowerCase();
       });
     }
-    
+
     // Filter by room
     if (this.filterRoom && this.filterRoom.trim() !== '') {
       const roomFilter = this.filterRoom.trim();
@@ -339,14 +361,15 @@ export class HousekeepingListComponent implements OnInit {
         return item.room && item.room.roomNumber && item.room.roomNumber.toString().includes(roomFilter);
       });
     }
-    
+
     this.filteredHousekeeping = filtered;
+    this.currentPage = 1;
   }
 
   onSearch(): void {
     // Clear previous filters
     this.activeFilters = [];
-    
+
     // Add active filters based on selected values
     if (this.filterStartDate) {
       this.activeFilters.push({
@@ -355,7 +378,7 @@ export class HousekeepingListComponent implements OnInit {
         value: this.filterStartDate
       });
     }
-    
+
     if (this.filterEndDate) {
       this.activeFilters.push({
         type: 'endDate',
@@ -363,7 +386,7 @@ export class HousekeepingListComponent implements OnInit {
         value: this.filterEndDate
       });
     }
-    
+
     if (this.filterStatus && this.filterStatus !== 'Select' && this.filterStatus !== '') {
       this.activeFilters.push({
         type: 'status',
@@ -371,7 +394,7 @@ export class HousekeepingListComponent implements OnInit {
         value: this.filterStatus
       });
     }
-    
+
     if (this.filterRoom && this.filterRoom.trim() !== '') {
       this.activeFilters.push({
         type: 'room',
@@ -379,7 +402,7 @@ export class HousekeepingListComponent implements OnInit {
         value: this.filterRoom
       });
     }
-    
+
     // Apply filters to the data
     this.applyFilters();
   }
@@ -395,7 +418,7 @@ export class HousekeepingListComponent implements OnInit {
     } else if (filterType === 'room') {
       this.filterRoom = '';
     }
-    
+
     // Re-apply search with remaining filters (this will update activeFilters)
     this.onSearch();
   }
@@ -410,9 +433,9 @@ export class HousekeepingListComponent implements OnInit {
     if (!dateString) return 'N/A';
     try {
       const date = new Date(dateString);
-      return date.toLocaleDateString('en-GB', { 
-        day: '2-digit', 
-        month: '2-digit', 
+      return date.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
         year: 'numeric',
         hour: '2-digit',
         minute: '2-digit'
@@ -425,9 +448,9 @@ export class HousekeepingListComponent implements OnInit {
   formatDateForDisplay(dateString: string): string {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB', { 
-      day: '2-digit', 
-      month: '2-digit', 
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
       year: 'numeric'
     });
   }

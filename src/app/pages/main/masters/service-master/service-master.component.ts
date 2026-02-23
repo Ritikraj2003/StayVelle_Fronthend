@@ -3,6 +3,7 @@ import { ApiService } from '../../../../core/services/api.service';
 import { Router, RouterModule } from '@angular/router';
 import { LoaderService } from '../../../../core/services/loader.service';
 import { CommonModule } from '@angular/common';
+import { NotificationService } from '../../../../core/services/notification.service';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -13,9 +14,31 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './service-master.component.css'
 })
 export class ServiceMasterComponent implements OnInit {
-  allService: any[] = []; // Store all rooms from API
-  filteredService: any[] = []; // Store filtered rooms for display
+  public Math = Math;
+  allService: any[] = [];
+  filteredService: any[] = [];
   isLoading: boolean = false;
+
+  // Pagination
+  currentPage: number = 1;
+  pageSize: number = 5;
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredService.length / this.pageSize);
+  }
+
+  get pagedService(): any[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredService.slice(start, start + this.pageSize);
+  }
+
+  get pages(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) this.currentPage = page;
+  }
 
   // Filter properties
   filterName: string = '';
@@ -27,7 +50,8 @@ export class ServiceMasterComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private router: Router,
-    private loaderService: LoaderService
+    private loaderService: LoaderService,
+    private notification: NotificationService
   ) { }
 
   ngOnInit(): void {
@@ -52,7 +76,7 @@ export class ServiceMasterComponent implements OnInit {
         console.error('Error loading rooms:', error);
         this.isLoading = false;
         this.loaderService.hide();
-        alert('Failed to load rooms. Please try again.');
+        this.notification.error('Failed to load services. Please try again.');
       }
     });
 
@@ -109,6 +133,7 @@ export class ServiceMasterComponent implements OnInit {
     }
 
     this.filteredService = filtered;
+    this.currentPage = 1;
   }
 
   onSearch(): void {
@@ -158,7 +183,7 @@ export class ServiceMasterComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error deleting room:', error);
-          alert('Failed to delete room. Please try again.');
+          this.notification.error('Failed to delete service. Please try again.');
           this.loaderService.hide();
         }
       });

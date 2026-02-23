@@ -5,6 +5,7 @@ import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../../../core/services/api.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { LoaderService } from '../../../../core/services/loader.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-user-add',
@@ -30,7 +31,8 @@ export class UserAddComponent implements OnInit {
     private route: ActivatedRoute,
     private apiService: ApiService,
     private authService: AuthService,
-    private loaderService: LoaderService
+    private loaderService: LoaderService,
+    private notification: NotificationService
   ) {
     this.userForm = this.fb.group({
       name: ['', [Validators.required]],
@@ -95,7 +97,7 @@ export class UserAddComponent implements OnInit {
         // Validate file size (max 5MB)
         const maxSize = 5 * 1024 * 1024; // 5MB
         if (file.size > maxSize) {
-          alert('Image size should be less than 5MB');
+          this.notification.warning('Image size should be less than 5MB');
           input.value = ''; // Clear the input
           return;
         }
@@ -108,7 +110,7 @@ export class UserAddComponent implements OnInit {
         };
         reader.readAsDataURL(file);
       } else {
-        alert('Please select only jpg, jpeg, png, or svg files');
+        this.notification.warning('Please select only jpg, jpeg, png, or svg files');
         input.value = ''; // Clear the input
       }
     }
@@ -173,7 +175,7 @@ export class UserAddComponent implements OnInit {
         this.isLoadingUser = false;
         this.loaderService.hide();
         console.error('Error loading user:', error);
-        alert('Error loading user data. Please try again.');
+        this.notification.error('Error loading user data. Please try again.');
         this.router.navigate(['/main/users']);
       }
     });
@@ -198,7 +200,7 @@ export class UserAddComponent implements OnInit {
             this.loaderService.hide();
             console.error('Error updating user:', error);
             const errorMessage = error.error?.message || 'Error updating user. Please try again.';
-            alert(errorMessage);
+            this.notification.error(errorMessage);
           }
         });
       } else {
@@ -214,7 +216,7 @@ export class UserAddComponent implements OnInit {
             this.loaderService.hide();
             console.error('Error creating user:', error);
             const errorMessage = error.error?.message || 'Error creating user. Please try again.';
-            alert(errorMessage);
+            this.notification.error(errorMessage);
           }
         });
       }

@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } fr
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../../../core/services/api.service';
 import { LoaderService } from '../../../../core/services/loader.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-reservation',
@@ -45,7 +46,8 @@ export class ReservationComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private apiService: ApiService,
-    private loaderService: LoaderService
+    private loaderService: LoaderService,
+    private notification: NotificationService
   ) {
     // Set today's date as default for check-in
     const today = new Date();
@@ -94,7 +96,7 @@ export class ReservationComponent implements OnInit {
           this.loadRoomData(this.roomId);
         } else {
           // If no valid roomId and no state data, redirect back
-          alert('Room information not available. Please select a room again.');
+          this.notification.warning('Room information not available. Please select a room again.');
           this.router.navigate(['/main/room-booking']);
         }
       }
@@ -115,7 +117,7 @@ export class ReservationComponent implements OnInit {
         console.error('Error loading room:', error);
         this.isLoading = false;
         this.loaderService.hide();
-        alert('Error loading room data. Please try again.');
+        this.notification.error('Error loading room data. Please try again.');
         this.router.navigate(['/main/room-booking']);
       }
     });
@@ -156,7 +158,7 @@ export class ReservationComponent implements OnInit {
 
     if (currentUnits > this.maxOccupancy) {
       // Only Adult selection can cause overflow now
-      alert('Maximum adult occupancy reached. Please select Child or Infant.');
+      this.notification.warning('Maximum adult occupancy reached. Please select Child or Infant.');
 
       if (newValue === 'Adult') {
         // Revert to Child (safe default)
@@ -242,7 +244,7 @@ export class ReservationComponent implements OnInit {
         // Validate file size (max 5MB)
         const maxSize = 5 * 1024 * 1024; // 5MB
         if (file.size > maxSize) {
-          alert('Image size should be less than 5MB');
+          this.notification.warning('Image size should be less than 5MB');
           input.value = '';
           return;
         }
@@ -254,7 +256,7 @@ export class ReservationComponent implements OnInit {
         };
         reader.readAsDataURL(file);
       } else {
-        alert('Please select only jpg, jpeg, png, or svg files');
+        this.notification.warning('Please select only jpg, jpeg, png, or svg files');
         input.value = '';
       }
     }
@@ -271,7 +273,7 @@ export class ReservationComponent implements OnInit {
 
   async onSubmit(destination?: 'service' | 'payment'): Promise<void> {
     if (!this.hasPrimaryGuest()) {
-      alert('Please select at least one guest as primary.');
+      this.notification.warning('Please select at least one guest as primary.');
       return;
     }
 
@@ -302,7 +304,7 @@ export class ReservationComponent implements OnInit {
           this.isLoading = false;
           this.loaderService.hide();
           const errorMessage = error?.error?.message || error?.message || 'Failed to create reservation. Please try again.';
-          alert(errorMessage);
+          this.notification.error(errorMessage);
         }
       });
     }

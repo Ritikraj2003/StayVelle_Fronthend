@@ -46,7 +46,7 @@ export class CurrentBookingComponent implements OnInit {
   }
 
   loadBookings(): void {
-    this.apiService.getBookings().subscribe({
+    this.apiService.getBookings("Booked").subscribe({
       next: (res: any) => {
         let bookings = Array.isArray(res) ? res : (res.data || []);
 

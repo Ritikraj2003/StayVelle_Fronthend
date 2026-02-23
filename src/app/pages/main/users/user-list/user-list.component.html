@@ -68,7 +68,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let user of filteredUsers">
+        <tr *ngFor="let user of pagedUsers">
           <td>
             <!-- Check for documents array first, then ImageUrl properties -->
             <img *ngIf="(user.documents && user.documents.length > 0) || user.ImageUrl || user.imageUrl"
@@ -108,15 +108,22 @@
   </div>
 
   <!-- Pagination -->
-  <div class="d-flex align-items-center justify-content-between">
-    <span class="d-block font_12 fw_reg text_black">Showing {{ filteredUsers.length }} of {{ allUsers.length }}
-      Results</span>
-    <div class="pagination_blk d-flex align-items-center">
-      <img src="assets/images/left_arrow.svg" alt="" class="cursor-pointer mr_12">
-      <span class="active font_12 fw_med cursor-pointer">1</span>
-      <span class="font_12 fw_med cursor-pointer">2</span>
-      <span class="font_12 fw_med cursor-pointer">3</span>
-      <img src="assets/images/chevron-down.svg" alt="" class="ml_12 cursor-pointer">
+  <div class="d-flex align-items-center justify-content-between" *ngIf="filteredUsers.length > 0">
+    <span class="d-block font_12 fw_reg text_black">
+      Showing {{ (currentPage - 1) * pageSize + 1 }} to {{ Math.min(currentPage * pageSize, filteredUsers.length) }} of
+      {{ filteredUsers.length }} Results
+    </span>
+    <div class="pagination_blk d-flex align-items-center" *ngIf="totalPages > 1">
+      <img src="assets/images/left_arrow.svg" alt="" class="cursor-pointer mr_12"
+        [style.opacity]="currentPage === 1 ? '0.5' : '1'" (click)="changePage(currentPage - 1)">
+
+      <span *ngFor="let page of pages" class="font_12 fw_med cursor-pointer mx-1" [class.active]="page === currentPage"
+        (click)="changePage(page)">
+        {{ page }}
+      </span>
+
+      <img src="assets/images/chevron-down.svg" alt="" class="ml_12 cursor-pointer" style="transform: rotate(-90deg);"
+        [style.opacity]="currentPage === totalPages ? '0.5' : '1'" (click)="changePage(currentPage + 1)">
     </div>
   </div>
 </div>

@@ -116,7 +116,7 @@
   </div>
 
   <!-- Empty State -->
-  <div *ngIf="!showResults"
+  <div *ngIf="availableRooms.length === 0"
     class="text-center d-flex justify-content-center flex-column align-items-center no_data_found_blk">
     <img src="assets/images/reservation_empty_img.svg" alt="No results" />
     <span class="font_14 fw_med text_black">Search your dream stay here.</span>

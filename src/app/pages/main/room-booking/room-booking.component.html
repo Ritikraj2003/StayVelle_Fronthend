@@ -1,7 +1,7 @@
 <div class="add_services_container">
   <h3 class="font_20 fw_semi text_black mb_2">Room Booking</h3>
   <span class="text_pri fw_med font_12 d-block mb_13">Reservations <span class="text_black">~ Room Booking</span></span>
-  
+
   <!-- Search and Filter Section -->
   <form [formGroup]="filterForm" class="services_info_blk position-relative mb_24">
     <div class="row">
@@ -13,17 +13,11 @@
           </label>
           <div class="date-range-box d-flex align-items-center justify-content-between">
             <div class="date-field w-46 position-relative first_date_field">
-              <input 
-                type="date" 
-                formControlName="fromDate"
-                placeholder="DD/MM/YYYY">
+              <input type="date" formControlName="fromDate" placeholder="DD/MM/YYYY">
               <img src="assets/images/calendar_icon.svg" alt="" class="custom_calendar_picker" />
             </div>
             <div class="date-field w-50 position-relative">
-              <input 
-                type="date" 
-                formControlName="toDate"
-                placeholder="DD/MM/YYYY">
+              <input type="date" formControlName="toDate" placeholder="DD/MM/YYYY">
               <img src="assets/images/calendar_icon.svg" alt="" class="custom_calendar_picker" />
             </div>
           </div>
@@ -55,18 +49,11 @@
   <!-- Filter Tags -->
   <div class="d-flex align-items-center justify-content-between mb_24" *ngIf="activeFilters.length > 0">
     <div class="d-flex align-items-center">
-      <div 
-        class="d-flex align-items-center mr_20" 
-        *ngFor="let filter of activeFilters"
-      >
+      <div class="d-flex align-items-center mr_20" *ngFor="let filter of activeFilters">
         <div class="luxury_info_blk d-flex align-items-center">
           <span class="font_10 fw_reg text_black luxury_txt d-block">{{ filter.label }}</span>
-          <img 
-            src="assets/images/cross_svgrepo.com.svg" 
-            alt="" 
-            class="cursor-pointer pl_8"
-            (click)="removeFilter(filter.type)"
-          >
+          <img src="assets/images/cross_svgrepo.com.svg" alt="" class="cursor-pointer pl_8"
+            (click)="removeFilter(filter.type)">
         </div>
       </div>
     </div>
@@ -74,16 +61,12 @@
 
   <!-- Rooms Grid -->
   <div class="rooms-grid mb_21">
-    <div 
-      *ngFor="let room of filteredRooms" 
-      class="room-box" 
-      [class.available]="isRoomAvailable(room)"
-      [class.occupied]="isRoomOccupied(room)"
-      (click)="onRoomClick(room)"
-    >
+    <div *ngFor="let room of filteredRooms" class="room-box" [class.available]="isRoomAvailable(room)"
+      [class.occupied]="isRoomOccupied(room)" (click)="onRoomClick(room)">
       <div class="room-number">{{ room.roomNumber || room.roomnumber || 'N/A' }}</div>
       <div class="room-type">{{ getRoomType(room) }}</div>
-      <div class="room-status" [class.status-available]="isRoomAvailable(room)" [class.status-occupied]="isRoomOccupied(room)">
+      <div class="room-status" [class.status-available]="isRoomAvailable(room)"
+        [class.status-occupied]="isRoomOccupied(room)">
         {{ getRoomStatus(room) }}
       </div>
     </div>
@@ -91,40 +74,19 @@
       <span class="font_14 fw_med text_black">No rooms found</span>
     </div>
   </div>
-  <!-- Pagination -->
-  <div class="d-flex align-items-center justify-content-between">
-    <span class="d-block font_12 fw_reg text_black">Showing {{ filteredRooms.length }} of {{ allRooms.length }} Results</span>
-    <div class="pagination_blk d-flex align-items-center">
-      <img src="assets/images/left_arrow.svg" alt="" class="cursor-pointer mr_12">
-      <span class="active font_12 fw_med cursor-pointer">1</span>
-      <span class="font_12 fw_med cursor-pointer">2</span>
-      <span class="font_12 fw_med cursor-pointer">3</span>
-      <img src="assets/images/chevron-down.svg" alt="" class="ml_12 cursor-pointer">
-    </div>
-  </div>
+  <!-- Pagination removed as requested -->
 </div>
 
 <!-- Maintenance Room Modal -->
-<div 
-  class="modal fade" 
-  [class.show]="showMaintenanceModal" 
-  [style.display]="showMaintenanceModal ? 'block' : 'none'"
-  tabindex="-1" 
-  role="dialog"
-  *ngIf="showMaintenanceModal"
-  style="z-index: 1050;"
->
+<div class="modal fade" [class.show]="showMaintenanceModal" [style.display]="showMaintenanceModal ? 'block' : 'none'"
+  tabindex="-1" role="dialog" *ngIf="showMaintenanceModal" style="z-index: 1050;">
   <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 600px;">
     <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
-      <div class="modal-header" style="border-bottom: 1px solid #E0E0E0; padding: 20px 30px; border-radius: 20px 20px 0 0;">
+      <div class="modal-header"
+        style="border-bottom: 1px solid #E0E0E0; padding: 20px 30px; border-radius: 20px 20px 0 0;">
         <h5 class="modal-title font_20 fw_semi text_black mb_0">Maintenance Room</h5>
-        <button 
-          type="button" 
-          class="close" 
-          (click)="closeMaintenanceModal()"
-          aria-label="Close"
-          style="background: none; border: none; font-size: 28px; opacity: 0.5; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;"
-        >
+        <button type="button" class="close" (click)="closeMaintenanceModal()" aria-label="Close"
+          style="background: none; border: none; font-size: 28px; opacity: 0.5; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
           <span aria-hidden="true" style="line-height: 1;">&times;</span>
         </button>
       </div>
@@ -135,12 +97,7 @@
             <div class="col-md-6 mb_20">
               <div class="d-flex flex-column">
                 <label class="font_14 fw_med text_black mb_7">Booking ID</label>
-                <input 
-                  type="text" 
-                  class="form-control" 
-                  formControlName="bookingId"
-                  placeholder="Enter Booking ID"
-                >
+                <input type="text" class="form-control" formControlName="bookingId" placeholder="Enter Booking ID">
               </div>
             </div>
 
@@ -148,16 +105,10 @@
             <div class="col-md-6 mb_20">
               <div class="d-flex flex-column">
                 <label class="font_14 fw_med text_black mb_7">Room ID <span class="text-danger">*</span></label>
-                <input 
-                  type="text" 
-                  class="form-control" 
-                  formControlName="roomId"
-                  placeholder="Enter Room ID"
-                  [readonly]="true"
-                  style="background-color: #f5f5f5; cursor: not-allowed;"
-                >
-                <div *ngIf="maintenanceForm.get('roomId')?.invalid && maintenanceForm.get('roomId')?.touched" 
-                     class="error-message font_12 text-danger mt_5">
+                <input type="text" class="form-control" formControlName="roomId" placeholder="Enter Room ID"
+                  [readonly]="true" style="background-color: #f5f5f5; cursor: not-allowed;">
+                <div *ngIf="maintenanceForm.get('roomId')?.invalid && maintenanceForm.get('roomId')?.touched"
+                  class="error-message font_12 text-danger mt_5">
                   Room ID is required
                 </div>
               </div>
@@ -167,17 +118,14 @@
             <div class="col-md-6 mb_20">
               <div class="d-flex flex-column">
                 <label class="font_14 fw_med text_black mb_7">Task Status <span class="text-danger">*</span></label>
-                <select 
-                  class="custom-select" 
-                  formControlName="taskStatus"
-                >
+                <select class="custom-select" formControlName="taskStatus">
                   <option value="">Select Status</option>
                   <option value="Pending">Pending</option>
                   <option value="In Progress">In Progress</option>
                   <option value="Completed">Completed</option>
                 </select>
-                <div *ngIf="maintenanceForm.get('taskStatus')?.invalid && maintenanceForm.get('taskStatus')?.touched" 
-                     class="error-message font_12 text-danger mt_5">
+                <div *ngIf="maintenanceForm.get('taskStatus')?.invalid && maintenanceForm.get('taskStatus')?.touched"
+                  class="error-message font_12 text-danger mt_5">
                   Task Status is required
                 </div>
               </div>
@@ -187,18 +135,15 @@
             <div class="col-md-6 mb_20">
               <div class="d-flex flex-column">
                 <label class="font_14 fw_med text_black mb_7">Task Type <span class="text-danger">*</span></label>
-                <select 
-                  class="custom-select" 
-                  formControlName="taskType"
-                >
+                <select class="custom-select" formControlName="taskType">
                   <option value="">Select Task Type</option>
                   <option value="Cleaning">Cleaning</option>
                   <option value="Maintenance">Maintenance</option>
                   <option value="Inspection">Inspection</option>
                   <option value="Setup">Setup</option>
                 </select>
-                <div *ngIf="maintenanceForm.get('taskType')?.invalid && maintenanceForm.get('taskType')?.touched" 
-                     class="error-message font_12 text-danger mt_5">
+                <div *ngIf="maintenanceForm.get('taskType')?.invalid && maintenanceForm.get('taskType')?.touched"
+                  class="error-message font_12 text-danger mt_5">
                   Task Type is required
                 </div>
               </div>
@@ -208,10 +153,7 @@
             <div class="col-md-12 mb_20">
               <div class="d-flex flex-column">
                 <label class="font_14 fw_med text_black mb_7">Staff</label>
-                <select 
-                  class="custom-select" 
-                  formControlName="assignedToUserId"
-                >
+                <select class="custom-select" formControlName="assignedToUserId">
                   <option value="">Select Staff</option>
                   <option *ngFor="let staff of housekeepingUsers" [value]="staff.id">
                     {{ staff.name }}
@@ -222,21 +164,13 @@
           </div>
         </form>
       </div>
-      <div class="modal-footer" style="border-top: 1px solid #E0E0E0; padding: 20px 30px; border-radius: 0 0 20px 20px; justify-content: flex-end; gap: 15px;">
-        <button 
-          type="button" 
-          class="btn_primary btn_secondary" 
-          (click)="closeMaintenanceModal()"
-          style="min-width: 120px;"
-        >
+      <div class="modal-footer"
+        style="border-top: 1px solid #E0E0E0; padding: 20px 30px; border-radius: 0 0 20px 20px; justify-content: flex-end; gap: 15px;">
+        <button type="button" class="btn_primary btn_secondary" (click)="closeMaintenanceModal()"
+          style="min-width: 120px;">
           Cancel
         </button>
-        <button 
-          type="button" 
-          class="btn_primary" 
-          (click)="onSubmitMaintenance()"
-          style="min-width: 120px;"
-        >
+        <button type="button" class="btn_primary" (click)="onSubmitMaintenance()" style="min-width: 120px;">
           Submit
         </button>
       </div>
@@ -245,11 +179,5 @@
 </div>
 
 <!-- Modal Backdrop -->
-<div 
-  class="modal-backdrop fade" 
-  [class.show]="showMaintenanceModal"
-  *ngIf="showMaintenanceModal"
-  (click)="closeMaintenanceModal()"
-  style="z-index: 1040; background-color: rgba(0, 0, 0, 0.5);"
-></div>
-
+<div class="modal-backdrop fade" [class.show]="showMaintenanceModal" *ngIf="showMaintenanceModal"
+  (click)="closeMaintenanceModal()" style="z-index: 1040; background-color: rgba(0, 0, 0, 0.5);"></div>

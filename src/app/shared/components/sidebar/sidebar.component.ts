@@ -44,26 +44,26 @@ export class SidebarComponent implements OnInit {
         //{ label: 'Availability', route: '/main/reservations/availability', permissionCode: 'RS' },
         { label: 'Room Booking', route: '/main/room-booking', permissionCode: 'RB' },
         { label: 'Current Booking', route: '/main/reservations/current-booking', permissionCode: 'RB' },
-        { label: 'Set Room Availability', route: '/main/reservations/set-availability', permissionCode: 'RB' },
+        // { label: 'Set Room Availability', route: '/main/reservations/set-availability', permissionCode: 'RB' },
         { label: 'Booking History', route: '/main/booking-history', permissionCode: 'RB' }, // Using same permission as Reservations
       ]
     },
-    {
-      label: 'Front Desk',
-      route: '/main/front-desk',
-      hasDropdown: false,
-      permissionCode: 'FD' // Front Desk permission code
-    },
+    // {
+    //   label: 'Front Desk',
+    //   route: '/main/front-desk',
+    //   hasDropdown: false,
+    //   permissionCode: 'FD' // Front Desk permission code
+    // },
     {
       label: 'House keeping',
       route: '/main/housekeeping',
       permissionCode: 'HK' // Housekeeping permission code
     },
-    {
-      label: 'Message Management',
-      route: '/main/messages',
-      permissionCode: 'MM' // Message Management permission code
-    },
+    // {
+    //   label: 'Message Management',
+    //   route: '/main/messages',
+    //   permissionCode: 'MM' // Message Management permission code
+    // },
     {
       label: 'Masters',
       hasDropdown: true,
@@ -76,12 +76,12 @@ export class SidebarComponent implements OnInit {
         { label: 'Bill Master', route: '/main/masters/bill-master', permissionCode: 'MS' }
       ]
     },
-    {
-      label: 'Property Setup',
-      route: '/main/property-setup',
-      hasDropdown: false,
-      permissionCode: 'PS' // Property Setup permission code
-    },
+    // {
+    //   label: 'Property Setup',
+    //   route: '/main/property-setup',
+    //   hasDropdown: false,
+    //   permissionCode: 'PS' // Property Setup permission code
+    // },
     {
       label: 'Revenue Management',
       route: '/main/revenue',
@@ -97,12 +97,12 @@ export class SidebarComponent implements OnInit {
         { label: 'Users', route: '/main/users', permissionCode: 'RU' }
       ]
     },
-    {
-      label: 'Reports',
-      route: '/main/reports',
-      hasDropdown: false,
-      permissionCode: 'RT' // Reports permission code
-    }
+    // {
+    //   label: 'Reports',
+    //   route: '/main/reports',
+    //   hasDropdown: false,
+    //   permissionCode: 'RT' // Reports permission code
+    // }
 
   ];
 

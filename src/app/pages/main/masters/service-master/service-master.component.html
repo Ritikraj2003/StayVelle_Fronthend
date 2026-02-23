@@ -56,7 +56,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let service of filteredService">
+        <tr *ngFor="let service of pagedService">
           <td>{{ service.serviceId }}</td>
           <td>{{ service.serviceCategory || 'N/A' }}</td>
           <td><a routerLink="/main/masters/service-master/edit/{{ service.serviceId }}" class="text_black fw_semi">{{
@@ -74,22 +74,29 @@
           </td>
         </tr>
         <tr *ngIf="filteredService.length === 0">
-          <td colspan="4" class="text-center">No rooms found</td>
+          <td colspan="4" class="text-center">No services found</td>
         </tr>
       </tbody>
     </table>
   </div>
 
   <!-- Pagination -->
-  <div class="d-flex align-items-center justify-content-between">
-    <span class="d-block font_12 fw_reg text_black">Showing {{ filteredService.length }} of {{ allService.length }}
-      Results</span>
-    <div class="pagination_blk d-flex align-items-center">
-      <img src="assets/images/left_arrow.svg" alt="" class="cursor-pointer mr_12">
-      <span class="active font_12 fw_med cursor-pointer">1</span>
-      <span class="font_12 fw_med cursor-pointer">2</span>
-      <span class="font_12 fw_med cursor-pointer">3</span>
-      <img src="assets/images/chevron-down.svg" alt="" class="ml_12 cursor-pointer">
+  <div class="d-flex align-items-center justify-content-between" *ngIf="filteredService.length > 0">
+    <span class="d-block font_12 fw_reg text_black">
+      Showing {{ (currentPage - 1) * pageSize + 1 }} to {{ Math.min(currentPage * pageSize, filteredService.length) }}
+      of {{ filteredService.length }} Results
+    </span>
+    <div class="pagination_blk d-flex align-items-center" *ngIf="totalPages > 1">
+      <img src="assets/images/left_arrow.svg" alt="" class="cursor-pointer mr_12"
+        [style.opacity]="currentPage === 1 ? '0.5' : '1'" (click)="changePage(currentPage - 1)">
+
+      <span *ngFor="let page of pages" class="font_12 fw_med cursor-pointer mx-1" [class.active]="page === currentPage"
+        (click)="changePage(page)">
+        {{ page }}
+      </span>
+
+      <img src="assets/images/chevron-down.svg" alt="" class="ml_12 cursor-pointer" style="transform: rotate(-90deg);"
+        [style.opacity]="currentPage === totalPages ? '0.5' : '1'" (click)="changePage(currentPage + 1)">
     </div>
   </div>
 </div>

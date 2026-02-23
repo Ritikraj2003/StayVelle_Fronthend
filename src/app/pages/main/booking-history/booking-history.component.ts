@@ -15,8 +15,30 @@ import { ViewBillComponent } from '../view-bill/view-bill.component';
   styleUrl: './booking-history.component.css'
 })
 export class BookingHistoryComponent implements OnInit {
-  allBookings: any[] = []; // Store all bookings from API
-  filteredBookings: any[] = []; // Store filtered bookings for display
+  public Math = Math;
+  allBookings: any[] = [];
+  filteredBookings: any[] = [];
+
+  // Pagination
+  currentPage: number = 1;
+  pageSize: number = 5;
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredBookings.length / this.pageSize);
+  }
+
+  get pagedBookings(): any[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredBookings.slice(start, start + this.pageSize);
+  }
+
+  get pages(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) this.currentPage = page;
+  }
 
   // Filter properties
   filterBookingId: string = '';
@@ -46,7 +68,7 @@ export class BookingHistoryComponent implements OnInit {
   getBookings(): void {
     this.isLoading = true;
     this.loaderService.show();
-    this.apiService.getBookings().subscribe({
+    this.apiService.getBookings("CheckedOut").subscribe({
       next: (bookings) => {
         this.allBookings = bookings || [];
         // Initially show all bookings, filters will be applied only on Search button click
@@ -109,6 +131,7 @@ export class BookingHistoryComponent implements OnInit {
     }
 
     this.filteredBookings = filtered;
+    this.currentPage = 1;
   }
 
   onSearch(): void {

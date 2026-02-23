@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { Service } from '../../../core/models/service.model';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { NotificationService } from '../../../core/services/notification.service';
 
 interface CartItem extends Service {
   cartId: string;
@@ -36,7 +37,10 @@ export class AddUpdateServcieComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private location: Location,
+    private router: Router,
+    private notification: NotificationService
   ) { }
 
   ngOnInit(): void {
@@ -180,12 +184,12 @@ export class AddUpdateServcieComponent implements OnInit {
 
   placeOrder() {
     if (!this.bookingId) {
-      alert('No active booking selected. Please select a room from Current Booking.');
+      this.notification.warning('No active booking selected. Please select a room from Current Booking.');
       return;
     }
 
     if (this.cart.length === 0) {
-      alert('Cart is empty.');
+      this.notification.warning('Cart is empty.');
       return;
     }
 
@@ -206,18 +210,28 @@ export class AddUpdateServcieComponent implements OnInit {
 
     this.apiService.addUpdateBookingServices(payload).subscribe({
       next: (res: any) => {
-        if (res.result) { // Checking res.result based on typical API patterns, or res.success if previously used
-          alert('Order Placed Successfully!');
+        // Robust success check - many APIs use 'result', 'success', or 'isSuccess'
+        const isSuccess = res.result || res.success || res.isSuccess || res.message?.toLowerCase().includes('success');
+        debugger;
+        if (isSuccess || res) {
+          this.notification.success(res.message || 'Order Placed Successfully!');
           this.cart = []; // Clear cart on success
-        } else {
-          // Fallback if success is not explicit but no error
-          alert(res.message || 'Order Placed Successfully!');
-          this.cart = [];
+
+          console.log('Order successful. Current URL:', this.router.url);
+
+          // Check if we are in the room-booking flow
+          if (this.router.url.includes('room-booking')) {
+            console.log('Redirection to /main/room-booking');
+            this.router.navigateByUrl('/main/room-booking');
+          } else {
+            console.log('Using browser back');
+            this.location.back();
+          }
         }
       },
       error: (err: any) => {
         console.error('Order Error:', err);
-        alert('Failed to place order.');
+        this.notification.error('Failed to place order. ' + (err.error?.message || err.message || ''));
       }
     });
   }

@@ -148,7 +148,10 @@ export class ApiService {
 
   ///////////////////////////////
   // Booking APIs
-  getBookings(): Observable<any> {
+  getBookings(status?: string): Observable<any> {
+    if (status) {
+      return this.get<any>(`Booking?bookingStatus=${status}`);
+    }
     return this.get<any>('Booking');
   }
 
@@ -236,11 +239,11 @@ export class ApiService {
   }
 
   updateService(id: number, data: any): Observable<any> {
-    return this.put<any>(`Service/${id}`, data);
+    return this.put<any>(`Service/UpdateService/${id}`, data);
   }
 
   deleteService(id: number): Observable<any> {
-    return this.delete<any>(`Service/${id}`);
+    return this.delete<any>(`Service/DeleteService/${id}`);
   }
 
   getRoomServices(data: any): Observable<any> {

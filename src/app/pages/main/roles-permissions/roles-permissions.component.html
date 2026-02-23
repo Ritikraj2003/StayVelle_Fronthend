@@ -1,19 +1,15 @@
 <div class="add_services_container">
   <h3 class="font_20 fw_semi text_black mb_2">Roles & Permissions</h3>
-  <span class="text_pri fw_med font_12 d-block mb_13">User Management <span class="text_black">~ Roles & Permissions</span></span>
-  
+  <span class="text_pri fw_med font_12 d-block mb_13">User Management <span class="text_black">~ Roles &
+      Permissions</span></span>
+
   <!-- Search and Filter Section -->
   <div class="services_info_blk position-relative mb_24">
     <div class="row">
       <div class="col-md-12">
         <div class="d-flex flex-column">
           <label class="font_14 fw_med text_black mb_5">Search</label>
-          <input 
-            type="text" 
-            class="form-control" 
-            placeholder="Search by role name or ID"
-            [(ngModel)]="filterSearch"
-          >
+          <input type="text" class="form-control" placeholder="Search by role name or ID" [(ngModel)]="filterSearch">
         </div>
       </div>
     </div>
@@ -25,22 +21,16 @@
   <!-- Filter Tags and Add Role Button -->
   <div class="d-flex align-items-center justify-content-between mb_24">
     <div class="d-flex align-items-center">
-      <div 
-        class="d-flex align-items-center mr_20" 
-        *ngFor="let filter of activeFilters"
-      >
+      <div class="d-flex align-items-center mr_20" *ngFor="let filter of activeFilters">
         <div class="luxury_info_blk d-flex align-items-center">
           <span class="font_10 fw_reg text_black luxury_txt d-block">{{ filter.label }}</span>
-          <img 
-            src="assets/images/cross_svgrepo.com.svg" 
-            alt="" 
-            class="cursor-pointer pl_8"
-            (click)="removeFilter(filter.type)"
-          >
+          <img src="assets/images/cross_svgrepo.com.svg" alt="" class="cursor-pointer pl_8"
+            (click)="removeFilter(filter.type)">
         </div>
       </div>
     </div>
-    <a *ngIf="permissionService.hasPermission('RA')" routerLink="/main/roles-permissions/add" class="text-decoration-none btn_primary services_pd">Add Role</a>
+    <a *ngIf="permissionService.hasPermission('RA')" routerLink="/main/roles-permissions/add"
+      class="text-decoration-none btn_primary services_pd">Add Role</a>
   </div>
 
   <!-- Roles Table -->
@@ -55,21 +45,18 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let role of filteredRoles">
+        <tr *ngFor="let role of pagedRoles">
           <td>{{ role.Id || role.id || 'N/A' }}</td>
-          <td><a routerLink="/main/roles-permissions/edit/{{ role.Id || role.id }}" class="text_black fw_semi">{{ role.role_name || 'N/A' }}</a></td>
+          <td><a routerLink="/main/roles-permissions/edit/{{ role.Id || role.id }}" class="text_black fw_semi">{{
+              role.role_name || 'N/A' }}</a></td>
           <td>{{ role.isactive ? 'Active' : 'Inactive' }}</td>
           <td>
             <div class="d-flex align-items-center">
               <a routerLink="/main/roles-permissions/edit/{{ role.Id || role.id }}">
                 <img src="assets/images/edit_icon.svg" alt="" class="cursor-pointer mr_10">
               </a>
-              <img 
-                src="assets/images/delete_icon.svg" 
-                alt="" 
-                class="cursor-pointer"
-                (click)="deleteRole(role.Id || role.id)"
-              >
+              <img src="assets/images/delete_icon.svg" alt="" class="cursor-pointer"
+                (click)="deleteRole(role.Id || role.id)">
             </div>
           </td>
         </tr>
@@ -81,15 +68,22 @@
   </div>
 
   <!-- Pagination -->
-  <div class="d-flex align-items-center justify-content-between">
-    <span class="d-block font_12 fw_reg text_black">Showing {{ filteredRoles.length }} of {{ allRoles.length }} Results</span>
-    <div class="pagination_blk d-flex align-items-center">
-      <img src="assets/images/left_arrow.svg" alt="" class="cursor-pointer mr_12">
-      <span class="active font_12 fw_med cursor-pointer">1</span>
-      <span class="font_12 fw_med cursor-pointer">2</span>
-      <span class="font_12 fw_med cursor-pointer">3</span>
-      <img src="assets/images/chevron-down.svg" alt="" class="ml_12 cursor-pointer">
+  <div class="d-flex align-items-center justify-content-between" *ngIf="filteredRoles.length > 0">
+    <span class="d-block font_12 fw_reg text_black">
+      Showing {{ (currentPage - 1) * pageSize + 1 }} to {{ Math.min(currentPage * pageSize, filteredRoles.length) }} of
+      {{ filteredRoles.length }} Results
+    </span>
+    <div class="pagination_blk d-flex align-items-center" *ngIf="totalPages > 1">
+      <img src="assets/images/left_arrow.svg" alt="" class="cursor-pointer mr_12"
+        [style.opacity]="currentPage === 1 ? '0.5' : '1'" (click)="changePage(currentPage - 1)">
+
+      <span *ngFor="let page of pages" class="font_12 fw_med cursor-pointer mx-1" [class.active]="page === currentPage"
+        (click)="changePage(page)">
+        {{ page }}
+      </span>
+
+      <img src="assets/images/chevron-down.svg" alt="" class="ml_12 cursor-pointer" style="transform: rotate(-90deg);"
+        [style.opacity]="currentPage === totalPages ? '0.5' : '1'" (click)="changePage(currentPage + 1)">
     </div>
   </div>
 </div>
-

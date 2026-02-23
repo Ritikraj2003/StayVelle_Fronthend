@@ -7,6 +7,7 @@ import { ApiService } from '../../../../core/services/api.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { PermissionService } from '../../../../core/services/permission.service';
 import { LoaderService } from '../../../../core/services/loader.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-role-add-update',
@@ -20,7 +21,7 @@ export class RoleAddUpdateComponent implements OnInit {
   roleId: number | null = null;
   isEditMode: boolean = false;
   isLoading: boolean = false;
-  
+
   // Permissions from API
   allPermissions: any[] = [];
   availablePermissions: any[] = [];
@@ -36,7 +37,8 @@ export class RoleAddUpdateComponent implements OnInit {
     private apiService: ApiService,
     private authService: AuthService,
     public permissionService: PermissionService,
-    private loaderService: LoaderService
+    private loaderService: LoaderService,
+    private notification: NotificationService
   ) {
     this.roleForm = this.fb.group({
       role_name: ['', [Validators.required]],
@@ -47,7 +49,7 @@ export class RoleAddUpdateComponent implements OnInit {
   ngOnInit(): void {
     // Load all permissions first
     this.loadPermissions();
-    
+
     // Check if we're in edit mode
     this.route.params.subscribe(params => {
       if (params['id']) {
@@ -88,7 +90,7 @@ export class RoleAddUpdateComponent implements OnInit {
           role_name: role.role_name,
           isactive: role.isactive
         });
-        
+
         // Set permissions - role.permissions contains permission objects
         const permissionIds = role.permissions ? role.permissions.map((p: any) => p.Id || p.id) : [];
         this.setPermissions(permissionIds);
@@ -97,7 +99,7 @@ export class RoleAddUpdateComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading role:', error);
-        alert('Error loading role. Please try again.');
+        this.notification.error('Error loading role. Please try again.');
         this.router.navigate(['/main/roles-permissions']);
         this.isLoading = false;
         this.loaderService.hide();
@@ -107,10 +109,10 @@ export class RoleAddUpdateComponent implements OnInit {
 
   setPermissions(permissionIds: number[]): void {
     // Split permissions into available and chosen
-    this.chosenPermissions = this.allPermissions.filter(perm => 
+    this.chosenPermissions = this.allPermissions.filter(perm =>
       permissionIds.includes(perm.Id || perm.id)
     );
-    this.availablePermissions = this.allPermissions.filter(perm => 
+    this.availablePermissions = this.allPermissions.filter(perm =>
       !permissionIds.includes(perm.Id || perm.id)
     );
   }
@@ -146,22 +148,22 @@ export class RoleAddUpdateComponent implements OnInit {
   }
 
   moveToChosen(): void {
-    const toMove = this.availablePermissions.filter(perm => 
+    const toMove = this.availablePermissions.filter(perm =>
       this.selectedAvailable.includes(perm.Id || perm.id)
     );
     this.chosenPermissions.push(...toMove);
-    this.availablePermissions = this.availablePermissions.filter(perm => 
+    this.availablePermissions = this.availablePermissions.filter(perm =>
       !this.selectedAvailable.includes(perm.Id || perm.id)
     );
     this.selectedAvailable = [];
   }
 
   moveToAvailable(): void {
-    const toMove = this.chosenPermissions.filter(perm => 
+    const toMove = this.chosenPermissions.filter(perm =>
       this.selectedChosen.includes(perm.Id || perm.id)
     );
     this.availablePermissions.push(...toMove);
-    this.chosenPermissions = this.chosenPermissions.filter(perm => 
+    this.chosenPermissions = this.chosenPermissions.filter(perm =>
       !this.selectedChosen.includes(perm.Id || perm.id)
     );
     this.selectedChosen = [];
@@ -184,7 +186,7 @@ export class RoleAddUpdateComponent implements OnInit {
       this.isLoading = true;
       this.loaderService.show();
       const formData = this.prepareFormData();
-      
+
       if (this.isEditMode && this.roleId) {
         this.apiService.updateRole(this.roleId, formData).subscribe({
           next: () => {
@@ -194,7 +196,7 @@ export class RoleAddUpdateComponent implements OnInit {
           },
           error: (error) => {
             console.error('Error updating role:', error);
-            alert(error.error?.message || 'Error updating role. Please try again.');
+            this.notification.error(error.error?.message || 'Error updating role. Please try again.');
             this.isLoading = false;
             this.loaderService.hide();
           }
@@ -208,14 +210,14 @@ export class RoleAddUpdateComponent implements OnInit {
           },
           error: (error) => {
             console.error('Error creating role:', error);
-            alert(error.error?.message || 'Error creating role. Please try again.');
+            this.notification.error(error.error?.message || 'Error creating role. Please try again.');
             this.isLoading = false;
             this.loaderService.hide();
           }
         });
       }
     } else if (this.chosenPermissions.length === 0) {
-      alert('Please select at least one permission for the role.');
+      this.notification.warning('Please select at least one permission for the role.');
     }
   }
 
@@ -233,7 +235,7 @@ export class RoleAddUpdateComponent implements OnInit {
       this.isLoading = true;
       this.loaderService.show();
       const formData = this.prepareFormData();
-      
+
       this.apiService.createRole(formData).subscribe({
         next: () => {
           this.isLoading = false;
@@ -252,23 +254,23 @@ export class RoleAddUpdateComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error creating role:', error);
-          alert(error.error?.message || 'Error creating role. Please try again.');
+          this.notification.error(error.error?.message || 'Error creating role. Please try again.');
           this.isLoading = false;
           this.loaderService.hide();
         }
       });
     } else if (this.chosenPermissions.length === 0) {
-      alert('Please select at least one permission for the role.');
+      this.notification.warning('Please select at least one permission for the role.');
     }
   }
 
   private prepareFormData(): any {
     const formValue = this.roleForm.value;
     const selectedPermissions = this.chosenPermissions.map(perm => perm.Id || perm.id);
-    
+
     // Get current user from auth service
     const currentUser = this.authService.getCurrentUser()?.email || 'system';
-    
+
     return {
       role_name: formValue.role_name,
       isactive: formValue.isactive === true || formValue.isactive === 'true',

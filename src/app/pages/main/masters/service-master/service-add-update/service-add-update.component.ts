@@ -4,6 +4,7 @@ import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { LoaderService } from '../../../../../core/services/loader.service';
 import { ApiService } from '../../../../../core/services/api.service';
+import { NotificationService } from '../../../../../core/services/notification.service';
 interface UploadedImage {
   file: File;
   name: string;
@@ -45,7 +46,8 @@ export class ServiceAddUpdateComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private apiService: ApiService,
-    private loaderService: LoaderService
+    private loaderService: LoaderService,
+    private notification: NotificationService
   ) {
     this.serviceForm = this.fb.group({
       serviceName: ['', [Validators.required]],
@@ -118,7 +120,7 @@ export class ServiceAddUpdateComponent implements OnInit {
         console.error('Error loading rooms:', error);
 
         this.loaderService.hide();
-        alert('Failed to load rooms. Please try again.');
+        this.notification.error('Failed to load categories. Please try again.');
       }
     });
     // Simulating API call with mock data as requested
@@ -170,7 +172,7 @@ export class ServiceAddUpdateComponent implements OnInit {
       error: (error: any) => {
         console.error('Error fetching service:', error);
         this.loaderService.hide();
-        alert('Failed to load service details.');
+        this.notification.error('Failed to load service details.');
       }
     });
   }
@@ -266,7 +268,7 @@ export class ServiceAddUpdateComponent implements OnInit {
           };
           reader.readAsDataURL(file);
         } else {
-          alert('Please select only jpg, png, or svg files');
+          this.notification.warning('Please select only jpg, png, or svg files');
         }
       });
     }
@@ -289,7 +291,7 @@ export class ServiceAddUpdateComponent implements OnInit {
           },
           error: (error: any) => {
             console.error('Error updating service:', error);
-            alert('Failed to update service. Please try again.');
+            this.notification.error('Failed to update service. Please try again.');
             this.loaderService.hide();
           }
         });
@@ -301,7 +303,7 @@ export class ServiceAddUpdateComponent implements OnInit {
           },
           error: (error: any) => {
             console.error('Error creating service:', error);
-            alert('Failed to create service. Please try again.');
+            this.notification.error('Failed to create service. Please try again.');
             this.loaderService.hide();
           }
         });
@@ -324,7 +326,7 @@ export class ServiceAddUpdateComponent implements OnInit {
           },
           error: (error: any) => {
             console.error('Error updating service:', error);
-            alert('Failed to update service. Please try again.');
+            this.notification.error('Failed to update service. Please try again.');
             this.loaderService.hide();
           }
         });
@@ -334,12 +336,12 @@ export class ServiceAddUpdateComponent implements OnInit {
           next: () => {
             // Reset form for adding another service
             this.resetFormForNewService();
-            alert('Service created successfully!');
+            this.notification.success('Service created successfully!');
             this.loaderService.hide();
           },
           error: (error: any) => {
             console.error('Error creating service:', error);
-            alert('Failed to create service. Please try again.');
+            this.notification.error('Failed to create service. Please try again.');
             this.loaderService.hide();
           }
         });
@@ -364,6 +366,10 @@ export class ServiceAddUpdateComponent implements OnInit {
     const formValue = this.serviceForm.value;
     const formData = new FormData();
 
+    if (this.isEditMode && this.serviceId) {
+      formData.append('ServiceId', this.serviceId.toString());
+    }
+
     formData.append('ServiceCategory', formValue.serviceCategory);
     formData.append('SubCategory', formValue.subCategory);
     formData.append('ServiceName', formValue.serviceName);
@@ -373,20 +379,37 @@ export class ServiceAddUpdateComponent implements OnInit {
     formData.append('IsActive', String(formValue.isActive));
     // formData.append('Description', formValue.description || ''); // Description not in screenshot, but good to keep if API supports it, or remove if strict. Keeping out for now based on screenshot unless user asked. The screenshot didn't show description but the form has it. I'll omit it to be safe or add if needed. The screenshot shows: ServiceCategory, SubCategory, ServiceName, Price, Unit, IsComplementary, IsActive, Image. 
 
-    // Handle Documents (Images)
+    let docIndex = 0;
+
+    // Handle Existing Images
+    if (this.existingImages.length > 0) {
+      for (let i = 0; i < this.existingImages.length; i++) {
+        formData.append(`Documents[${docIndex}].filePath`, this.existingImages[i]);
+        formData.append(`Documents[${docIndex}].fileName`, 'existing_image.jpg');
+        formData.append(`Documents[${docIndex}].documentType`, 'Image');
+        formData.append(`Documents[${docIndex}].documentId`, '0');
+        formData.append(`Documents[${docIndex}].isPrimary`, docIndex === 0 ? 'true' : 'false');
+        formData.append(`Documents[${docIndex}].entityType`, 'Service');
+        formData.append(`Documents[${docIndex}].entityId`, '0');
+        docIndex++;
+      }
+    }
+
+    // Handle New Documents (Images)
     if (this.uploadedImages.length > 0) {
       for (let i = 0; i < this.uploadedImages.length; i++) {
         const image = this.uploadedImages[i];
 
-        formData.append(`Documents[${i}].filePath`, '');
-        formData.append(`Documents[${i}].fileName`, image.name);
-        formData.append(`Documents[${i}].documentType`, 'Image');
-        formData.append(`Documents[${i}].documentId`, '0');
-        formData.append(`Documents[${i}].isPrimary`, i === 0 ? 'true' : 'false');
-        formData.append(`Documents[${i}].file`, image.file);
-        formData.append(`Documents[${i}].description`, '');
-        formData.append(`Documents[${i}].entityType`, 'Service');
-        formData.append(`Documents[${i}].entityId`, '0');
+        formData.append(`Documents[${docIndex}].filePath`, '');
+        formData.append(`Documents[${docIndex}].fileName`, image.name);
+        formData.append(`Documents[${docIndex}].documentType`, 'Image');
+        formData.append(`Documents[${docIndex}].documentId`, '0');
+        formData.append(`Documents[${docIndex}].isPrimary`, docIndex === 0 ? 'true' : 'false');
+        formData.append(`Documents[${docIndex}].file`, image.file);
+        formData.append(`Documents[${docIndex}].description`, '');
+        formData.append(`Documents[${docIndex}].entityType`, 'Service');
+        formData.append(`Documents[${docIndex}].entityId`, '0');
+        docIndex++;
       }
     }
 

@@ -322,15 +322,13 @@ export class RoomAddUpdateComponent implements OnInit {
     // 1. Add Existing Documents (that haven't been removed)
     if (this.existingImages.length > 0) {
       for (const existingDoc of this.existingImages) {
-        if (existingDoc.documentId) {
-          formData.append(`Documents[${docIndex}].documentId`, existingDoc.documentId);
-          formData.append(`Documents[${docIndex}].entityType`, existingDoc.entityType || 'Room');
-          formData.append(`Documents[${docIndex}].entityId`, existingDoc.entityId || '0');
-          formData.append(`Documents[${docIndex}].documentType`, existingDoc.documentType || 'Image');
-          formData.append(`Documents[${docIndex}].fileName`, existingDoc.fileName || '');
-          formData.append(`Documents[${docIndex}].filePath`, existingDoc.filePath || '');
-          formData.append(`Documents[${docIndex}].isPrimary`, String(existingDoc.isPrimary));
-        }
+        formData.append(`Documents[${docIndex}].documentId`, existingDoc.documentId || '0');
+        formData.append(`Documents[${docIndex}].entityType`, existingDoc.entityType || 'Room');
+        formData.append(`Documents[${docIndex}].entityId`, existingDoc.entityId || '0');
+        formData.append(`Documents[${docIndex}].documentType`, existingDoc.documentType || 'Image');
+        formData.append(`Documents[${docIndex}].fileName`, existingDoc.fileName || 'existing_image.jpg');
+        formData.append(`Documents[${docIndex}].filePath`, existingDoc.filePath || '');
+        formData.append(`Documents[${docIndex}].isPrimary`, existingDoc.isPrimary !== undefined ? String(existingDoc.isPrimary) : (docIndex === 0 ? 'true' : 'false'));
         docIndex++;
       }
     }

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/services/api.service';
 import { LoaderService } from '../../../../core/services/loader.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-taxmaster',
@@ -12,10 +13,31 @@ import { LoaderService } from '../../../../core/services/loader.service';
   styleUrl: './taxmaster.component.css'
 })
 export class TaxmasterComponent implements OnInit {
-
+  public Math = Math;
   taxes: any[] = [];
   filteredTaxes: any[] = [];
   filterName: string = '';
+
+  // Pagination
+  currentPage: number = 1;
+  pageSize: number = 5;
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredTaxes.length / this.pageSize);
+  }
+
+  get pagedTaxes(): any[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredTaxes.slice(start, start + this.pageSize);
+  }
+
+  get pages(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) this.currentPage = page;
+  }
 
   // Modal state
   showModal: boolean = false;
@@ -31,7 +53,8 @@ export class TaxmasterComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
-    private loaderService: LoaderService
+    private loaderService: LoaderService,
+    private notification: NotificationService
   ) { }
 
   ngOnInit(): void {
@@ -64,6 +87,7 @@ export class TaxmasterComponent implements OnInit {
         (t.taxName || '').toLowerCase().includes(q)
       );
     }
+    this.currentPage = 1;
   }
 
   openAddModal(): void {
@@ -136,7 +160,7 @@ export class TaxmasterComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error deleting tax:', err);
-        alert(err?.error?.message || 'Failed to delete tax.');
+        this.notification.error(err?.error?.message || 'Failed to delete tax.');
         this.loaderService.hide();
       }
     });

@@ -8,6 +8,7 @@ import { LoaderService } from '../../../core/services/loader.service';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ViewBillComponent } from '../view-bill/view-bill.component';
+import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-paymentpage',
@@ -37,7 +38,8 @@ export class PaymentpageComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private loaderService: LoaderService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private notification: NotificationService
   ) { }
 
   ngOnInit(): void {
@@ -157,7 +159,12 @@ export class PaymentpageComponent implements OnInit {
     }
     const nights = this.calculateNights();
     const pricePerNight = Number(this.bookingData.room.price) || 0;
-    return pricePerNight * nights;
+    const baseOccupancy = Number(this.bookingData.room.baseOccupancy) || 0;
+    const extraAdultCharge = Number(this.bookingData.room.extraAdultCharge) || 0;
+    const numberOfGuests = Number(this.bookingData.numberOfGuests) || 0;
+    const extraGuests = Math.max(numberOfGuests - baseOccupancy, 0);
+    const pricePerNightWithExtras = pricePerNight + (extraGuests * extraAdultCharge);
+    return pricePerNightWithExtras * nights;
   }
 
   calculateTax(): number {
@@ -252,8 +259,9 @@ export class PaymentpageComponent implements OnInit {
               this.isCheckoutProcessing = false;
               this.loaderService.hide();
               this.closePaymentModal();
-              alert(`Payment of ₹${amountToPay} and Check Out Processed Successfully!`);
-              this.openBillModal();
+              this.notification.success(`Payment of ₹${amountToPay} and Check Out Processed Successfully!`);
+              // Redirect to Room Booking after checkout success (requested by user)
+              this.openBillModal('/main/room-booking');
             },
             error: (checkoutError: any) => {
               console.error('Error during checkout after payment:', checkoutError);
@@ -269,8 +277,9 @@ export class PaymentpageComponent implements OnInit {
           this.isCheckoutProcessing = false;
           this.loaderService.hide();
           this.closePaymentModal();
-          alert(`Payment of ₹${amountToPay} Processed Successfully!`);
-          this.router.navigate(['/main/booking-history']);
+          this.notification.success(`Payment of ₹${amountToPay} Processed Successfully!`);
+          // Redirect to Current Booking (requested by user)
+          this.router.navigate(['/main/reservations/current-booking']);
         }
       },
       error: (error: any) => {
@@ -284,7 +293,6 @@ export class PaymentpageComponent implements OnInit {
   }
 
   checkout(): void {
-    this.openBillModal();
     if (!this.bookingId) return;
 
     this.isSaving = true;
@@ -295,8 +303,9 @@ export class PaymentpageComponent implements OnInit {
       next: (response: any) => {
         this.isSaving = false;
         this.loaderService.hide();
-        alert('Check Out Processed Successfully!');
-        this.openBillModal();
+        this.notification.success('Check Out Processed Successfully!');
+        // Default checkout from button goes to room-booking as it implies guest left and room should be available
+        this.openBillModal('/main/room-booking');
       },
       error: (error: any) => {
         console.error('Error during checkout:', error);
@@ -307,14 +316,14 @@ export class PaymentpageComponent implements OnInit {
     });
   }
 
-  openBillModal(): void {
+  openBillModal(redirectPath: string = '/main/booking-history'): void {
     const modalRef = this.modalService.open(ViewBillComponent, { size: 'lg', centered: true, backdrop: 'static' });
     modalRef.componentInstance.bookingData = this.bookingData;
 
     modalRef.result.then(() => {
-      this.router.navigate(['/main/booking-history']);
+      this.router.navigate([redirectPath]);
     }).catch(() => {
-      this.router.navigate(['/main/booking-history']);
+      this.router.navigate([redirectPath]);
     });
   }
 

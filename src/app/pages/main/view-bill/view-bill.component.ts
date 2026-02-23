@@ -66,7 +66,14 @@ export class ViewBillComponent implements OnInit {
   }
 
   getRoomBasePrice(): number {
-    return (this.bookingData?.room?.price || 0) * this.calculateNights();
+    const nights = this.calculateNights();
+    const pricePerNight = Number(this.bookingData?.room?.price) || 0;
+    const baseOccupancy = Number(this.bookingData?.room?.baseOccupancy) || 0;
+    const extraAdultCharge = Number(this.bookingData?.room?.extraAdultCharge) || 0;
+    const numberOfGuests = Number(this.bookingData?.numberOfGuests) || 0;
+    const extraGuests = Math.max(numberOfGuests - baseOccupancy, 0);
+    const pricePerNightWithExtras = pricePerNight + (extraGuests * extraAdultCharge);
+    return pricePerNightWithExtras * nights;
   }
 
   getServiceAmount(service: any): number {

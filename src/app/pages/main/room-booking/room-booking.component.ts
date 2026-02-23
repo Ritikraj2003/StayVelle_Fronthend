@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 import { MaintenanceTask } from '../../../models/maintenance-task.model';
 import { LoaderService } from '../../../core/services/loader.service';
+import { NotificationService } from '../../../core/services/notification.service';
 
 
 @Component({
@@ -44,7 +45,8 @@ export class RoomBookingComponent implements OnInit {
     private fb: FormBuilder,
     private apiService: ApiService,
     private router: Router,
-    private loaderService: LoaderService
+    private loaderService: LoaderService,
+    private notification: NotificationService
   ) {
     this.filterForm = this.fb.group({
       fromDate: [''],
@@ -97,7 +99,7 @@ export class RoomBookingComponent implements OnInit {
         this.filteredRooms = [];
         this.isLoading = false;
         this.loaderService.hide();
-        alert('Failed to load rooms. Please try again.');
+        this.notification.error('Failed to load rooms. Please try again.');
       }
     });
   }
@@ -247,7 +249,7 @@ export class RoomBookingComponent implements OnInit {
         this.showMaintenanceModal = false;
         this.maintenanceForm.reset();
         this.selectedRoom = null;
-        alert('No maintenance task found for this room.');
+        this.notification.info('No maintenance task found for this room.');
       }
     });
   }
@@ -277,7 +279,7 @@ export class RoomBookingComponent implements OnInit {
 
     // Check if taskId is present (required for update)
     if (!formData.taskId) {
-      alert('Task ID is required. Please close and reopen the maintenance modal.');
+      this.notification.error('Task ID is required. Please close and reopen the maintenance modal.');
       return;
     }
 
@@ -327,7 +329,7 @@ export class RoomBookingComponent implements OnInit {
     // Ensure taskId is a number
     const taskIdNumber = Number(taskId);
     if (isNaN(taskIdNumber)) {
-      alert('Invalid Task ID. Cannot update task.');
+      this.notification.error('Invalid Task ID. Cannot update task.');
       console.error('Task ID is not a valid number:', taskId);
       return;
     }
@@ -342,7 +344,7 @@ export class RoomBookingComponent implements OnInit {
       apiCall.subscribe({
         next: (response: any) => {
           console.log('Update response received:', response);
-          alert('Maintenance task updated successfully!');
+          this.notification.success('Maintenance task updated successfully!');
           this.closeMaintenanceModal();
           this.getRooms();
           this.loaderService.hide();
@@ -352,7 +354,7 @@ export class RoomBookingComponent implements OnInit {
           console.error('Error status:', error.status);
           console.error('Error details:', error.error);
           console.error('Full error object:', JSON.stringify(error, null, 2));
-          alert('Failed to update maintenance task: ' + (error.error?.message || error.message || 'Unknown error'));
+          this.notification.error('Failed to update maintenance task: ' + (error.error?.message || error.message || 'Unknown error'));
           this.loaderService.hide();
         },
         complete: () => {
@@ -361,7 +363,7 @@ export class RoomBookingComponent implements OnInit {
       });
     } catch (error) {
       console.error('Exception while calling API:', error);
-      alert('Failed to call update API. Please check console for details.');
+      this.notification.error('Failed to call update API. Please check console for details.');
       this.loaderService.hide();
     }
   }
@@ -384,14 +386,14 @@ export class RoomBookingComponent implements OnInit {
       case 'occupied': {
         const roomId = room.Id || room.id || room.roomId;
         if (!roomId) {
-          alert('Room ID not found. Cannot proceed to checkout.');
+          this.notification.error('Room ID not found. Cannot proceed to checkout.');
           return;
         }
 
         const roomNumber = room.roomNumber || room.RoomNumber || room.room_number;
 
         if (!roomNumber) {
-          alert('Room Number not found. Cannot proceed to checkout.');
+          this.notification.error('Room Number not found. Cannot proceed to checkout.');
           return;
         }
 
@@ -400,7 +402,7 @@ export class RoomBookingComponent implements OnInit {
         break;
       }
       default:
-        alert('This room is not available for booking at the moment.');
+        this.notification.warning('This room is not available for booking at the moment.');
         break;
     }
   }

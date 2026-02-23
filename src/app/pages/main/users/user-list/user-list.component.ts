@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/services/api.service';
 import { PermissionService } from '../../../../core/services/permission.service';
 import { LoaderService } from '../../../../core/services/loader.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-user-list',
@@ -17,21 +18,44 @@ export class UserListComponent implements OnInit {
   allUsers: any[] = []; // Store all users from API
   filteredUsers: any[] = []; // Store filtered users for display
   roles: any[] = []; // Store roles for filter dropdown
-  
+
   // Filter properties
   filterName: string = '';
   filterRole: string = '';
   filterStatus: string = '';
-  
+
   // Active filters array
-  activeFilters: Array<{type: string, label: string, value: string}> = [];
+  activeFilters: Array<{ type: string, label: string, value: string }> = [];
+  public Math = Math;
+
+  // Pagination properties
+  currentPage: number = 1;
+  pageSize: number = 5;
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredUsers.length / this.pageSize);
+  }
+
+  get pagedUsers(): any[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredUsers.slice(start, start + this.pageSize);
+  }
+
+  get pages(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) this.currentPage = page;
+  }
 
   constructor(
     private apiService: ApiService,
     private router: Router,
     public permissionService: PermissionService,
-    private loaderService: LoaderService
-  ) {}
+    private loaderService: LoaderService,
+    private notification: NotificationService
+  ) { }
 
   ngOnInit(): void {
     this.getUsers();
@@ -92,7 +116,7 @@ export class UserListComponent implements OnInit {
         error: (error) => {
           console.error('Error deleting user:', error);
           const errorMessage = error.error?.message || 'Error deleting user. Please try again.';
-          alert(errorMessage);
+          this.notification.error(errorMessage);
           this.loaderService.hide();
         }
       });
@@ -101,11 +125,11 @@ export class UserListComponent implements OnInit {
 
   applyFilters(): void {
     let filtered = [...this.allUsers];
-    
+
     // Filter by name
     if (this.filterName && this.filterName.trim() !== '') {
       const nameFilter = this.filterName.toLowerCase().trim();
-      filtered = filtered.filter(user => 
+      filtered = filtered.filter(user =>
         (user.Name && user.Name.toLowerCase().includes(nameFilter)) ||
         (user.name && user.name.toLowerCase().includes(nameFilter)) ||
         (user.Email && user.Email.toLowerCase().includes(nameFilter)) ||
@@ -114,7 +138,7 @@ export class UserListComponent implements OnInit {
         (user.username && user.username.toLowerCase().includes(nameFilter))
       );
     }
-    
+
     // Filter by role
     if (this.filterRole && this.filterRole !== 'Select' && this.filterRole !== '') {
       filtered = filtered.filter(user => {
@@ -122,33 +146,34 @@ export class UserListComponent implements OnInit {
         return userRole === this.filterRole;
       });
     }
-    
+
     // Filter by status
     if (this.filterStatus && this.filterStatus !== 'Select' && this.filterStatus !== '') {
       const isActive = this.filterStatus === 'Active';
       filtered = filtered.filter(user => {
-        const userStatus = user.isactive !== undefined ? user.isactive : 
-                          (user.is_active !== undefined ? user.is_active : user.isActive);
+        const userStatus = user.isactive !== undefined ? user.isactive :
+          (user.is_active !== undefined ? user.is_active : user.isActive);
         return userStatus === isActive;
       });
     }
-    
+
     this.filteredUsers = filtered;
+    this.currentPage = 1;
   }
 
   onSearch(): void {
     // Clear previous filters
     this.activeFilters = [];
-    
+
     // Add active filters based on selected values
     if (this.filterName && this.filterName.trim() !== '') {
       this.activeFilters.push({
         type: 'name',
-        label:this.filterName,
+        label: this.filterName,
         value: this.filterName
       });
     }
-    
+
     if (this.filterRole && this.filterRole !== 'Select' && this.filterRole !== '') {
       this.activeFilters.push({
         type: 'role',
@@ -156,7 +181,7 @@ export class UserListComponent implements OnInit {
         value: this.filterRole
       });
     }
-    
+
     if (this.filterStatus && this.filterStatus !== 'Select' && this.filterStatus !== '') {
       this.activeFilters.push({
         type: 'status',
@@ -164,7 +189,7 @@ export class UserListComponent implements OnInit {
         value: this.filterStatus
       });
     }
-    
+
     // Apply filters to the data
     this.applyFilters();
   }
@@ -178,7 +203,7 @@ export class UserListComponent implements OnInit {
     } else if (filterType === 'status') {
       this.filterStatus = '';
     }
-    
+
     // Re-apply search with remaining filters (this will update activeFilters)
     this.onSearch();
   }

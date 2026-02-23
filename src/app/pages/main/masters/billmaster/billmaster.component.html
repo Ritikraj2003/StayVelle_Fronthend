@@ -40,8 +40,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let t of templates; let i = index">
-                        <td>{{ i + 1 }}</td>
+                    <tr *ngFor="let t of pagedTemplates; let i = index">
+                        <td>{{ (currentPage - 1) * pageSize + i + 1 }}</td>
                         <td class="fw_semi text_black">{{ t.name }}</td>
                         <td>
                             <span class="status-pill pill-active" *ngIf="t.isDefault">Default</span>
@@ -63,6 +63,27 @@
                     </tr>
                 </tbody>
             </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="d-flex align-items-center justify-content-between" *ngIf="templates.length > 0">
+            <span class="d-block font_12 fw_reg text_black">
+                Showing {{ (currentPage - 1) * pageSize + 1 }} to {{ Math.min(currentPage * pageSize, templates.length)
+                }} of {{ templates.length }} Results
+            </span>
+            <div class="pagination_blk d-flex align-items-center" *ngIf="totalPages > 1">
+                <img src="assets/images/left_arrow.svg" alt="" class="cursor-pointer mr_12"
+                    [style.opacity]="currentPage === 1 ? '0.5' : '1'" (click)="changePage(currentPage - 1)">
+
+                <span *ngFor="let page of pages" class="font_12 fw_med cursor-pointer mx-1"
+                    [class.active]="page === currentPage" (click)="changePage(page)">
+                    {{ page }}
+                </span>
+
+                <img src="assets/images/chevron-down.svg" alt="" class="ml_12 cursor-pointer"
+                    style="transform: rotate(-90deg);" [style.opacity]="currentPage === totalPages ? '0.5' : '1'"
+                    (click)="changePage(currentPage + 1)">
+            </div>
         </div>
     </div>
 </ng-container>

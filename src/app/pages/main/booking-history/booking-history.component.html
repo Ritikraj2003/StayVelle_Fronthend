@@ -52,7 +52,7 @@
   </div>
 
   <!-- Bookings Table -->
-  <div class="mb_21 rounded table-responsive">
+  <div class="mb_21 rounded table-responsive" *ngIf="filteredBookings.length > 0">
     <table class="">
       <thead>
         <tr>
@@ -68,7 +68,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let booking of filteredBookings">
+        <tr *ngFor="let booking of pagedBookings">
           <td>#{{ booking.bookingId || booking.id || 'N/A' }}</td>
           <td>
             <a href="" class="text_black fw_semi">
@@ -94,23 +94,34 @@
             </div>
           </td>
         </tr>
-        <tr *ngIf="filteredBookings.length === 0">
-          <td colspan="9" class="text-center">No bookings found</td>
-        </tr>
       </tbody>
     </table>
   </div>
 
+  <!-- Empty State -->
+  <div *ngIf="filteredBookings.length === 0"
+    class="text-center d-flex justify-content-center flex-column align-items-center no_data_found_blk">
+    <img src="assets/images/reservation_empty_img.svg" alt="No results" />
+    <span class="font_14 fw_med text_black">No bookings found.</span>
+  </div>
+
   <!-- Pagination -->
-  <div class="d-flex align-items-center justify-content-between">
-    <span class="d-block font_12 fw_reg text_black">Showing {{ filteredBookings.length }} of {{ allBookings.length }}
-      Results</span>
-    <div class="pagination_blk d-flex align-items-center">
-      <img src="assets/images/left_arrow.svg" alt="" class="cursor-pointer mr_12">
-      <span class="active font_12 fw_med cursor-pointer">1</span>
-      <span class="font_12 fw_med cursor-pointer">2</span>
-      <span class="font_12 fw_med cursor-pointer">3</span>
-      <img src="assets/images/chevron-down.svg" alt="" class="ml_12 cursor-pointer">
+  <div class="d-flex align-items-center justify-content-between" *ngIf="filteredBookings.length > 0">
+    <span class="d-block font_12 fw_reg text_black">
+      Showing {{ (currentPage - 1) * pageSize + 1 }} to {{ Math.min(currentPage * pageSize, filteredBookings.length) }}
+      of {{ filteredBookings.length }} Results
+    </span>
+    <div class="pagination_blk d-flex align-items-center" *ngIf="totalPages > 1">
+      <img src="assets/images/left_arrow.svg" alt="" class="cursor-pointer mr_12"
+        [style.opacity]="currentPage === 1 ? '0.5' : '1'" (click)="changePage(currentPage - 1)">
+
+      <span *ngFor="let page of pages" class="font_12 fw_med cursor-pointer mx-1" [class.active]="page === currentPage"
+        (click)="changePage(page)">
+        {{ page }}
+      </span>
+
+      <img src="assets/images/chevron-down.svg" alt="" class="ml_12 cursor-pointer" style="transform: rotate(-90deg);"
+        [style.opacity]="currentPage === totalPages ? '0.5' : '1'" (click)="changePage(currentPage + 1)">
     </div>
   </div>
 </div>

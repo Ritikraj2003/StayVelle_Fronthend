@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { ApiService } from '../../../../core/services/api.service';
 import { LoaderService } from '../../../../core/services/loader.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-room-master',
@@ -14,9 +15,31 @@ import { LoaderService } from '../../../../core/services/loader.service';
   styleUrl: './room-master.component.css'
 })
 export class RoomMasterComponent implements OnInit {
-  allRooms: any[] = []; // Store all rooms from API
-  filteredRooms: any[] = []; // Store filtered rooms for display
+  public Math = Math;
+  allRooms: any[] = [];
+  filteredRooms: any[] = [];
   isLoading: boolean = false;
+
+  // Pagination
+  currentPage: number = 1;
+  pageSize: number = 5;
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredRooms.length / this.pageSize);
+  }
+
+  get pagedRooms(): any[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredRooms.slice(start, start + this.pageSize);
+  }
+
+  get pages(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) this.currentPage = page;
+  }
 
   // Filter properties
   filterName: string = '';
@@ -28,7 +51,8 @@ export class RoomMasterComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private router: Router,
-    private loaderService: LoaderService
+    private loaderService: LoaderService,
+    private notification: NotificationService
   ) { }
 
   ngOnInit(): void {
@@ -50,7 +74,7 @@ export class RoomMasterComponent implements OnInit {
         console.error('Error loading rooms:', error);
         this.isLoading = false;
         this.loaderService.hide();
-        alert('Failed to load rooms. Please try again.');
+        this.notification.error('Failed to load rooms. Please try again.');
       }
     });
   }
@@ -76,6 +100,7 @@ export class RoomMasterComponent implements OnInit {
     }
 
     this.filteredRooms = filtered;
+    this.currentPage = 1;
   }
 
   onSearch(): void {
@@ -130,7 +155,7 @@ export class RoomMasterComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error deleting room:', error);
-          alert('Failed to delete room. Please try again.');
+          this.notification.error('Failed to delete room. Please try again.');
           this.loaderService.hide();
         }
       });
@@ -146,7 +171,7 @@ export class RoomMasterComponent implements OnInit {
       this.selectedRoomNumber = room.roomNumber || 'Unknown';
       this.showQrModal = true;
     } else {
-      alert('QR Code token not available for this room.');
+      this.notification.warning('QR Code token not available for this room.');
     }
   }
 
@@ -189,7 +214,7 @@ export class RoomMasterComponent implements OnInit {
       })
       .catch(err => {
         console.error('Error generating PDF:', err);
-        alert('Failed to generate PDF. Please try again.');
+        this.notification.error('Failed to generate PDF. Please try again.');
         // Fallback or just error
       });
   }

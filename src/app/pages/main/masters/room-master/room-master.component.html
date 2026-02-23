@@ -57,7 +57,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let room of filteredRooms">
+        <tr *ngFor="let room of pagedRooms">
           <td>{{ room.id || 'N/A' }}</td>
           <td><a routerLink="/main/masters/room-master/edit/{{ room.id }}" class="text_black fw_semi">{{ room.roomNumber
               || 'N/A' }}</a></td>
@@ -87,15 +87,22 @@
   </div>
 
   <!-- Pagination -->
-  <div class="d-flex align-items-center justify-content-between">
-    <span class="d-block font_12 fw_reg text_black">Showing {{ filteredRooms.length }} of {{ allRooms.length }}
-      Results</span>
-    <div class="pagination_blk d-flex align-items-center">
-      <img src="assets/images/left_arrow.svg" alt="" class="cursor-pointer mr_12">
-      <span class="active font_12 fw_med cursor-pointer">1</span>
-      <span class="font_12 fw_med cursor-pointer">2</span>
-      <span class="font_12 fw_med cursor-pointer">3</span>
-      <img src="assets/images/chevron-down.svg" alt="" class="ml_12 cursor-pointer">
+  <div class="d-flex align-items-center justify-content-between" *ngIf="filteredRooms.length > 0">
+    <span class="d-block font_12 fw_reg text_black">
+      Showing {{ (currentPage - 1) * pageSize + 1 }} to {{ Math.min(currentPage * pageSize, filteredRooms.length) }} of
+      {{ filteredRooms.length }} Results
+    </span>
+    <div class="pagination_blk d-flex align-items-center" *ngIf="totalPages > 1">
+      <img src="assets/images/left_arrow.svg" alt="" class="cursor-pointer mr_12"
+        [style.opacity]="currentPage === 1 ? '0.5' : '1'" (click)="changePage(currentPage - 1)">
+
+      <span *ngFor="let page of pages" class="font_12 fw_med cursor-pointer mx-1" [class.active]="page === currentPage"
+        (click)="changePage(page)">
+        {{ page }}
+      </span>
+
+      <img src="assets/images/chevron-down.svg" alt="" class="ml_12 cursor-pointer" style="transform: rotate(-90deg);"
+        [style.opacity]="currentPage === totalPages ? '0.5' : '1'" (click)="changePage(currentPage + 1)">
     </div>
   </div>
 </div>

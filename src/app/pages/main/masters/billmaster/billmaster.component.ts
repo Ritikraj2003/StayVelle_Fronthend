@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 // ─── Data Interfaces ─────────────────────────────────────────────────────────
 
@@ -217,12 +218,34 @@ function defaultSections(): BillSection[] {
   styleUrl: './billmaster.component.css'
 })
 export class BillmasterComponent implements OnInit {
+  public Math = Math;
 
   // ── List view ───────────────────────────────────────────────────────────
   bills: any[] = [];
   filteredBills: any[] = [];
   filterName: string = '';
   designerOpen: boolean = false;
+
+  // Pagination
+  currentPage: number = 1;
+  pageSize: number = 5;
+
+  get totalPages(): number {
+    return Math.ceil(this.templates.length / this.pageSize);
+  }
+
+  get pagedTemplates(): BillTemplate[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.templates.slice(start, start + this.pageSize);
+  }
+
+  get pages(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) this.currentPage = page;
+  }
 
   // ── Designer state ──────────────────────────────────────────────────────
   templateName: string = 'My Invoice Template';
@@ -240,6 +263,7 @@ export class BillmasterComponent implements OnInit {
 
   // Drag-drop
   dragSrcIndex: number = -1;
+  constructor(private notification: NotificationService) { }
 
   ngOnInit(): void {
     this.loadTemplatesFromStorage();
@@ -396,7 +420,7 @@ export class BillmasterComponent implements OnInit {
     const idx = this.templates.findIndex(x => x.name === this.templateName);
     if (idx > -1) { this.templates[idx] = t; } else { this.templates.push(t); }
     localStorage.setItem('bill_templates', JSON.stringify(this.templates));
-    alert(`Template "${this.templateName}" saved!`);
+    this.notification.success(`Template "${this.templateName}" saved!`);
   }
 
   loadTemplate(t: BillTemplate): void {
