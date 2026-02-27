@@ -69,7 +69,8 @@ export class QrPinValidationpageComponent implements OnInit {
           this.router.navigate(['/qr-room-page/homepage'], {
             queryParams: {
               bookingId: res.data.bookingId,
-              roomId: this.roomData.roomId
+              roomId: this.roomData.roomId,
+              roomNumber: this.roomData.roomNumber
             }
           });
         } else {

@@ -34,3 +34,78 @@
 .cursor-pointer {
   cursor: pointer;
 }
+
+/* Hamburger toggle button */
+.sidebar-toggle-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 6px;
+  transition: background 0.2s;
+}
+
+.sidebar-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.hamburger-line {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background-color: #ffffff;
+  border-radius: 2px;
+  transition: all 0.2s;
+}
+
+/* Header row: logo + collapse arrow side by side */
+.sidebar-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 16px 14px;
+}
+
+.sidebar-logo {
+  height: 48px;
+  border-radius: 10px;
+  object-fit: contain;
+}
+
+/* Collapse arrow button (shown when sidebar is open) */
+.sidebar-collapse-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 32px;
+  font-weight: 300;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.sidebar-collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* Collapsed state: center the hamburger button */
+.sidebar-collapsed-btn-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 8px;
+}

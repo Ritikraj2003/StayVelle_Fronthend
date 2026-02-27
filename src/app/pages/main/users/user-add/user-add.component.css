@@ -31,14 +31,14 @@
   position: fixed !important;
   bottom: 15px !important;
   right: 15px !important;
-  /* Sidebar (248px) + base container padding (15px left + 15px right = 30px) = 278px */
-  width: calc(100% - 278px) !important;
+  width: calc(100% - var(--sidebar-w, 248px) - 30px) !important;
   margin-top: 0;
   box-shadow: 0px 0px 25px 0px #0038BC36;
   background: var(--white_color);
   border-radius: 0px 0px 20px 20px;
   padding: 17px 20px;
   z-index: 1000;
+  transition: width 0.3s ease;
 }
 
 /* Image upload preview styling */
@@ -60,4 +60,3 @@
   padding: 2px 6px;
   font-size: 11px;
 }
-

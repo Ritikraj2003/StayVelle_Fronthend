@@ -62,11 +62,13 @@
   <!-- Rooms Grid -->
   <div class="rooms-grid mb_21">
     <div *ngFor="let room of filteredRooms" class="room-box" [class.available]="isRoomAvailable(room)"
-      [class.occupied]="isRoomOccupied(room)" (click)="onRoomClick(room)">
+      [class.occupied]="isRoomOccupied(room)" [class.reserved]="isRoomReserved(room)"
+      [class.maintenance]="isRoomMaintenance(room)" (click)="onRoomClick(room)">
       <div class="room-number">{{ room.roomNumber || room.roomnumber || 'N/A' }}</div>
       <div class="room-type">{{ getRoomType(room) }}</div>
       <div class="room-status" [class.status-available]="isRoomAvailable(room)"
-        [class.status-occupied]="isRoomOccupied(room)">
+        [class.status-occupied]="isRoomOccupied(room)" [class.status-reserved]="isRoomReserved(room)"
+        [class.status-maintenance]="isRoomMaintenance(room)">
         {{ getRoomStatus(room) }}
       </div>
     </div>

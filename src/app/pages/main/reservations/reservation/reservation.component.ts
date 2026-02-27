@@ -20,6 +20,7 @@ export class ReservationComponent implements OnInit {
   roomId: number | null = null;
   guestImagePreviews: { [key: number]: string } = {};
   guestImageFiles: { [key: number]: File } = {};
+  isDateOverlap: boolean = false;
 
   idProofTypes = [
     { value: '', label: 'Select' },
@@ -101,6 +102,10 @@ export class ReservationComponent implements OnInit {
         }
       }
     });
+
+    // Subscribe to date changes for availability check
+    this.reservationForm.get('checkInDate')?.valueChanges.subscribe(() => this.checkAvailability());
+    this.reservationForm.get('checkOutDate')?.valueChanges.subscribe(() => this.checkAvailability());
   }
 
   loadRoomData(roomId: number): void {
@@ -124,8 +129,68 @@ export class ReservationComponent implements OnInit {
   }
 
   initializeForm(): void {
-    // Form is already initialized in constructor
-    // You can pre-fill any fields here if needed
+    const state = history.state;
+    if (state?.fromDate) {
+      this.reservationForm.patchValue({ checkInDate: state.fromDate });
+    }
+    if (state?.toDate) {
+      this.reservationForm.patchValue({ checkOutDate: state.toDate });
+    }
+  }
+
+  checkAvailability(): void {
+    const checkIn = this.reservationForm.get('checkInDate')?.value;
+    const checkOut = this.reservationForm.get('checkOutDate')?.value;
+    const roomId = this.roomId || this.roomData?.Id || this.roomData?.id;
+
+    if (!checkIn || !checkOut || !roomId) {
+      this.isDateOverlap = false;
+      return;
+    }
+
+    const inDate = new Date(checkIn);
+    const outDate = new Date(checkOut);
+    // Reset hours to 0 for proper day comparison
+    inDate.setHours(0, 0, 0, 0);
+    outDate.setHours(0, 0, 0, 0);
+
+    if (inDate >= outDate) {
+      this.isDateOverlap = true;
+      return; // Validation handled by form normally, but flag overlap to prevent submit
+    }
+
+    // Call calendar API
+    this.apiService.getRoomCalendar(roomId, checkIn, checkOut).subscribe({
+      next: (entries: any[]) => {
+        if (!entries || !Array.isArray(entries)) {
+          this.isDateOverlap = false;
+          return;
+        }
+
+        const overlaps = entries.filter((e: any) => {
+          const eDateStr = e.date || e.Date;
+          if (!eDateStr) return false;
+          const eDate = new Date(eDateStr);
+          eDate.setHours(0, 0, 0, 0);
+
+          const status = (e.status || e.Status || '').toLowerCase();
+          const isBlocking = status === 'reserved' || status === 'occupied' || status === 'maintenance';
+
+          // If calendar date falls within checkIn (inclusive) and checkOut (exclusive)
+          return eDate >= inDate && eDate < outDate && isBlocking;
+        });
+
+        if (overlaps.length > 0) {
+          this.notification.warning('Room is already booked for the selected dates! Please adjust the check-in and check-out dates.');
+          this.isDateOverlap = true;
+        } else {
+          this.isDateOverlap = false;
+        }
+      },
+      error: (err: any) => {
+        console.error('Failed to get calendar data:', err);
+      }
+    });
   }
 
   get maxOccupancy(): number {
@@ -272,6 +337,11 @@ export class ReservationComponent implements OnInit {
   }
 
   async onSubmit(destination?: 'service' | 'payment'): Promise<void> {
+    if (this.isDateOverlap) {
+      this.notification.error('Cannot proceed: The room is already booked for the selected dates.');
+      return;
+    }
+
     if (!this.hasPrimaryGuest()) {
       this.notification.warning('Please select at least one guest as primary.');
       return;

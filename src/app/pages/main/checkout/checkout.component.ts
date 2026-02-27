@@ -18,6 +18,7 @@ export class CheckoutComponent implements OnInit {
   bookingData: any = null;
   isLoading: boolean = false;
   isSaving: boolean = false;
+  isCancelling: boolean = false;
   error: string = '';
 
   constructor(
@@ -263,6 +264,33 @@ export class CheckoutComponent implements OnInit {
         this.loaderService.hide();
       }
     });
+  }
+
+  cancelBooking(): void {
+    if (!this.bookingId) {
+      this.error = 'Booking ID is required';
+      return;
+    }
+
+    if (confirm('Are you sure you want to cancel this booking? This action cannot be undone.')) {
+      this.isCancelling = true;
+      this.error = '';
+      this.loaderService.show();
+
+      this.apiService.cancelBooking(this.bookingId, { cancelReason: 'Cancelled from Checkout screen' }).subscribe({
+        next: (response: any) => {
+          this.isCancelling = false;
+          this.loaderService.hide();
+          this.router.navigate(['/main/room-booking']);
+        },
+        error: (error: any) => {
+          console.error('Error during cancellation:', error);
+          this.error = error?.error?.message || 'Failed to cancel booking. Please try again.';
+          this.isCancelling = false;
+          this.loaderService.hide();
+        }
+      });
+    }
   }
 }
 

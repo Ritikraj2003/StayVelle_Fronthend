@@ -252,9 +252,14 @@
 </div>
 <div class="right_side_footer_blk d-flex align-items-center justify-content-center" *ngIf="bookingData">
   <button type="button" class="btn_primary btn_secondary mr_20 w-200px" (click)="cancel()"
-    [disabled]="isSaving">Cancel</button>
-  <button type="button" class="btn_primary mr_20 w-200px" (click)="save()" [disabled]="isSaving">
+    [disabled]="isSaving || isCancelling">Cancel</button>
+  <button type="button" class="btn_primary mr_20 w-200px" (click)="save()" [disabled]="isSaving || isCancelling">
     <span *ngIf="!isSaving">Save</span>
     <span *ngIf="isSaving">Saving...</span>
+  </button>
+  <button type="button" class="btn_primary w-200px text-white" style="background-color: #dc3545; border-color: #dc3545;"
+    (click)="cancelBooking()" [disabled]="isSaving || isCancelling">
+    <span *ngIf="!isCancelling">Cancel Booking</span>
+    <span *ngIf="isCancelling">Cancelling...</span>
   </button>
 </div>

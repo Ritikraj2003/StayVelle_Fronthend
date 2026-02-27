@@ -24,6 +24,18 @@ export class SidebarComponent implements OnInit {
   currentUser$ = this.authService.currentUser$;
   showProfileMenu: boolean = false;
   imageError: boolean = false;
+  isCollapsed: boolean = false;
+
+  toggleSidebar(): void {
+    this.isCollapsed = !this.isCollapsed;
+    if (this.isCollapsed) {
+      document.body.classList.add('sidebar-collapsed');
+      document.body.style.setProperty('--sidebar-w', '56px');
+    } else {
+      document.body.classList.remove('sidebar-collapsed');
+      document.body.style.setProperty('--sidebar-w', '248px');
+    }
+  }
 
   // Generic dropdown state management - works for any number of dropdowns
   dropdownStates: { [key: string]: boolean } = {};
@@ -116,6 +128,8 @@ export class SidebarComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    // Initialize sidebar CSS variable
+    document.body.style.setProperty('--sidebar-w', '248px');
     this.filterMenuItemsByPermissions();
 
     this.router.events

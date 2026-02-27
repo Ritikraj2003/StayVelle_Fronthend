@@ -110,6 +110,14 @@ export class ApiService {
     return this.get<any>('Room');
   }
 
+  getAvailableRooms(start: string, end: string): Observable<any> {
+    return this.get<any>(`Room/available?start=${start}&end=${end}`);
+  }
+
+  getRoomCalendar(roomId: number, start: string, end: string): Observable<any> {
+    return this.get<any>(`Room/${roomId}/calendar?start=${start}&end=${end}`);
+  }
+
   getRoomById(id: number): Observable<any> {
     return this.get<any>(`Room/${id}`);
   }
@@ -199,6 +207,10 @@ export class ApiService {
     return this.post<any>('Booking/InsertDataByBookingId', data);
   }
 
+  cancelBooking(id: number, data: any): Observable<any> {
+    return this.post<any>(`Booking/${id}/cancel`, data);
+  }
+
   ///////////////////////////////
   // Housekeeping Task APIs
   getHousekeepingTasks(): Observable<any> {
@@ -282,6 +294,29 @@ export class ApiService {
 
   deleteTax(id: number): Observable<any> {
     return this.delete<any>(`Tax/${id}`);
+  }
+
+  // Dashboard APIs
+  getDashboardStats(startDate: string, endDate: string): Observable<any> {
+    let params = new HttpParams().set('startDate', startDate).set('endDate', endDate);
+    return this.get<any>('Dashboard/stats', params);
+  }
+
+  getDashboardCalendar(startDate: string, endDate: string): Observable<any> {
+    let params = new HttpParams().set('startDate', startDate).set('endDate', endDate);
+    return this.get<any>('Dashboard/calendar', params);
+  }
+
+  // Global dashboard (summary + graphs) with optional date range
+  getDashboardOverview(fromDate?: string, toDate?: string): Observable<any> {
+    let params = new HttpParams();
+    if (fromDate) {
+      params = params.set('fromDate', fromDate);
+    }
+    if (toDate) {
+      params = params.set('toDate', toDate);
+    }
+    return this.get<any>('Dashboard', params);
   }
 }
 

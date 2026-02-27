@@ -1,52 +1,258 @@
-.dashboard {
-  max-width: 1200px;
+.dashboard-container {
+  padding: 1.5rem;
+  background-color: #f8f9fc;
+  min-height: calc(100vh - 70px);
 }
 
-h1 {
-  color: #2c3e50;
-  margin-bottom: 2rem;
+/* Date Range Styles (aligned with room booking) */
+.date-range-wrapper {
+  width: 100%;
+  max-width: 360px;
 }
 
+.date-range-box {
+  border: 1px solid #C3C3C3;
+  border-radius: 20px;
+  padding: 0;
+  background-color: #ffffff;
+}
+
+.date-field {
+  padding: 11px 18px;
+}
+
+.date-field input[type="date"] {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 16px;
+  color: #000;
+  padding: 0;
+  outline: none;
+}
+
+.date-field input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* Stats Cards */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1.5rem;
 }
 
 .stat-card {
   background: white;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  border-top: 4px solid;
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 1rem;
-  transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  color: #2c3e50;
+}
+
+.stat-label {
+  color: #6c757d;
+  font-size: 0.875rem;
+  margin: 0;
+  font-weight: 500;
 }
 
 .stat-icon {
   font-size: 2.5rem;
+  opacity: 0.8;
 }
 
-.stat-content {
-  flex: 1;
+.stat-icon-img {
+  width: 32px;
+  height: 32px;
+  display: block;
+  object-fit: contain;
+  opacity: 0.9;
 }
 
-.stat-value {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #2c3e50;
-  margin-bottom: 0.25rem;
+.nav-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
 }
 
-.stat-label {
-  color: #7f8c8d;
-  font-size: 0.9rem;
+.nav-icon-left {
+  transform: rotate(180deg);
 }
 
+/* Calendar */
+.calendar-wrapper {
+  overflow: hidden;
+}
+
+.calendar-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: minmax(110px, auto);
+}
+
+.calendar-cell {
+  background-color: white;
+}
+
+.header-cell {
+  font-size: 0.875rem;
+  color: #495057;
+}
+
+.day-cell {
+  position: relative;
+  transition: background-color 0.2s;
+}
+
+.day-cell:hover:not(.empty-cell) {
+  background-color: #f8f9fa;
+}
+
+.empty-cell {
+  background-color: #fbfbfb;
+}
+
+.is-today {
+  background-color: #f0f7ff;
+}
+
+.day-number {
+  font-size: 0.85rem;
+  color: #212529;
+}
+
+/* Status Pills */
+.status-pill {
+  border: 1px solid;
+  border-radius: 4px;
+}
+
+.pill-text {
+  font-size: 0.70rem;
+  font-weight: 600;
+}
+
+.pill-badge {
+  font-size: 0.65rem;
+  width: 16px;
+  height: 16px;
+  line-height: 1;
+}
+
+/* Colors for Pills */
+.pill-available {
+  background-color: #e8f5e9;
+  border-color: #c8e6c9;
+  color: #2e7d32;
+}
+
+.badge-available {
+  background-color: #4caf50;
+}
+
+.pill-occupied {
+  background-color: #ffebee;
+  border-color: #ffcdd2;
+  color: #c62828;
+}
+
+.badge-occupied {
+  background-color: #e53935;
+}
+
+.pill-reserved {
+  background-color: #e3f2fd;
+  border-color: #bbdefb;
+  color: #1565c0;
+}
+
+.badge-reserved {
+  background-color: #1e88e5;
+}
+
+.pill-maintenance {
+  background-color: #fff8e1;
+  border-color: #ffecb3;
+  color: #f57f17;
+}
+
+.badge-maintenance {
+  background-color: #ffb300;
+}
+
+.pill-cancelled {
+  background-color: #fdf2f2;
+  border-color: #fbd6d6;
+  color: #c92a2a;
+}
+
+.badge-cancelled {
+  background-color: #e03131;
+}
+
+/* Charts */
+
+.charts-section {
+  margin-top: 1.5rem;
+}
+
+.charts-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.chart-card {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  min-height: 260px;
+}
+
+.chart-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #344767;
+}
+
+.chart-wrapper {
+  position: relative;
+  height: 220px;
+}
+
+/* amCharts container */
+.amchart-root {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 991.98px) {
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
+}

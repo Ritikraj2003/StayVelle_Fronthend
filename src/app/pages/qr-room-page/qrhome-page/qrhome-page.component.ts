@@ -13,7 +13,7 @@ import { ApiService } from '../../../core/services/api.service';
 })
 export class QRHomePageComponent implements OnInit {
   guestName = 'Mr. Henderson';
-  roomNumber = '305';
+  roomNumber = '';
 
   wifiNetwork = 'HMS_Premium_Guest';
   wifiPassword = 'LuxuryStay2024';
@@ -47,6 +47,12 @@ export class QRHomePageComponent implements OnInit {
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       const bookingId = params['bookingId'];
+      const roomNumber = params['roomNumber'];
+
+      if (roomNumber) {
+        this.roomNumber = roomNumber;
+      }
+
       if (bookingId) {
         this.loadRoomServices(Number(bookingId));
       } else {

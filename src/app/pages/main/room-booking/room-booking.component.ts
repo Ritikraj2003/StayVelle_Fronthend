@@ -48,9 +48,16 @@ export class RoomBookingComponent implements OnInit {
     private loaderService: LoaderService,
     private notification: NotificationService
   ) {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const todayStr = today.toLocaleDateString('en-CA'); // en-CA gives YYYY-MM-DD
+    const tomorrowStr = tomorrow.toLocaleDateString('en-CA');
+
     this.filterForm = this.fb.group({
-      fromDate: [''],
-      toDate: [''],
+      fromDate: [todayStr],
+      toDate: [tomorrowStr],
       roomType: [''],
       floor: ['']
     });
@@ -66,7 +73,8 @@ export class RoomBookingComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.getRooms();
+    // If the date inputs are populated, onSearch will use the available rooms endpoint.
+    this.onSearch();
     this.getHousekeepingUser();
   }
 
@@ -179,7 +187,56 @@ export class RoomBookingComponent implements OnInit {
       });
     }
 
-    this.applyFilters();
+    if (fromDate || toDate) {
+      if (!fromDate || !toDate) {
+        this.notification.warning("Please provide both From Date and To Date to search availability.");
+        return;
+      }
+
+      const startDate = new Date(fromDate);
+      const endDate = new Date(toDate);
+      if (startDate >= endDate) {
+        this.notification.warning("To Date must be after From Date.");
+        return;
+      }
+
+      this.isLoading = true;
+      this.loaderService.show();
+      this.apiService.getAvailableRooms(fromDate, toDate).subscribe({
+        next: (rooms: any) => {
+          this.allRooms = rooms || [];
+          this.extractFloors();
+          this.applyFilters();
+          this.isLoading = false;
+          this.loaderService.hide();
+        },
+        error: (error: any) => {
+          console.error('Error loading available rooms:', error);
+          this.notification.error('Failed to load available rooms.');
+          this.isLoading = false;
+          this.loaderService.hide();
+        }
+      });
+    } else {
+      // No dates provided, fallback to standard getRooms to show live status
+      this.isLoading = true;
+      this.loaderService.show();
+      this.apiService.getRooms().subscribe({
+        next: (rooms: any) => {
+          this.allRooms = rooms || [];
+          this.extractFloors();
+          this.applyFilters();
+          this.isLoading = false;
+          this.loaderService.hide();
+        },
+        error: (error: any) => {
+          console.error('Error loading rooms:', error);
+          this.notification.error('Failed to load rooms.');
+          this.isLoading = false;
+          this.loaderService.hide();
+        }
+      });
+    }
   }
 
   removeFilter(filterType: string): void {
@@ -224,10 +281,15 @@ export class RoomBookingComponent implements OnInit {
     return status && status.toLowerCase() === 'occupied';
   }
 
-  // isRoomMaintenance(room: any): boolean {
-  //   const status = room.roomStatus || room.roomstatus || room.status || room.Status || '';
-  //   return status && status.toLowerCase() === 'maintenance';
-  // }
+  isRoomReserved(room: any): boolean {
+    const status = room.roomStatus || room.roomstatus || room.status || room.Status || '';
+    return status && status.toLowerCase() === 'reserved';
+  }
+
+  isRoomMaintenance(room: any): boolean {
+    const status = room.roomStatus || room.roomstatus || room.status || room.Status || '';
+    return status && status.toLowerCase() === 'maintenance';
+  }
 
   openMaintenanceModal(room: any, event?: Event): void {
     if (event) {
@@ -378,12 +440,13 @@ export class RoomBookingComponent implements OnInit {
         break;
       case 'available': {
         const roomId = room.Id || room.id || room.roomId || 0;
+        const { fromDate, toDate } = this.filterForm.value;
         this.router.navigate(['/main/reservations/reservation', roomId], {
-          state: { room: room }
+          state: { room: room, fromDate, toDate }
         });
         break;
       }
-      case 'occupied': {
+      case 'reserved': {
         const roomId = room.Id || room.id || room.roomId;
         if (!roomId) {
           this.notification.error('Room ID not found. Cannot proceed to checkout.');

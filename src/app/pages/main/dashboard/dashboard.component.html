@@ -1,13 +1,245 @@
-<div class="dashboard">
-  <h1>Dashboard</h1>
-  <div class="stats-grid">
-    <div *ngFor="let stat of stats" class="stat-card" [style.border-top-color]="stat.color">
-      <div class="stat-icon">{{ stat.icon }}</div>
-      <div class="stat-content">
-        <div class="stat-value">{{ stat.value }}</div>
-        <div class="stat-label">{{ stat.label }}</div>
+<div class="dashboard-container">
+
+  <!-- Welcome & Date Filter Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="m-0 fw-semibold text-dark mb-1">Welcome admin</h3>
+
+    <div class="date-range-wrapper">
+      <label class="d-flex align-items-center mb-2">
+        <span class="font_14 fw_med text_black w-50">From Date</span>
+        <span class="font_14 fw_med text_black">To Date</span>
+      </label>
+      <div class="date-range-box d-flex align-items-center justify-content-between">
+        <div class="date-field w-46 position-relative first_date_field">
+          <input type="date" [(ngModel)]="filterStartDateStr" (change)="onFilterDateChange()">
+          <img src="assets/images/calendar_icon.svg" alt="" class="custom_calendar_picker" />
+        </div>
+        <div class="date-field w-50 position-relative">
+          <input type="date" [(ngModel)]="filterEndDateStr" (change)="onFilterDateChange()">
+          <img src="assets/images/calendar_icon.svg" alt="" class="custom_calendar_picker" />
+        </div>
+      </div>
+      <div class="mt-2 text-end" *ngIf="parsedDateRangeStr">
+        <span class="badge bg-light text-dark px-3 py-2">
+          {{ parsedDateRangeStr }}
+        </span>
       </div>
     </div>
   </div>
-</div>
 
+  <!-- Top Stats Cards -->
+  <div class="stats-grid mb-4">
+    <div class="stat-card">
+      <div class="stat-content">
+        <h3 class="stat-value">{{ stats.totalRevenue | currency:'INR' }}</h3>
+        <p class="stat-label">Total Revenue (Net)</p>
+      </div>
+      <div class="stat-icon text-success">
+        <img src="assets/images/plus_icon.svg" alt="Revenue" class="stat-icon-img">
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-content">
+        <h3 class="stat-value">{{ stats.totalBookings }}</h3>
+        <p class="stat-label">Total Bookings</p>
+      </div>
+      <div class="stat-icon text-primary">
+        <img src="assets/images/view_icon.svg" alt="Bookings" class="stat-icon-img">
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-content">
+        <h3 class="stat-value">{{ stats.checkIns }}</h3>
+        <p class="stat-label">Check-ins</p>
+      </div>
+      <div class="stat-icon text-warning">
+        <img src="assets/images/calendar_icon.svg" alt="Check-ins" class="stat-icon-img">
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-content">
+        <h3 class="stat-value">{{ stats.cancellations }}</h3>
+        <p class="stat-label">Cancellations</p>
+      </div>
+      <div class="stat-icon text-danger">
+        <img src="assets/images/cross_svgrepo.com.svg" alt="Cancellations" class="stat-icon-img">
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-content">
+        <h3 class="stat-value">{{ stats.availableRooms }}</h3>
+        <p class="stat-label">Available Rooms</p>
+      </div>
+      <div class="stat-icon text-success">
+        <img src="assets/images/placeholder.svg" alt="Available Rooms" class="stat-icon-img">
+      </div>
+    </div>
+  </div>
+
+  <!-- Calendar Controls -->
+  <div class="calendar-controls d-flex justify-content-between align-items-center mb-3 p-3 bg-white rounded shadow-sm">
+    <div class="d-flex align-items-center gap-3">
+      <!-- Nav Buttons -->
+      <div class="btn-group border rounded">
+        <button class="btn btn-light border-end" (click)="previous()">
+          <img src="assets/images/Blue_arrow.svg" alt="Previous" class="nav-icon nav-icon-left">
+        </button>
+        <button class="btn btn-light" (click)="next()">
+          <img src="assets/images/Blue_arrow.svg" alt="Next" class="nav-icon">
+        </button>
+      </div>
+
+      <!-- Month Title -->
+      <h4 class="m-0 ms-2 fw-semibold">{{ displayDateTitle }}</h4>
+
+      <!-- View Switcher -->
+      <div class="btn-group ms-4 border rounded">
+        <button class="btn" [ngClass]="currentView === 'monthly' ? 'btn-primary text-white' : 'btn-light'"
+          (click)="setView('monthly')">Monthly by</button>
+        <button class="btn" [ngClass]="currentView === 'weekly' ? 'btn-primary text-white' : 'btn-light'"
+          (click)="setView('weekly')">Weekly by</button>
+      </div>
+    </div>
+
+    <!-- Right Date Range Text -->
+    <div class="text-end fw-semibold text-secondary">
+      {{ displayCurrentDateRight }}
+    </div>
+  </div>
+
+  <!-- Calendar Grid -->
+  <div class="calendar-wrapper bg-white shadow-sm rounded border">
+
+    <!-- Weekday Header -->
+    <div class="calendar-row header-row text-center fw-semibold text-secondary bg-light">
+      <div class="calendar-cell header-cell py-2 border-end" *ngFor="let day of weekDays">{{ day }}</div>
+    </div>
+
+    <!-- Calendar Body -->
+    <div class="calendar-grid">
+      <div *ngFor="let cell of calendarGrid" class="calendar-cell day-cell border-end border-bottom p-2"
+        [class.empty-cell]="cell.isEmpty" [class.is-today]="cell.isToday">
+
+        <ng-container *ngIf="!cell.isEmpty">
+          <!-- Day Number -->
+          <div class="day-number fw-medium mb-1" [class.text-primary]="cell.isToday">{{ cell.day }}</div>
+
+          <!-- Pills -->
+          <div class="d-flex flex-column gap-1 mt-2">
+
+            <div *ngIf="cell.stats?.availableCount > 0"
+              class="status-pill pill-available d-flex justify-content-between align-items-center px-1 py-0 rounded">
+              <span class="pill-text small">Available</span>
+              <span
+                class="pill-badge badge-available rounded-circle text-white d-flex justify-content-center align-items-center">{{
+                cell.stats.availableCount }}</span>
+            </div>
+
+            <div *ngIf="cell.stats?.occupiedCount > 0"
+              class="status-pill pill-occupied d-flex justify-content-between align-items-center px-1 py-0 rounded">
+              <span class="pill-text small">Checked-in</span>
+              <span
+                class="pill-badge badge-occupied rounded-circle text-white d-flex justify-content-center align-items-center">{{
+                cell.stats.occupiedCount }}</span>
+            </div>
+
+            <div *ngIf="cell.stats?.reservedCount > 0"
+              class="status-pill pill-reserved d-flex justify-content-between align-items-center px-1 py-0 rounded">
+              <span class="pill-text small">Reserved</span>
+              <span
+                class="pill-badge badge-reserved rounded-circle text-white d-flex justify-content-center align-items-center">{{
+                cell.stats.reservedCount }}</span>
+            </div>
+
+            <div *ngIf="cell.stats?.maintenanceCount > 0"
+              class="status-pill pill-maintenance d-flex justify-content-between align-items-center px-1 py-0 rounded">
+              <span class="pill-text small">Maintenance</span>
+              <span
+                class="pill-badge badge-maintenance rounded-circle text-white d-flex justify-content-center align-items-center">{{
+                cell.stats.maintenanceCount }}</span>
+            </div>
+
+            <div *ngIf="cell.stats?.cancelledCount > 0"
+              class="status-pill pill-cancelled d-flex justify-content-between align-items-center px-1 py-0 rounded mt-1">
+              <span class="pill-text small">Cancelled</span>
+              <span
+                class="pill-badge badge-cancelled rounded-circle text-white d-flex justify-content-center align-items-center">{{
+                cell.stats.cancelledCount }}</span>
+            </div>
+
+          </div>
+        </ng-container>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Section (below calendar) -->
+  <div class="charts-section mt-4">
+
+    <!-- Row 1: Monthly Revenue Trend + Per-Day Revenue -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title d-flex justify-content-between align-items-center mb-2">
+          <span>Monthly Revenue Trend</span>
+        </div>
+        <div class="chart-wrapper">
+          <div id="monthlyRevenueChart" class="amchart-root"></div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title d-flex justify-content-between align-items-center mb-2">
+          <span>Per-Day Revenue</span>
+        </div>
+        <div class="chart-wrapper">
+          <div id="dailyRevenueChart" class="amchart-root"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: Booking Status Distribution + Payment Mode Distribution -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title d-flex justify-content-between align-items-center mb-2">
+          <span>Booking Status Distribution</span>
+        </div>
+        <div class="chart-wrapper">
+          <div id="bookingStatusChart" class="amchart-root"></div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title d-flex justify-content-between align-items-center mb-2">
+          <span>Payment Mode Distribution</span>
+        </div>
+        <div class="chart-wrapper">
+          <div id="paymentModeChart" class="amchart-root"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: Room Occupancy Overview + Monthly Cancellation Trend -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title d-flex justify-content-between align-items-center mb-2">
+          <span>Room Occupancy Overview</span>
+        </div>
+        <div class="chart-wrapper">
+          <div id="roomOccupancyChart" class="amchart-root"></div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title d-flex justify-content-between align-items-center mb-2">
+          <span>Monthly Cancellation Trend</span>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="monthlyCancellationChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

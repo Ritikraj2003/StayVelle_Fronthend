@@ -46,12 +46,12 @@ export class CurrentBookingComponent implements OnInit {
   }
 
   loadBookings(): void {
-    this.apiService.getBookings("Booked").subscribe({
+    this.apiService.getBookings("Reserved").subscribe({
       next: (res: any) => {
         let bookings = Array.isArray(res) ? res : (res.data || []);
 
-        // Filter for "Booked" status
-        this.allBookings = bookings.filter((b: any) => b.bookingStatus === 'Booked');
+        // Filter for "Reserved" status
+        this.allBookings = bookings.filter((b: any) => b.bookingStatus === 'Reserved');
 
         this.applyFilter();
       },
