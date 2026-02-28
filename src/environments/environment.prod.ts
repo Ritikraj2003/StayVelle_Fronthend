@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.stayvelle.com/api'
+  apiUrl: 'https://stayvelle-api.onrender.com/api'
 };
 
