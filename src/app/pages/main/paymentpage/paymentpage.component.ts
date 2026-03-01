@@ -25,6 +25,10 @@ export class PaymentpageComponent implements OnInit {
   isSaving: boolean = false;
   error: string = '';
 
+  // Amount tracking
+  baseAmountDue: number = 0;
+  editedAmountDue: number | null = null;
+
   // Payment Modal variables
   showPaymentModal: boolean = false;
   selectedPaymentMethod: 'Razorpay' | 'Cash' = 'Razorpay';
@@ -81,6 +85,8 @@ export class PaymentpageComponent implements OnInit {
         this.paidAmount = (payments || []).reduce(
           (sum: number, p: any) => sum + (Number(p.amount) || 0), 0
         );
+        this.baseAmountDue = Math.max(this.calculateTotal() - this.paidAmount, 0);
+        this.editedAmountDue = this.baseAmountDue;
         this.isLoading = false;
         this.loaderService.hide();
       },
@@ -189,8 +195,26 @@ export class PaymentpageComponent implements OnInit {
     return this.paidAmount;
   }
 
+  onAmountEdit(): void {
+    if (this.editedAmountDue !== null && this.editedAmountDue > this.baseAmountDue) {
+      this.editedAmountDue = this.baseAmountDue;
+    }
+    // Also prevent negative amounts
+    if (this.editedAmountDue !== null && this.editedAmountDue < 0) {
+      this.editedAmountDue = 0;
+    }
+  }
+
   calculateAmountDue(): number {
+    if (this.editedAmountDue !== null) {
+      return this.editedAmountDue;
+    }
     return Math.max(this.calculateTotal() - this.paidAmount, 0);
+  }
+
+  isAmountFull(): boolean {
+    const calculatedDue = Math.max(this.calculateTotal() - this.paidAmount, 0);
+    return Math.abs((this.editedAmountDue || 0) - calculatedDue) < 0.01;
   }
 
   processBookingData(data: any): void {

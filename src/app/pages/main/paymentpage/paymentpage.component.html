@@ -58,10 +58,10 @@
       </div>
 
       <!-- Service List Card -->
-      <div class="payment-card">
+      <div class="payment-card" *ngIf="bookingData.bookingServices && bookingData.bookingServices.length > 0">
         <div class="d-flex align-items-center gap-2 mb_20">
           <!-- <span class="material-icons text_pri">restaurant</span> -->
-          <img src="assets/images/service_icon.svg" alt="Service" class="icon-img">
+          <img src="assets/images/Service_list.png" alt="Service" class="icon-img">
           <h4 class="font_16 fw_bold text_black m-0">Service List</h4>
         </div>
 
@@ -125,7 +125,8 @@
             <span class="font_13 fw_med text_gray">Room Total</span>
             <span class="font_13 fw_med text_black">₹{{ calculateRoomSubtotal() | number:'1.2-2' }}</span>
           </div>
-          <div class="d-flex justify-content-between align-items-center mb_12">
+          <div class="d-flex justify-content-between align-items-center mb_12"
+            *ngIf="bookingData.bookingServices && bookingData.bookingServices.length > 0">
             <span class="font_13 fw_med text_gray">Service Charges</span>
             <span class="font_13 fw_med text_black">₹{{ calculateServiceTotal() | number:'1.2-2' }}</span>
           </div>
@@ -145,14 +146,19 @@
 
         <div class="d-flex justify-content-between align-items-center mb_24 total-section">
           <span class="font_12 fw_bold text_gray text-uppercase letter-spacing-1">TOTAL<br>AMOUNT DUE</span>
-          <span class="font_24 fw_extra_bold text_pri">₹{{ calculateAmountDue() | number:'1.2-2' }}</span>
+          <div class="d-flex align-items-center justify-content-end flex-grow-1">
+            <span class="font_24 fw_extra_bold text_pri mr-1">₹</span>
+            <input type="number" class="editable-amount-input font_24 fw_extra_bold text_pri text-right"
+              [(ngModel)]="editedAmountDue" (ngModelChange)="onAmountEdit()" [max]="baseAmountDue" min="0"
+              style="width: 120px; border: none; outline: none; background: transparent; box-shadow: none;">
+          </div>
         </div>
 
         <div class="d-flex align-items-center gap-2 mb_12">
           <button *ngIf="calculateAmountDue() > 0" class="btn btn-primary flex-grow-1 btn-payment"
             (click)="openPaymentModal()" [disabled]="isSaving">
             <!-- <span class="material-icons icon-sm mr-2" *ngIf="!isSaving">payments</span>  -->
-            <img src="assets/images/payment_white_icon.svg" alt="" class="icon-img-sm mr-2" *ngIf="!isSaving">
+            <!-- <img src="assets/images/payment.png" alt="" class="icon-img-sm mr-2" *ngIf="!isSaving"> -->
             <span class="spinner-border spinner-border-sm mr-2" *ngIf="isSaving" role="status"
               aria-hidden="true"></span>
             {{ isSaving ? 'Processing...' : 'Process Payment' }}
@@ -337,7 +343,8 @@
             'Complete Payment' }}</span>
         </button>
 
-        <button class="btn btn-success flex-grow-1 d-flex align-items-center justify-content-center gap-2 text-white"
+        <button *ngIf="isAmountFull()"
+          class="btn btn-success flex-grow-1 d-flex align-items-center justify-content-center gap-2 text-white"
           (click)="processPayment(true)" [disabled]="isSaving">
           <span class="spinner-border spinner-border-sm" *ngIf="isSaving && isCheckoutProcessing" role="status"
             aria-hidden="true"></span>

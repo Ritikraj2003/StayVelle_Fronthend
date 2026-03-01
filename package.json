@@ -1,14 +1,49 @@
 {
   "name": "stayvelle",
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "author": "Pyush Production",
+  "main": "electron/main.js",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "electron-start": "ng build --base-href ./ && electron .",
+    "build-desktop": "node build-desktop.js"
   },
   "private": true,
+  "build": {
+    "appId": "com.stayvelle.app",
+    "productName": "Stayvelle",
+    "copyright": "Copyright © 2024 Stayvelle",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/stayvelle/**",
+      "electron/main.js",
+      "package.json"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Stayvelle"
+    }
+  },
   "dependencies": {
     "@amcharts/amcharts5": "^5.16.0",
     "@angular/animations": "^17.3.0",
@@ -37,12 +72,16 @@
     "@angular/compiler-cli": "^17.3.0",
     "@angular/localize": "^17.3.0",
     "@types/jasmine": "~5.1.0",
+    "electron": "^34.3.1",
+    "electron-builder": "^24.13.3",
     "jasmine-core": "~5.1.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "png-to-ico": "^3.0.1",
+    "png2icons": "^2.0.1",
     "typescript": "~5.4.2"
   }
 }
