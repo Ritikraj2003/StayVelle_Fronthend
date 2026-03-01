@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { LoaderService } from '../../../core/services/loader.service';
+import { PermissionService } from '../../../core/services/permission.service';
 
 @Component({
   selector: 'app-login',
@@ -23,7 +24,8 @@ export class LoginComponent {
     private authService: AuthService,
     private router: Router,
     private notificationService: NotificationService,
-    private loaderService: LoaderService
+    private loaderService: LoaderService,
+    private permissionService: PermissionService
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required]],
@@ -45,7 +47,10 @@ export class LoginComponent {
           this.notificationService.success('Login successful');
           this.isLoading = false;
           this.loaderService.hide();
-          this.router.navigate(['/main/dashboard']);
+
+          // Re-direct based on permissions
+          const defaultRoute = this.permissionService.getDefaultRoute();
+          this.router.navigate([defaultRoute]);
         },
         error: (error) => {
           this.errorMessage = error.error?.message || 'Invalid email or password. Please try again.';

@@ -55,7 +55,7 @@ export class DashboardComponent implements OnInit {
   // Calendar Grid
   weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   calendarGrid: any[] = []; // Array of day objects
-  currentUser: any = null;
+  currentUser: any = '';
 
   constructor(
     private apiService: ApiService,
@@ -63,7 +63,9 @@ export class DashboardComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.currentUser = JSON.parse(localStorage.getItem('current_user') || '{}')?.username || '';
+    debugger;
+
+    this.currentUser = JSON.parse(localStorage.getItem('current_user') || '{}')?.name || '';
     // Initialize: both From and To default to today
     const today = this.datePipe.transform(new Date(), 'yyyy-MM-dd')!;
     this.filterStartDateStr = today;

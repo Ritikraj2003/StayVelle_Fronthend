@@ -8,7 +8,7 @@ import { Permission, User } from './auth.service';
 export class PermissionService {
   private readonly PERMISSIONS_KEY = 'user_permissions';
 
-  constructor(private storageService: StorageService,) {}
+  constructor(private storageService: StorageService,) { }
 
   /**
    * Set permissions (called after login)
@@ -37,13 +37,42 @@ export class PermissionService {
 
     const permissions = this.getPermissions();
     const codes = Array.isArray(permissionCode) ? permissionCode : [permissionCode];
-    
-    return codes.some(code => 
-      permissions.some(p => 
+
+    return codes.some(code =>
+      permissions.some(p =>
         p.module?.toLowerCase() === code.toLowerCase() ||
         p.name?.toLowerCase() === code.toLowerCase()
       )
     );
+  }
+
+  /**
+   * Get the default route based on user permissions
+   */
+  getDefaultRoute(): string {
+    const routeMappings = [
+      { code: 'DS', route: '/main/dashboard' },
+      { code: 'RB', route: '/main/room-booking' },
+      { code: 'RC', route: '/main/reservations/current-booking' },
+      { code: 'RH', route: '/main/booking-history' },
+      { code: 'HK', route: '/main/housekeeping' },
+      { code: 'MR', route: '/main/masters/room-master' },
+      { code: 'MHR', route: '/main/masters/hotel-registration' },
+      { code: 'MS', route: '/main/masters/service-master' },
+      { code: 'MT', route: '/main/masters/tax-master' },
+      { code: 'MB', route: '/main/masters/bill-master' },
+      { code: 'RM', route: '/main/revenue' },
+      { code: 'RO', route: '/main/roles-permissions' },
+      { code: 'RU', route: '/main/users' }
+    ];
+
+    for (const mapping of routeMappings) {
+      if (this.hasPermission(mapping.code)) {
+        return mapping.route;
+      }
+    }
+
+    return '/main/dashboard'; // Fallback
   }
 
   /**
