@@ -51,13 +51,13 @@ export class SidebarComponent implements OnInit {
     {
       label: 'Reservations',
       hasDropdown: true,
-      permissionCode: 'RB', // Reservations permission code (matches backend "RB" - Reservation | RoomBooking)
+      permissionCode: ['RB', 'RC', 'RH'], // Reservations permission code (matches backend "RB" - Reservation | RoomBooking)
       children: [
         //{ label: 'Availability', route: '/main/reservations/availability', permissionCode: 'RS' },
         { label: 'Room Booking', route: '/main/room-booking', permissionCode: 'RB' },
-        { label: 'Current Booking', route: '/main/reservations/current-booking', permissionCode: 'RB' },
+        { label: 'Current Booking', route: '/main/reservations/current-booking', permissionCode: 'RC' },
         // { label: 'Set Room Availability', route: '/main/reservations/set-availability', permissionCode: 'RB' },
-        { label: 'Booking History', route: '/main/booking-history', permissionCode: 'RB' }, // Using same permission as Reservations
+        { label: 'Booking History', route: '/main/booking-history', permissionCode: 'RH' }, // Using same permission as Reservations
       ]
     },
     // {
@@ -79,13 +79,13 @@ export class SidebarComponent implements OnInit {
     {
       label: 'Masters',
       hasDropdown: true,
-      permissionCode: 'MS', // Masters permission code
+      permissionCode: ['MS', 'MR', 'MHR', 'MT', 'MB'], // Masters permission code
       children: [
-        { label: 'Room Master', route: '/main/masters/room-master', permissionCode: 'MS' },
-        { label: 'Hotel Registration', route: '/main/masters/hotel-registration', permissionCode: 'MS' },
+        { label: 'Room Master', route: '/main/masters/room-master', permissionCode: 'MR' },
+        { label: 'Hotel Registration', route: '/main/masters/hotel-registration', permissionCode: 'MHR' },
         { label: 'Service Master', route: '/main/masters/service-master', permissionCode: 'MS' },
-        { label: 'Tax Master', route: '/main/masters/tax-master', permissionCode: 'MS' },
-        { label: 'Bill Master', route: '/main/masters/bill-master', permissionCode: 'MS' }
+        { label: 'Tax Master', route: '/main/masters/tax-master', permissionCode: 'MT' },
+        { label: 'Bill Master', route: '/main/masters/bill-master', permissionCode: 'MB' }
       ]
     },
     // {

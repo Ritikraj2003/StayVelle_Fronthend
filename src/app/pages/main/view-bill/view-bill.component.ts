@@ -2,6 +2,8 @@ import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ApiService } from '../../../core/services/api.service';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 @Component({
   selector: 'app-view-bill',
@@ -147,7 +149,50 @@ export class ViewBillComponent implements OnInit {
   }
 
   print(): void {
-    window.print();
+    const element = document.getElementById('invoiceArea');
+    if (!element) return;
+
+    // Guest Name for filename
+    const guestName = this.primaryGuest?.guestName ? this.primaryGuest.guestName.replace(/\s+/g, '') : 'Guest';
+
+    // Format Checkout Date for filename (e.g. 02Mar2026)
+    let checkoutDateStr = 'UnknownDate';
+    if (this.bookingData?.checkOutDate) {
+      const d = new Date(this.bookingData.checkOutDate);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = d.toLocaleString('default', { month: 'short' });
+      const year = d.getFullYear();
+      checkoutDateStr = `${day}${month}${year}`;
+    }
+
+    const filename = `${guestName}${checkoutDateStr}.pdf`;
+
+    // Add a temporary class to ensure the invoice renders correctly for snapshot
+    element.classList.add('pdf-render-mode');
+
+    // Slight delay to ensure DOM updates applied the css class before capture
+    setTimeout(() => {
+      html2canvas(element, { scale: 2, useCORS: true }).then(canvas => {
+        element.classList.remove('pdf-render-mode');
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+        let position = 0;
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+
+        pdf.save(filename);
+
+        // Auto-close modal after download
+        this.cancel();
+      }).catch(err => {
+        console.error('Error generating PDF:', err);
+        element.classList.remove('pdf-render-mode');
+      });
+    }, 100);
   }
 
   cancel(): void {
